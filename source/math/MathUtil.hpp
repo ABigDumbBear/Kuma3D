@@ -170,6 +170,20 @@ inline Mat4 Orthographic(const Camera& aCamera)
               0.0, 0.0, 0.0, 1.0);
 }
 
+/**
+ * Calculates and returns the linear interpolation between two values
+ * and a third percentage value.
+ *
+ * @param aStart The starting value.
+ * @param aTarget The target value.
+ * @param aPercent The percentage to interpolate, between 0.0 and 1.0.
+ * @return The value that is aPercent of the way towards aTarget from aStart.
+ */
+inline float Lerp(float aStart, float aTarget, float aPercent)
+{
+  return (aStart + (aTarget - aStart) * aPercent);
+}
+
 } // namespace Kuma3D
 
 #endif
