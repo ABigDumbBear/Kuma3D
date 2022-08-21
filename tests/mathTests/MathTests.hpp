@@ -137,6 +137,11 @@ inline void TestMat4Scaling()
   assert(pos.z == 18.0);
 }
 
+inline void TestLerp()
+{
+  assert(Lerp(5.0, 15.0, 0.5) == 10.0);
+}
+
 } // namespace Kuma3D
 
 #endif

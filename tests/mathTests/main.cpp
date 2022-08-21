@@ -39,5 +39,10 @@ int main()
   Kuma3D::TestMat4Scaling();
   std::cout << "Mat4 scaling successful!" << std::endl;
 
+  std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Testing linear interpolation..." << std::endl;
+  Kuma3D::TestLerp();
+  std::cout << "Linear interpolation successful!" << std::endl;
+
   return 0;
 }
