@@ -24,7 +24,8 @@ namespace Kuma3D {
  * inside of a house, or a dungeon, or a wide-open field.
  *
  * More specifically, a Scene contains a separate list of components for
- * each type of component needed.
+ * each type of component needed, as well as a map of Entity IDs to indexes,
+ * which can be used to look up a component for a specific Entity.
  */
 class Scene
 {

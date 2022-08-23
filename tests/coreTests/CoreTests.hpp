@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include <ComponentList.hpp>
+#include <Scene.hpp>
 #include <Types.hpp>
 
 #include <Transform.hpp>
@@ -44,6 +45,30 @@ inline void TestComponentListRemoval()
   try
   {
     transform = list.GetComponentForEntity(0);
+  }
+  catch(const std::invalid_argument& e)
+  {
+    accessFailed = true;
+  }
+
+  assert(accessFailed);
+}
+
+inline void TestEntityRemoval()
+{
+  Scene scene;
+  scene.RegisterComponentType<Transform>();
+
+  auto entity = scene.CreateEntity();
+  scene.AddComponentToEntity<Transform>(entity);
+  scene.RemoveEntity(entity);
+
+  scene.OperateSystems(0.0);
+
+  bool accessFailed = false;
+  try
+  {
+    auto& transform = scene.GetComponentForEntity<Transform>(entity);
   }
   catch(const std::invalid_argument& e)
   {

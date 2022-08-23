@@ -13,5 +13,11 @@ int main()
   std::cout << "Testing ComponentList removal..." << std::endl;
   Kuma3D::TestComponentListRemoval();
   std::cout << "ComponentList removal successful!" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Testing Entity removal..." << std::endl;
+  Kuma3D::TestEntityRemoval();
+  std::cout << "Entity removal successful!" << std::endl;
+
   return 0;
 }
