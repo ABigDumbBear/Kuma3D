@@ -79,6 +79,7 @@ void ShaderLoader::SetInt(const ID& aID, const std::string& aName, int aValue)
   int loc = glGetUniformLocation(aID, aName.c_str());
   if(loc != -1)
   {
+    glUseProgram(aID);
     glUniform1i(loc, aValue);
   }
   else
@@ -94,6 +95,7 @@ void ShaderLoader::SetFloat(const ID& aID, const std::string& aName, float aValu
   int loc = glGetUniformLocation(aID, aName.c_str());
   if(loc != -1)
   {
+    glUseProgram(aID);
     glUniform1f(loc, aValue);
   }
   else
@@ -109,6 +111,7 @@ void ShaderLoader::SetVec3(const ID& aID, const std::string& aName, const Vec3& 
   int loc = glGetUniformLocation(aID, aName.c_str());
   if(loc != -1)
   {
+    glUseProgram(aID);
     glUniform3fv(loc, 1, &aVec.x);
   }
   else
@@ -124,6 +127,7 @@ void ShaderLoader::SetMat4(const ID& aID, const std::string& aName, const Mat4& 
   int loc = glGetUniformLocation(aID, aName.c_str());
   if(loc != -1)
   {
+    glUseProgram(aID);
     glUniformMatrix4fv(loc, 1, GL_FALSE, &aMat(0, 0));
   }
   else
