@@ -56,6 +56,14 @@ class Scene
     void RemoveEntity(const Entity& aEntity);
 
     /**
+     * Takes ownership of a System and asks it to operate on each of its
+     * Entities during OperateSystems().
+     *
+     * @param aSystem The system to add.
+     */
+    void AddSystem(std::unique_ptr<System> aSystem);
+
+    /**
      * Creates and returns an empty Signature for use with a System.
      *
      * @return An empty Signature.
@@ -90,14 +98,6 @@ class Scene
 
       return index;
     }
-
-    /**
-     * Takes ownership of a System and asks it to operate on each of its
-     * Entities during OperateSystems().
-     *
-     * @param aSystem The system to add.
-     */
-    void AddSystem(std::unique_ptr<System> aSystem);
 
     /**
      * "Registers" a component type by creating a vector to store components
@@ -205,6 +205,18 @@ class Scene
       // Schedule this component on the given Entity for removal.
       std::pair<Entity, unsigned int> entityComponentPair(aEntity, GetComponentIndex<T>());
       mComponentsToRemove.emplace_back(entityComponentPair);
+    };
+
+    /**
+     * Returns whether the given Entity has a component of type T.
+     *
+     * @param aEntity The Entity to check.
+     * @return Whether the Entity has a component of type T.
+     */
+    template<typename T>
+    bool DoesEntityHaveComponent(const Entity& aEntity)
+    {
+      return mEntityToSignatureMap[aEntity][GetComponentIndex<T>()];
     };
 
     /**

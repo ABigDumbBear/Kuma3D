@@ -20,6 +20,7 @@ void Scene::OperateSystems(double aTime)
     auto index = entityComponentPair.second;
     mComponentLists[index]->RemoveComponentFromEntity(entity);
 
+    // Update the Entity's Signature.
     mEntityToSignatureMap[entity][index] = false;
     EntitySignatureChanged.Notify(entity, mEntityToSignatureMap[entity]);
   }
