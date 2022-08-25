@@ -3,6 +3,9 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include <GL/glew.h>
 
 #include "TextureLoader.hpp"

@@ -5,11 +5,11 @@
 #include <string>
 #include <tuple>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include "Mesh.hpp"
 #include "Types.hpp"
+
+class FT_LibraryRec_;
+class FT_FaceRec_;
 
 namespace Kuma3D {
 
@@ -114,7 +114,7 @@ class FontLoader
     static void CreateGlyphMapForFont(const FontTextureIdentifier& aFontTextureID);
 
     static bool mInitialized;
-    static FT_Library mLibrary;
+    static FT_LibraryRec_* mLibrary;
 
     // Maps single characters to the dimensions required to render them.
     using GlyphMap = std::map<char, GlyphInfo>;
@@ -123,7 +123,7 @@ class FontLoader
     using FontFileMap = std::map<std::string, FontFaceIdentifier>;
 
     // Maps font family/style combinations to their font face object.
-    using FontFaceMap = std::map<FontFaceIdentifier, FT_Face>;
+    using FontFaceMap = std::map<FontFaceIdentifier, FT_FaceRec_*>;
 
     // Maps font/size combinations to their glyph data.
     using FontGlyphMap = std::map<FontTextureIdentifier, GlyphMap>;
