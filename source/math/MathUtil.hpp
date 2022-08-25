@@ -165,8 +165,8 @@ inline Mat4 Perspective(const Camera& aCamera)
 inline Mat4 Orthographic(const Camera& aCamera)
 {
   return Mat4(2.0 / aCamera.mViewportX, 0.0, 0.0, -1.0,
-              0.0, 2.0 / -aCamera.mViewportY, 0.0, 1.0,
-              0.0, 0.0, 1.0, 0.0,
+              0.0, 2.0 / aCamera.mViewportY, 0.0, -1.0,
+              0.0, 0.0, -2.0, -1.0,
               0.0, 0.0, 0.0, 1.0);
 }
 
