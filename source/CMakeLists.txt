@@ -8,7 +8,8 @@ find_package(Freetype REQUIRED)
 set(3RD_PARTY_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rd_party)
 
 # Gather the source files for the engine.
-file(GLOB ENGINE_SOURCES core/*.?pp
+file(GLOB ENGINE_SOURCES audio/*.?pp
+                         core/*.?pp
                          components/*.?pp
                          math/*.?pp
                          renderer/*.?pp)
@@ -22,6 +23,7 @@ target_link_libraries(Kuma3D PUBLIC
 
 # Set the include directories for the engine.
 target_include_directories(Kuma3D PUBLIC
+                           audio
                            core
                            components
                            math
