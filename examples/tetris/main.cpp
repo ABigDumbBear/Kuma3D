@@ -1,6 +1,8 @@
 #include <Game.hpp>
-#include <ShaderLoader.hpp>
 #include <WindowOptions.hpp>
+
+#include <ShaderLoader.hpp>
+#include <TextureLoader.hpp>
 
 #include "SceneFactory.hpp"
 
@@ -17,6 +19,11 @@ int main()
   // Load the shaders.
   Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/GridShader.vert",
                                             "resources/shaders/GridShader.frag");
+  Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/TileShader.vert",
+                                            "resources/shaders/TileShader.frag");
+
+  // Load the textures.
+  Kuma3D::TextureLoader::LoadTextureFromFile("resources/tileTexture.png");
 
   // Create a Game and load a Scene.
   Kuma3D::Game game;

@@ -3,6 +3,7 @@
 #include <Scene.hpp>
 
 #include <ShaderLoader.hpp>
+#include <TextureLoader.hpp>
 
 #include <Mesh.hpp>
 #include <Transform.hpp>
@@ -202,9 +203,14 @@ Kuma3D::Mesh CreateCube(int aSize)
   mesh.mIndices.emplace_back(22);
   mesh.mIndices.emplace_back(23);
 
-  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/GridShader.vert",
-                                                            "resources/shaders/GridShader.frag");
+  // Add the shader.
+  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/TileShader.vert",
+                                                            "resources/shaders/TileShader.frag");
   mesh.mShaders.emplace_back(shaderID);
+
+  // Add the texture.
+  auto textureID = Kuma3D::TextureLoader::LoadTextureFromFile("resources/tileTexture.png");
+  mesh.mTextures.emplace_back(textureID);
 
   mesh.mSystem = Kuma3D::CoordinateSystem::eSCREEN_SPACE;
   mesh.mDirty = true;
@@ -320,7 +326,7 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     }
   }
 
-  // Reset the fall timer;
+  // Reset the fall timer.
   if(dt >= mFallSpeed)
   {
     mTimeSinceLastFall = aTime;
