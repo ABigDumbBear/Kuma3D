@@ -14,3 +14,4 @@ target_include_directories(Tetris PUBLIC
 
 # Install this example.
 install(TARGETS Tetris DESTINATION ${EXAMPLES_INSTALL_DIR}/Tetris)
+install(DIRECTORY resources DESTINATION ${EXAMPLES_INSTALL_DIR}/Tetris)

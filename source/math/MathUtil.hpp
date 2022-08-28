@@ -157,16 +157,20 @@ inline Mat4 Perspective(const Camera& aCamera)
 
 /**
  * Creates and returns an orthographic projection matrix for the given camera.
- * It's assumed that the left and bottom values are 0.0, the near plane is 0.0,
- * and the far plane is 1.0.
+ * It's assumed that the left and bottom values are 0.0.
  *
  * @param aCamera The camera to create a matrix for.
  */
 inline Mat4 Orthographic(const Camera& aCamera)
 {
-  return Mat4(2.0 / aCamera.mViewportX, 0.0, 0.0, -1.0,
-              0.0, 2.0 / aCamera.mViewportY, 0.0, -1.0,
-              0.0, 0.0, -2.0, -1.0,
+  auto right = aCamera.mViewportX;
+  auto top = aCamera.mViewportY;
+  auto far = aCamera.mFarPlane;
+  auto near = aCamera.mNearPlane;
+
+  return Mat4(2.0 / right, 0.0, 0.0, -1.0,
+              0.0, 2.0 / top, 0.0, -1.0,
+              0.0, 0.0, 1.0 / (far - near), -near / (far - near),
               0.0, 0.0, 0.0, 1.0);
 }
 

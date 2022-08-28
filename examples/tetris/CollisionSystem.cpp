@@ -48,6 +48,8 @@ void CollisionSystem::Operate(Kuma3D::Scene& aScene, double aTime)
       }
     }
 
+    // If the block has fallen, take each of the tiles in the block and add
+    // them to the list of fallen tiles.
     if(blockFallen)
     {
       for(const auto& blockTile : block.mTiles)
