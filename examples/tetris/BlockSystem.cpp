@@ -1,5 +1,8 @@
 #include "BlockSystem.hpp"
 
+#include <cstdlib>
+#include <ctime>
+
 #include <Scene.hpp>
 
 #include <ShaderLoader.hpp>
@@ -12,7 +15,7 @@
 
 namespace Tetris {
 
-const float BlockSystem::mFallSpeed = 0.1;
+const float BlockSystem::mFallSpeed = 0.5;
 
 /**
  * Creates and returns a random Block.
@@ -21,7 +24,22 @@ const float BlockSystem::mFallSpeed = 0.1;
  */
 Block CreateBlock()
 {
-  Block block = SBlock;
+  Block block;
+
+  int blockType = rand() % 3;
+  if(blockType == 0)
+  {
+    block = LBlock;
+  }
+  else if(blockType == 1)
+  {
+    block = IBlock;
+  }
+  else if(blockType == 2)
+  {
+    block = SBlock;
+  }
+
   block.mPosition.x = 3;
   block.mPosition.y = 25;
 
@@ -32,9 +50,10 @@ Block CreateBlock()
  * Creates and returns a cube mesh for a given size.
  *
  * @param aSize The cube size in pixels.
+ * @param aColor The color of the cube.
  * @return A cube mesh for the given size.
  */
-Kuma3D::Mesh CreateCube(int aSize)
+Kuma3D::Mesh CreateCube(int aSize, const Kuma3D::Vec3& aColor)
 {
   Kuma3D::Mesh mesh;
 
@@ -52,7 +71,7 @@ Kuma3D::Mesh CreateCube(int aSize)
 
   // Front face
   vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
+  vertex.mColor = aColor;
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
@@ -247,7 +266,17 @@ void BlockSystem::Initialize(Kuma3D::Scene& aScene)
     this->HandleKeyPressed(aKey, aMods);
   });
 
+  // Initialize the fallen tile grid.
+  for(auto& row : mFallenTiles)
+  {
+    for(auto& tile : row)
+    {
+      tile = 0;
+    }
+  }
+
   // Create the first block.
+  srand(time(NULL));
   auto blockEntity = aScene.CreateEntity();
   auto newBlock = CreateBlock();
   aScene.AddComponentToEntity<Block>(blockEntity, newBlock);
@@ -262,7 +291,7 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
   for(const auto& entity : mNewEntities)
   {
     auto& block = aScene.GetComponentForEntity<Block>(entity);
-    auto& tiles = block.mTiles;
+    auto& tiles = block.mRotations[block.mCurrentRotation];
     auto& column = block.mPosition.x;
     auto& row = block.mPosition.y;
 
@@ -270,7 +299,7 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     {
       auto tileEntity = aScene.CreateEntity();
 
-      auto cubeMesh = CreateCube(mTileSizeInPixels);
+      auto cubeMesh = CreateCube(mTileSizeInPixels, block.mColor);
       Kuma3D::Transform cubeTransform;
       cubeTransform.mPosition.x = (mTileSizeInPixels * (column + tiles[i].x)) + (mTileSizeInPixels / 2.0);
       cubeTransform.mPosition.y = (mTileSizeInPixels * (row + tiles[i].y)) + (mTileSizeInPixels / 2.0);
@@ -289,21 +318,38 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
   for(const auto& blockEntity : GetEntities())
   {
     auto& block = aScene.GetComponentForEntity<Block>(blockEntity);
-    auto& tiles = block.mTiles;
     auto& column = block.mPosition.x;
     auto& row = block.mPosition.y;
 
-    // Move the Block left or right, depending on the previously pressed key.
+    // Handle input, either moving the block left/right or rotating it.
     switch(mKeyPress)
     {
       case Kuma3D::KeyCode::eKEY_LEFT:
       {
-        column -= 1;
+        GridPosition newPos { column - 1, row };
+        if(IsMoveValid(block, newPos))
+        {
+          column -= 1;
+        }
         break;
       }
       case Kuma3D::KeyCode::eKEY_RIGHT:
       {
-        column += 1;
+        GridPosition newPos { column + 1, row };
+        if(IsMoveValid(block, newPos))
+        {
+          column += 1;
+        }
+        break;
+      }
+      case Kuma3D::KeyCode::eKEY_UP:
+      {
+        ++block.mCurrentRotation;
+        if(block.mCurrentRotation > 3)
+        {
+          block.mCurrentRotation = 0;
+        }
+
         break;
       }
       default:
@@ -311,6 +357,8 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
         break;
       }
     }
+
+    auto& tiles = block.mRotations[block.mCurrentRotation];
 
     // Move the Block down if enough time has passed.
     bool blockFallen = false;
@@ -346,7 +394,7 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
         tilePos.x += column;
         tilePos.y += row;
 
-        mFallenTiles.emplace_back(tilePos);
+        mFallenTiles[tilePos.y][tilePos.x] = 1;
       }
 
       aScene.RemoveComponentFromEntity<Block>(blockEntity);
@@ -385,29 +433,62 @@ bool BlockSystem::IsBlockColliding(const Block& aBlock)
 {
   bool colliding = false;
 
-  for(const auto& blockTile : aBlock.mTiles)
+  for(const auto& blockTile : aBlock.mRotations[aBlock.mCurrentRotation])
   {
     GridPosition tilePos;
     tilePos.x = blockTile.x + aBlock.mPosition.x;
     tilePos.y = blockTile.y + aBlock.mPosition.y;
 
-    for(const auto& fallenTile : mFallenTiles)
+    if(tilePos.y > 0)
     {
-      if(fallenTile.x == tilePos.x &&
-         fallenTile.y == tilePos.y - 1)
+      if(mFallenTiles[tilePos.y - 1][tilePos.x] == 1)
       {
         colliding = true;
         break;
       }
     }
-
-    if(colliding)
-    {
-      break;
-    }
   }
 
   return colliding;
+}
+
+/******************************************************************************/
+bool BlockSystem::IsMoveValid(const Block& aBlock, const GridPosition& aPosition)
+{
+  bool success = true;
+
+  // Calculate the extents of the block and determine if moving it would place
+  // it outside of the grid.
+  int left = 0;
+  int right = 0;
+  int bottom = 0;
+  int top = 0;
+
+  const auto& blockPos = aBlock.mPosition;
+  const auto& tiles = aBlock.mRotations[aBlock.mCurrentRotation];
+
+  for(const auto& tile : tiles)
+  {
+    left = std::min(left, tile.x);
+    right = std::max(right, tile.x);
+    bottom = std::min(bottom, tile.y);
+    top = std::max(top, tile.y);
+  }
+
+  if(aPosition.x - left < 0 ||
+     aPosition.x + right > 9 ||
+     aPosition.y - bottom < 0 ||
+     aPosition.y + top > 24)
+  {
+    success = false;
+  }
+
+  return success;
+}
+
+/******************************************************************************/
+void BlockSystem::RemoveFilledRows()
+{
 }
 
 } // namespace Tetris

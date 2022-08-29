@@ -61,6 +61,20 @@ class BlockSystem : public Kuma3D::System
      */
     bool IsBlockColliding(const Block& aBlock);
 
+    /**
+     * Checks if it is possible to move a given Block to a given GridPosition.
+     *
+     * @param aBlock The Block to move.
+     * @param aPosition The position to move the Block to.
+     * @return Whether it's possible to move the Block.
+     */
+    bool IsMoveValid(const Block& aBlock, const GridPosition& aPosition);
+
+    /**
+     * Checks for rows that have been completely filled and removes them.
+     */
+    void RemoveFilledRows();
+
     // Maps entities with a block component (positions in 2D) to entities with
     // meshes and transform components (positions in 3D). Each block is
     // composed of four 3D cubes.
@@ -70,9 +84,8 @@ class BlockSystem : public Kuma3D::System
     // created.
     std::vector<Kuma3D::Entity> mNewEntities;
 
-    // Keeps track of all the tiles that have fallen and are no longer
-    // moving.
-    std::vector<GridPosition> mFallenTiles;
+    // Keeps track of all the tiles that have fallen and are no longer moving.
+    bool mFallenTiles[25][10];
 
     Kuma3D::KeyCode mKeyPress { Kuma3D::KeyCode::eKEY_UNKNOWN };
 
