@@ -12,7 +12,7 @@
 
 namespace Tetris {
 
-const float BlockSystem::mFallSpeed = 0.5;
+const float BlockSystem::mFallSpeed = 0.1;
 
 /**
  * Creates and returns a random Block.
@@ -21,11 +21,9 @@ const float BlockSystem::mFallSpeed = 0.5;
  */
 Block CreateBlock()
 {
-  Block block;
-  block.mTiles[0] = { 0, 25 };
-  block.mTiles[1] = { 1, 25 };
-  block.mTiles[2] = { 2, 25 };
-  block.mTiles[3] = { 3, 26 };
+  Block block = SBlock;
+  block.mPosition.x = 3;
+  block.mPosition.y = 25;
 
   return block;
 }
@@ -265,6 +263,8 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
   {
     auto& block = aScene.GetComponentForEntity<Block>(entity);
     auto& tiles = block.mTiles;
+    auto& column = block.mPosition.x;
+    auto& row = block.mPosition.y;
 
     for(int i = 0; i < 4; ++i)
     {
@@ -272,8 +272,8 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 
       auto cubeMesh = CreateCube(mTileSizeInPixels);
       Kuma3D::Transform cubeTransform;
-      cubeTransform.mPosition.x = (mTileSizeInPixels * tiles[i].x) + (mTileSizeInPixels / 2.0);
-      cubeTransform.mPosition.y = (mTileSizeInPixels * tiles[i].y) + (mTileSizeInPixels / 2.0);
+      cubeTransform.mPosition.x = (mTileSizeInPixels * (column + tiles[i].x)) + (mTileSizeInPixels / 2.0);
+      cubeTransform.mPosition.y = (mTileSizeInPixels * (row + tiles[i].y)) + (mTileSizeInPixels / 2.0);
 
       aScene.AddComponentToEntity<Kuma3D::Mesh>(tileEntity, cubeMesh);
       aScene.AddComponentToEntity<Kuma3D::Transform>(tileEntity, cubeTransform);
@@ -290,39 +290,71 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
   {
     auto& block = aScene.GetComponentForEntity<Block>(blockEntity);
     auto& tiles = block.mTiles;
+    auto& column = block.mPosition.x;
+    auto& row = block.mPosition.y;
 
+    // Move the Block left or right, depending on the previously pressed key.
+    switch(mKeyPress)
+    {
+      case Kuma3D::KeyCode::eKEY_LEFT:
+      {
+        column -= 1;
+        break;
+      }
+      case Kuma3D::KeyCode::eKEY_RIGHT:
+      {
+        column += 1;
+        break;
+      }
+      default:
+      {
+        break;
+      }
+    }
+
+    // Move the Block down if enough time has passed.
+    bool blockFallen = false;
+    if(dt >= mFallSpeed)
+    {
+      row -= 1;
+
+      // If the block is at the bottom of the grid, or if there's a collision,
+      // then the block has finished falling.
+      if(row == 0 || IsBlockColliding(block))
+      {
+        blockFallen = true;
+      }
+    }
+
+    // For each tile in the Block, update the position of the corresponding
+    // 3D cube.
     for(int i = 0; i < 4; ++i)
     {
-      // Move the tile left or right, depending on the previously pressed key.
-      switch(mKeyPress)
-      {
-        case Kuma3D::KeyCode::eKEY_LEFT:
-        {
-          tiles[i].x -= 1;
-          break;
-        }
-        case Kuma3D::KeyCode::eKEY_RIGHT:
-        {
-          tiles[i].x += 1;
-          break;
-        }
-        default:
-        {
-          break;
-        }
-      }
-
-      // Move the tile down, if enough time has passed.
-      if(dt >= mFallSpeed)
-      {
-        tiles[i].y -= 1;
-      }
-
-      // Update the transform of the corresponding 3D object.
       auto tileEntity = mEntityTileMap[blockEntity][i];
       auto& transform = aScene.GetComponentForEntity<Kuma3D::Transform>(tileEntity);
-      transform.mPosition.x = (mTileSizeInPixels * tiles[i].x) + (mTileSizeInPixels / 2.0);
-      transform.mPosition.y = (mTileSizeInPixels * tiles[i].y) + (mTileSizeInPixels / 2.0);
+      transform.mPosition.x = (mTileSizeInPixels * (column + tiles[i].x)) + (mTileSizeInPixels / 2.0);
+      transform.mPosition.y = (mTileSizeInPixels * (row  + tiles[i].y)) + (mTileSizeInPixels / 2.0);
+    }
+
+    // If the block has fallen, add each tile to the list of fallen
+    // tiles, then remove the Block component and create a new block.
+    if(blockFallen)
+    {
+      for(const auto& tile : tiles)
+      {
+        GridPosition tilePos = tile;
+        tilePos.x += column;
+        tilePos.y += row;
+
+        mFallenTiles.emplace_back(tilePos);
+      }
+
+      aScene.RemoveComponentFromEntity<Block>(blockEntity);
+      mEntityTileMap.erase(blockEntity);
+
+      auto newEntity = aScene.CreateEntity();
+      auto newBlock = CreateBlock();
+      aScene.AddComponentToEntity<Block>(newEntity, newBlock);
     }
   }
 
@@ -346,6 +378,36 @@ void BlockSystem::HandleEntityBecameEligible(const Kuma3D::Entity& aEntity)
 void BlockSystem::HandleKeyPressed(const Kuma3D::KeyCode& aKey, int aMods)
 {
   mKeyPress = aKey;
+}
+
+/******************************************************************************/
+bool BlockSystem::IsBlockColliding(const Block& aBlock)
+{
+  bool colliding = false;
+
+  for(const auto& blockTile : aBlock.mTiles)
+  {
+    GridPosition tilePos;
+    tilePos.x = blockTile.x + aBlock.mPosition.x;
+    tilePos.y = blockTile.y + aBlock.mPosition.y;
+
+    for(const auto& fallenTile : mFallenTiles)
+    {
+      if(fallenTile.x == tilePos.x &&
+         fallenTile.y == tilePos.y - 1)
+      {
+        colliding = true;
+        break;
+      }
+    }
+
+    if(colliding)
+    {
+      break;
+    }
+  }
+
+  return colliding;
 }
 
 } // namespace Tetris

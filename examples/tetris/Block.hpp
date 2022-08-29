@@ -1,8 +1,6 @@
 #ifndef BLOCK_HPP
 #define BLOCK_HPP
 
-#include <Mat4.hpp>
-
 namespace Tetris {
 
 struct GridPosition
@@ -13,15 +11,41 @@ struct GridPosition
 
 struct Block
 {
+  GridPosition mPosition;
   GridPosition mTiles[4];
 };
 
-const Kuma3D::Mat4 L1 =
+const Block LBlock
 {
-  0, 0, 0, 0,
-  0, 0, 0, 1,
-  1, 1, 1, 0,
-  0, 0, 0, 0
+  {0, 0},
+  {
+    {0, 0},
+    {1, 0},
+    {2, 0},
+    {2, 1}
+  }
+};
+
+const Block IBlock
+{
+  {0, 0},
+  {
+    {0, 0},
+    {1, 0},
+    {2, 0},
+    {3, 0}
+  }
+};
+
+const Block SBlock
+{
+  {0, 0},
+  {
+    {0, 0},
+    {1, 0},
+    {1, 1},
+    {2, 1}
+  }
 };
 
 } // namespace Tetris

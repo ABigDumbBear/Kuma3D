@@ -9,6 +9,8 @@
 #include <InputSignals.hpp>
 #include <Observer.hpp>
 
+#include "Block.hpp"
+
 namespace Tetris {
 
 class BlockSystem : public Kuma3D::System
@@ -50,6 +52,15 @@ class BlockSystem : public Kuma3D::System
      */
     void HandleKeyPressed(const Kuma3D::KeyCode& aKey, int aMods);
 
+    /**
+     * Checks a given Block against the list of fallen tiles to check
+     * if there's a collision.
+     *
+     * @param aBlock The Block to check for collisions.
+     * @return Whether there is a collision or not.
+     */
+    bool IsBlockColliding(const Block& aBlock);
+
     // Maps entities with a block component (positions in 2D) to entities with
     // meshes and transform components (positions in 3D). Each block is
     // composed of four 3D cubes.
@@ -58,6 +69,10 @@ class BlockSystem : public Kuma3D::System
     // Keeps track of new blocks that need to have meshes and transforms
     // created.
     std::vector<Kuma3D::Entity> mNewEntities;
+
+    // Keeps track of all the tiles that have fallen and are no longer
+    // moving.
+    std::vector<GridPosition> mFallenTiles;
 
     Kuma3D::KeyCode mKeyPress { Kuma3D::KeyCode::eKEY_UNKNOWN };
 
