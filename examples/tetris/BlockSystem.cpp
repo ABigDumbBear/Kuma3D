@@ -15,7 +15,7 @@
 
 namespace Tetris {
 
-const float BlockSystem::mFallSpeed = 0.5;
+const float BlockSystem::mFallSpeed = 0.2;
 
 /**
  * Creates and returns a random Block.
@@ -403,6 +403,12 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
       auto newEntity = aScene.CreateEntity();
       auto newBlock = CreateBlock();
       aScene.AddComponentToEntity<Block>(newEntity, newBlock);
+
+      // Also check for any filled rows and remove them.
+      for(const auto& rowIndex : GetFilledRows())
+      {
+        RemoveRow(rowIndex);
+      }
     }
   }
 
@@ -487,8 +493,53 @@ bool BlockSystem::IsMoveValid(const Block& aBlock, const GridPosition& aPosition
 }
 
 /******************************************************************************/
-void BlockSystem::RemoveFilledRows()
+std::vector<int> BlockSystem::GetFilledRows()
 {
+  // Gather the index of each filled row.
+  std::vector<int> filledRows;
+  for(int rowIndex = 0; rowIndex < 25; ++rowIndex)
+  {
+    bool rowFilled = true;
+    for(const auto& tile : mFallenTiles[rowIndex])
+    {
+      if(tile == 0)
+      {
+        rowFilled = false;
+        break;
+      }
+    }
+
+    if(rowFilled)
+    {
+      filledRows.emplace_back(rowIndex);
+    }
+  }
+
+  return filledRows;
+}
+
+/******************************************************************************/
+void BlockSystem::RemoveRow(int aIndex)
+{
+  // If the row is at the top of the grid, replace each value in the row with 0.
+  // Otherwise, replace each value in the row with the value above it and call
+  // this function again with aIndex + 1.
+  if(aIndex == 24)
+  {
+    for(int column = 0; column < 10; ++column)
+    {
+      mFallenTiles[aIndex][column] = 0;
+    }
+  }
+  else
+  {
+    for(int column = 0; column < 10; ++column)
+    {
+      mFallenTiles[aIndex][column] = mFallenTiles[aIndex + 1][column];
+    }
+
+    RemoveRow(aIndex + 1);
+  }
 }
 
 } // namespace Tetris

@@ -71,9 +71,18 @@ class BlockSystem : public Kuma3D::System
     bool IsMoveValid(const Block& aBlock, const GridPosition& aPosition);
 
     /**
-     * Checks for rows that have been completely filled and removes them.
+     * Returns a list of row indexes that have been completely filled.
+     *
+     * @return A list of rows to remove.
      */
-    void RemoveFilledRows();
+    std::vector<int> GetFilledRows();
+
+    /**
+     * Clears a row at the specified index and moves all rows above it down by 1.
+     *
+     * @param aIndex The index of the row to clear.
+     */
+    void RemoveRow(int aIndex);
 
     // Maps entities with a block component (positions in 2D) to entities with
     // meshes and transform components (positions in 3D). Each block is
