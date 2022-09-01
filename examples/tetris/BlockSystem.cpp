@@ -12,228 +12,11 @@
 #include <Transform.hpp>
 
 #include "Block.hpp"
+#include "BlockUtil.hpp"
 
 namespace Tetris {
 
 const float BlockSystem::mFallSpeed = 0.2;
-
-/**
- * Creates and returns a random Block.
- *
- * @return A random Block.
- */
-Block CreateBlock()
-{
-  Block block;
-
-  int blockType = rand() % 3;
-  if(blockType == 0)
-  {
-    block = LBlock;
-  }
-  else if(blockType == 1)
-  {
-    block = IBlock;
-  }
-  else if(blockType == 2)
-  {
-    block = SBlock;
-  }
-
-  block.mPosition.x = 3;
-  block.mPosition.y = 25;
-
-  return block;
-}
-
-/**
- * Creates and returns a cube mesh for a given size.
- *
- * @param aSize The cube size in pixels.
- * @param aColor The color of the cube.
- * @return A cube mesh for the given size.
- */
-Kuma3D::Mesh CreateCube(int aSize, const Kuma3D::Vec3& aColor)
-{
-  Kuma3D::Mesh mesh;
-
-  float xVal = aSize / 2.0;
-  float yVal = aSize / 2.0;
-  float zVal = aSize / 2.0;
-
-  Kuma3D::MeshVertex vertex;
-
-  // Vertices for each face are defined in the following order:
-  // 1) bottom left
-  // 2) bottom right
-  // 3) top right
-  // 4) top left
-
-  // Front face
-  vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, zVal);
-  vertex.mColor = aColor;
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, yVal, zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, zVal);
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-
-  mesh.mIndices.emplace_back(0);
-  mesh.mIndices.emplace_back(1);
-  mesh.mIndices.emplace_back(3);
-  mesh.mIndices.emplace_back(1);
-  mesh.mIndices.emplace_back(2);
-  mesh.mIndices.emplace_back(3);
-
-  // Top face
-  vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, zVal);
-  vertex.mTexCoords[0] = 0.0;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, yVal, zVal);
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, yVal, -zVal);
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, -zVal);
-  vertex.mTexCoords[0] = 0.0;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-
-  mesh.mIndices.emplace_back(4);
-  mesh.mIndices.emplace_back(5);
-  mesh.mIndices.emplace_back(7);
-  mesh.mIndices.emplace_back(5);
-  mesh.mIndices.emplace_back(6);
-  mesh.mIndices.emplace_back(7);
-
-  // Back face
-  vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, -zVal);
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, -zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, yVal, -zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, -zVal);
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-
-  mesh.mIndices.emplace_back(8);
-  mesh.mIndices.emplace_back(9);
-  mesh.mIndices.emplace_back(11);
-  mesh.mIndices.emplace_back(9);
-  mesh.mIndices.emplace_back(10);
-  mesh.mIndices.emplace_back(11);
-
-  // Left face
-  vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, -zVal);
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, -zVal);
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-
-  mesh.mIndices.emplace_back(12);
-  mesh.mIndices.emplace_back(13);
-  mesh.mIndices.emplace_back(15);
-  mesh.mIndices.emplace_back(13);
-  mesh.mIndices.emplace_back(14);
-  mesh.mIndices.emplace_back(15);
-
-  // Bottom face
-  vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, -zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, -zVal);
-  vertex.mTexCoords[0] = 1.0;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, zVal);
-  vertex.mTexCoords[0] = 1.0;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-
-  mesh.mIndices.emplace_back(16);
-  mesh.mIndices.emplace_back(17);
-  mesh.mIndices.emplace_back(19);
-  mesh.mIndices.emplace_back(17);
-  mesh.mIndices.emplace_back(18);
-  mesh.mIndices.emplace_back(19);
-
-  // Right face
-  vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, -zVal);
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 0.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, yVal, zVal);
-  vertex.mTexCoords[0] = 0.66;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(xVal, yVal, -zVal);
-  vertex.mTexCoords[0] = 0.33;
-  vertex.mTexCoords[1] = 1.0;
-  mesh.mVertices.emplace_back(vertex);
-
-  mesh.mIndices.emplace_back(20);
-  mesh.mIndices.emplace_back(21);
-  mesh.mIndices.emplace_back(23);
-  mesh.mIndices.emplace_back(21);
-  mesh.mIndices.emplace_back(22);
-  mesh.mIndices.emplace_back(23);
-
-  // Add the shader.
-  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/TileShader.vert",
-                                                            "resources/shaders/TileShader.frag");
-  mesh.mShaders.emplace_back(shaderID);
-
-  // Add the texture.
-  auto textureID = Kuma3D::TextureLoader::LoadTextureFromFile("resources/tileTexture.png");
-  mesh.mTextures.emplace_back(textureID);
-
-  mesh.mSystem = Kuma3D::CoordinateSystem::eSCREEN_SPACE;
-  mesh.mDirty = true;
-
-  return mesh;
-}
 
 /******************************************************************************/
 void BlockSystem::Initialize(Kuma3D::Scene& aScene)
@@ -366,9 +149,18 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     {
       row -= 1;
 
+      bool onGround = false;
+      for(const auto& tile : tiles)
+      {
+        if((row + tile.y) == 0)
+        {
+          onGround = true;
+        }
+      }
+
       // If the block is at the bottom of the grid, or if there's a collision,
       // then the block has finished falling.
-      if(row == 0 || IsBlockColliding(block))
+      if(onGround || IsBlockColliding(block))
       {
         blockFallen = true;
       }
@@ -388,29 +180,37 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     // tiles, then remove the Block component and create a new block.
     if(blockFallen)
     {
-      for(const auto& tile : tiles)
+      for(int i = 0; i < 4; ++i)
       {
-        GridPosition tilePos = tile;
+        GridPosition tilePos = tiles[i];
         tilePos.x += column;
         tilePos.y += row;
 
         mFallenTiles[tilePos.y][tilePos.x] = 1;
+        mFallenTileEntities[tilePos.y][tilePos.x] = mEntityTileMap[blockEntity][i];
       }
 
-      aScene.RemoveComponentFromEntity<Block>(blockEntity);
+      mEntitiesToRemove.emplace_back(blockEntity);
       mEntityTileMap.erase(blockEntity);
 
       auto newEntity = aScene.CreateEntity();
       auto newBlock = CreateBlock();
       aScene.AddComponentToEntity<Block>(newEntity, newBlock);
 
-      // Also check for any filled rows and remove them.
-      for(const auto& rowIndex : GetFilledRows())
-      {
-        RemoveRow(rowIndex);
-      }
+      // Check for any filled rows and remove them.
+      RemoveFilledRows();
+
+      // Update the tile Entities to their new positions after falling.
+      UpdateFallenTileEntities(aScene);
     }
   }
+
+  // Remove all Entities that have been marked for removal.
+  for(const auto& entity : mEntitiesToRemove)
+  {
+    aScene.RemoveEntity(entity);
+  }
+  mEntitiesToRemove.clear();
 
   // Reset the fall timer.
   if(dt >= mFallSpeed)
@@ -463,39 +263,33 @@ bool BlockSystem::IsMoveValid(const Block& aBlock, const GridPosition& aPosition
 {
   bool success = true;
 
-  // Calculate the extents of the block and determine if moving it would place
-  // it outside of the grid.
-  int left = 0;
-  int right = 0;
-  int bottom = 0;
-  int top = 0;
-
-  const auto& blockPos = aBlock.mPosition;
+  // Check each tile at the new position to see if it's out of bounds or
+  // if that space is already occupied.
   const auto& tiles = aBlock.mRotations[aBlock.mCurrentRotation];
-
   for(const auto& tile : tiles)
   {
-    left = std::min(left, tile.x);
-    right = std::max(right, tile.x);
-    bottom = std::min(bottom, tile.y);
-    top = std::max(top, tile.y);
-  }
+    auto tileX = tile.x + aPosition.x;
+    auto tileY = tile.y + aPosition.y;
 
-  if(aPosition.x - left < 0 ||
-     aPosition.x + right > 9 ||
-     aPosition.y - bottom < 0 ||
-     aPosition.y + top > 24)
-  {
-    success = false;
+    if(tileX < 0 || tileX > 9 || tileY < 0 || tileY > 24)
+    {
+      success = false;
+      break;
+    }
+    else if(mFallenTiles[tileY][tileX] == 1)
+    {
+      success = false;
+      break;
+    }
   }
 
   return success;
 }
 
 /******************************************************************************/
-std::vector<int> BlockSystem::GetFilledRows()
+void BlockSystem::RemoveFilledRows()
 {
-  // Gather the index of each filled row.
+  // First, determine which rows, if any, are filled.
   std::vector<int> filledRows;
   for(int rowIndex = 0; rowIndex < 25; ++rowIndex)
   {
@@ -515,30 +309,59 @@ std::vector<int> BlockSystem::GetFilledRows()
     }
   }
 
-  return filledRows;
+  // For each filled row, add each Entity in the row into the list of
+  // Entities to remove.
+  for(const auto& rowIndex : filledRows)
+  {
+    for(int column = 0; column < 10; ++column)
+    {
+      mEntitiesToRemove.emplace_back(mFallenTileEntities[rowIndex][column]);
+    }
+  }
+
+  // For each filled row, copy the values of the above row into it. Then repeat
+  // the process all the way up to the top of the grid.
+  int clearedRows = 0;
+  for(const auto& rowIndex : filledRows)
+  {
+    for(int row = rowIndex - clearedRows; row < 25; ++row)
+    {
+      for(int column = 0; column < 10; ++column)
+      {
+        // If this row is the top of the grid, fill the row with zeroes.
+        // Otherwise, copy the values of the row above it.
+        if(row == 24)
+        {
+          mFallenTiles[row][column] = 0;
+        }
+        else
+        {
+          mFallenTiles[row][column] = mFallenTiles[row + 1][column];
+          mFallenTileEntities[row][column] = mFallenTileEntities[row + 1][column];
+        }
+      }
+    }
+
+    ++clearedRows;
+  }
 }
 
 /******************************************************************************/
-void BlockSystem::RemoveRow(int aIndex)
+void BlockSystem::UpdateFallenTileEntities(Kuma3D::Scene& aScene)
 {
-  // If the row is at the top of the grid, replace each value in the row with 0.
-  // Otherwise, replace each value in the row with the value above it and call
-  // this function again with aIndex + 1.
-  if(aIndex == 24)
+  for(int row = 0; row < 25; ++row)
   {
     for(int column = 0; column < 10; ++column)
     {
-      mFallenTiles[aIndex][column] = 0;
-    }
-  }
-  else
-  {
-    for(int column = 0; column < 10; ++column)
-    {
-      mFallenTiles[aIndex][column] = mFallenTiles[aIndex + 1][column];
-    }
+      if(mFallenTiles[row][column])
+      {
+        auto& entity = mFallenTileEntities[row][column];
+        auto& transform = aScene.GetComponentForEntity<Kuma3D::Transform>(entity);
 
-    RemoveRow(aIndex + 1);
+        transform.mPosition.x = (column * mTileSizeInPixels) + (mTileSizeInPixels / 2.0);
+        transform.mPosition.y = (row * mTileSizeInPixels) + (mTileSizeInPixels / 2.0);
+      }
+    }
   }
 }
 

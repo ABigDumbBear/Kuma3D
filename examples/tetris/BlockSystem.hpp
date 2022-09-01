@@ -71,30 +71,24 @@ class BlockSystem : public Kuma3D::System
     bool IsMoveValid(const Block& aBlock, const GridPosition& aPosition);
 
     /**
-     * Returns a list of row indexes that have been completely filled.
-     *
-     * @return A list of rows to remove.
+     * Checks for filled rows and removes them.
      */
-    std::vector<int> GetFilledRows();
+    void RemoveFilledRows();
 
     /**
-     * Clears a row at the specified index and moves all rows above it down by 1.
+     * Updates the Transform components of each tile Entity based on their
+     * position in the grid.
      *
-     * @param aIndex The index of the row to clear.
+     * @param aScene The Scene containing the Entity data.
      */
-    void RemoveRow(int aIndex);
+    void UpdateFallenTileEntities(Kuma3D::Scene& aScene);
 
-    // Maps entities with a block component (positions in 2D) to entities with
-    // meshes and transform components (positions in 3D). Each block is
-    // composed of four 3D cubes.
     std::map<Kuma3D::Entity, Kuma3D::Entity[4]> mEntityTileMap;
-
-    // Keeps track of new blocks that need to have meshes and transforms
-    // created.
     std::vector<Kuma3D::Entity> mNewEntities;
+    std::vector<Kuma3D::Entity> mEntitiesToRemove;
 
-    // Keeps track of all the tiles that have fallen and are no longer moving.
     bool mFallenTiles[25][10];
+    Kuma3D::Entity mFallenTileEntities[25][10];
 
     Kuma3D::KeyCode mKeyPress { Kuma3D::KeyCode::eKEY_UNKNOWN };
 
