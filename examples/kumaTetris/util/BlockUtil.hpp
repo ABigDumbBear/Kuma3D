@@ -1,34 +1,75 @@
-#ifndef SCENEFACTORY_HPP
-#define SCENEFACTORY_HPP
+#ifndef BLOCKUTIL_HPP
+#define BLOCKUTIL_HPP
 
-#include <cstdlib>
-#include <ctime>
+#include "Block.hpp"
 
-#include <Scene.hpp>
+#include <ShaderLoader.hpp>
+#include <TextureLoader.hpp>
 
-#include <Camera.hpp>
 #include <Mesh.hpp>
-#include <Transform.hpp>
 
-#include <RenderSystem.hpp>
+namespace KumaTetris {
 
-#include <Types.hpp>
-
-#include "Movable.hpp"
-
-#include "MovementSystem.hpp"
-
-namespace example_2 {
-
-inline Kuma3D::Mesh CreateCube()
+/**
+ * Creates and returns a random Block.
+ *
+ * @return A random Block.
+ */
+inline Block CreateBlock()
 {
-  float xVal = 0.5;
-  float yVal = 0.5;
-  float zVal = 0.5;
+  Block block;
 
+  int blockType = rand() % 7;
+  if(blockType == 0)
+  {
+    block = IBlock;
+  }
+  else if(blockType == 1)
+  {
+    block = JBlock;
+  }
+  else if(blockType == 2)
+  {
+    block = LBlock;
+  }
+  else if(blockType == 3)
+  {
+    block = OBlock;
+  }
+  else if(blockType == 4)
+  {
+    block = SBlock;
+  }
+  else if(blockType == 5)
+  {
+    block = TBlock;
+  }
+  else if(blockType == 6)
+  {
+    block = ZBlock;
+  }
+
+  block.mPosition.x = 3;
+  block.mPosition.y = 25;
+
+  return block;
+}
+
+/**
+ * Creates and returns a cube mesh for a given size.
+ *
+ * @param aSize The cube size in pixels.
+ * @param aColor The color of the cube.
+ * @return A cube mesh for the given size.
+ */
+inline Kuma3D::Mesh CreateCube(int aSize, const Kuma3D::Vec3& aColor)
+{
   Kuma3D::Mesh mesh;
 
-  // Create the 3D vertices for this cube.
+  float xVal = aSize / 2.0;
+  float yVal = aSize / 2.0;
+  float zVal = aSize / 2.0;
+
   Kuma3D::MeshVertex vertex;
 
   // Vertices for each face are defined in the following order:
@@ -39,22 +80,19 @@ inline Kuma3D::Mesh CreateCube()
 
   // Front face
   vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
+  vertex.mColor = aColor;
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 1.0, 0.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 0.0, 1.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
@@ -68,22 +106,18 @@ inline Kuma3D::Mesh CreateCube()
 
   // Top face
   vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.0;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 1.0, 0.0);
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 0.0, 1.0);
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.0;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
@@ -97,22 +131,18 @@ inline Kuma3D::Mesh CreateCube()
 
   // Back face
   vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 1.0, 0.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 0.0, 1.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
@@ -126,22 +156,18 @@ inline Kuma3D::Mesh CreateCube()
 
   // Left face
   vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 1.0, 0.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 0.0, 1.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-xVal, yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
@@ -155,22 +181,18 @@ inline Kuma3D::Mesh CreateCube()
 
   // Bottom face
   vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 1.0, 0.0);
   vertex.mTexCoords[0] = 1.0;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 0.0, 1.0);
   vertex.mTexCoords[0] = 1.0;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-xVal, -yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
@@ -184,22 +206,18 @@ inline Kuma3D::Mesh CreateCube()
 
   // Right face
   vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, -yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 1.0, 0.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 0.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, yVal, zVal);
-  vertex.mColor = Kuma3D::Vec3(0.0, 0.0, 1.0);
   vertex.mTexCoords[0] = 0.66;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(xVal, yVal, -zVal);
-  vertex.mColor = Kuma3D::Vec3(1.0, 0.0, 0.0);
   vertex.mTexCoords[0] = 0.33;
   vertex.mTexCoords[1] = 1.0;
   mesh.mVertices.emplace_back(vertex);
@@ -211,65 +229,20 @@ inline Kuma3D::Mesh CreateCube()
   mesh.mIndices.emplace_back(22);
   mesh.mIndices.emplace_back(23);
 
+  // Add the shader.
+  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/TileShader.vert",
+                                                            "resources/shaders/TileShader.frag");
+  mesh.mShaders.emplace_back(shaderID);
+
+  // Add the texture.
+  auto textureID = Kuma3D::TextureLoader::LoadTextureFromFile("resources/tileTexture.png");
+  mesh.mTextures.emplace_back(textureID);
+
+  mesh.mSystem = Kuma3D::CoordinateSystem::eSCREEN_SPACE;
   mesh.mDirty = true;
 
   return mesh;
 }
-
-inline std::unique_ptr<Kuma3D::Scene> CreateScene(const Kuma3D::ID& aCubeTextureID,
-                                                        const Kuma3D::ID& aCubeShaderID)
-{
-  auto scene = std::make_unique<Kuma3D::Scene>();
-
-  // Create a MovementSystem and add it to the scene.
-  scene->AddSystem(std::make_unique<example_2::MovementSystem>());
-
-  // Create a RenderSystem and add it to the scene.
-  // IMPORTANT: Note that the RenderSystem is added last. This is because
-  // we want all non-rendering logic to occur first, before rendering
-  // the scene.
-  auto renderSystem = std::make_unique<Kuma3D::RenderSystem>();
-  renderSystem->CreateCamera(*scene.get());
-  scene->AddSystem(std::move(renderSystem));
-
-  // Create a bunch of new Entities and give each a Mesh, a Transform, and a
-  // Movable component.
-  //
-  // These entities will automatically be tracked and rendered by
-  // the RenderSystem. They will also be updated by the MovementSystem.
-  srand(time(NULL));
-  int xMax = 25;
-  int yMax = 100;
-  int zMax = 50;
-  int speedMax = 5;
-
-  for(int i = 0; i < 1000; ++i)
-  {
-    auto entity = scene->CreateEntity();
-
-    // Create the Mesh.
-    auto cubeMesh = CreateCube();
-    cubeMesh.mTextures.emplace_back(aCubeTextureID);
-    cubeMesh.mShaders.emplace_back(aCubeShaderID);
-    scene->AddComponentToEntity<Kuma3D::Mesh>(entity, cubeMesh);
-
-    // Create a Transform and randomize the position.
-    Kuma3D::Transform transform;
-    transform.mPosition.x = (rand() % xMax) * (rand() % 2 ? 1 : -1);
-    transform.mPosition.y = (std::rand() % yMax) * (std::rand() % 2 ? 1 : -1);
-    transform.mPosition.z = std::rand() % zMax * -1;
-    scene->AddComponentToEntity<Kuma3D::Transform>(entity, transform);
-
-    // Create a Movable component.
-    example_2::Movable movableComponent;
-    movableComponent.mSpeed = (std::rand() % speedMax) + 0.5;
-    movableComponent.mDirection.y = -1.0;
-    scene->AddComponentToEntity<example_2::Movable>(entity, movableComponent);
-  }
-
-  return std::move(scene);
-}
-
-} // namespace example_2
+} // namespace KumaTetris
 
 #endif

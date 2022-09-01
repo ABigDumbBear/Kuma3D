@@ -13,8 +13,9 @@
 
 #include "Block.hpp"
 #include "BlockUtil.hpp"
+#include "Movable.hpp"
 
-namespace Tetris {
+namespace KumaTetris {
 
 const float BlockSystem::mFallSpeed = 0.2;
 
@@ -35,6 +36,11 @@ void BlockSystem::Initialize(Kuma3D::Scene& aScene)
   if(!aScene.IsComponentTypeRegistered<Block>())
   {
     aScene.RegisterComponentType<Block>();
+  }
+
+  if(!aScene.IsComponentTypeRegistered<Movable>())
+  {
+    aScene.RegisterComponentType<Movable>();
   }
 
   // Set the signature to care about Entities with Block components.
@@ -89,6 +95,7 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 
       aScene.AddComponentToEntity<Kuma3D::Mesh>(tileEntity, cubeMesh);
       aScene.AddComponentToEntity<Kuma3D::Transform>(tileEntity, cubeTransform);
+      aScene.AddComponentToEntity<Movable>(tileEntity);
 
       mEntityTileMap[entity][i] = tileEntity;
     }
@@ -127,12 +134,16 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
       }
       case Kuma3D::KeyCode::eKEY_UP:
       {
-        ++block.mCurrentRotation;
-        if(block.mCurrentRotation > 3)
+        auto newRotation = block.mCurrentRotation + 1;
+        if(newRotation > 3)
         {
-          block.mCurrentRotation = 0;
+          newRotation = 0;
         }
 
+        if(IsRotationValid(block, newRotation))
+        {
+          block.mCurrentRotation = newRotation;
+        }
         break;
       }
       default:
@@ -141,39 +152,40 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
       }
     }
 
-    auto& tiles = block.mRotations[block.mCurrentRotation];
-
     // Move the Block down if enough time has passed.
     bool blockFallen = false;
     if(dt >= mFallSpeed)
     {
-      row -= 1;
-
-      bool onGround = false;
-      for(const auto& tile : tiles)
+      // If the block can move down 1 row, then do so. Otherwise,
+      // the block has landed.
+      if(row > 24)
       {
-        if((row + tile.y) == 0)
-        {
-          onGround = true;
-        }
+        --row;
       }
-
-      // If the block is at the bottom of the grid, or if there's a collision,
-      // then the block has finished falling.
-      if(onGround || IsBlockColliding(block))
+      else
       {
-        blockFallen = true;
+        GridPosition newPos { column, row - 1 };
+        if(IsMoveValid(block, newPos))
+        {
+          block.mPosition = newPos;
+        }
+        else
+        {
+          blockFallen = true;
+        }
       }
     }
 
-    // For each tile in the Block, update the position of the corresponding
-    // 3D cube.
+    // For each tile in the Block, update the position of the corresponding 3D cube.
+    auto& tiles = block.mRotations[block.mCurrentRotation];
     for(int i = 0; i < 4; ++i)
     {
       auto tileEntity = mEntityTileMap[blockEntity][i];
-      auto& transform = aScene.GetComponentForEntity<Kuma3D::Transform>(tileEntity);
-      transform.mPosition.x = (mTileSizeInPixels * (column + tiles[i].x)) + (mTileSizeInPixels / 2.0);
-      transform.mPosition.y = (mTileSizeInPixels * (row  + tiles[i].y)) + (mTileSizeInPixels / 2.0);
+      auto& movable = aScene.GetComponentForEntity<Movable>(tileEntity);
+      movable.mTargetPosition.x = (mTileSizeInPixels * (column + tiles[i].x)) + (mTileSizeInPixels / 2.0);
+      movable.mTargetPosition.y = (mTileSizeInPixels * (row  + tiles[i].y)) + (mTileSizeInPixels / 2.0);
+      movable.mMoveSpeed = 0.5;
+      movable.mFinishedMoving = false;
     }
 
     // If the block has fallen, add each tile to the list of fallen
@@ -190,7 +202,7 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
         mFallenTileEntities[tilePos.y][tilePos.x] = mEntityTileMap[blockEntity][i];
       }
 
-      mEntitiesToRemove.emplace_back(blockEntity);
+      aScene.RemoveEntity(blockEntity);
       mEntityTileMap.erase(blockEntity);
 
       auto newEntity = aScene.CreateEntity();
@@ -208,7 +220,14 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
   // Remove all Entities that have been marked for removal.
   for(const auto& entity : mEntitiesToRemove)
   {
-    aScene.RemoveEntity(entity);
+    //aScene.RemoveEntity(entity);
+    auto& movable = aScene.GetComponentForEntity<Movable>(entity);
+    auto& transform = aScene.GetComponentForEntity<Kuma3D::Transform>(entity);
+
+    movable.mTargetPosition = transform.mPosition;
+    movable.mTargetPosition.x -= (10 * mTileSizeInPixels);
+    movable.mMoveSpeed = 0.3;
+    movable.mFinishedMoving = false;
   }
   mEntitiesToRemove.clear();
 
@@ -270,6 +289,35 @@ bool BlockSystem::IsMoveValid(const Block& aBlock, const GridPosition& aPosition
   {
     auto tileX = tile.x + aPosition.x;
     auto tileY = tile.y + aPosition.y;
+
+    if(tileX < 0 || tileX > 9 || tileY < 0 || tileY > 24)
+    {
+      success = false;
+      break;
+    }
+    else if(mFallenTiles[tileY][tileX] == 1)
+    {
+      success = false;
+      break;
+    }
+  }
+
+  return success;
+}
+
+/******************************************************************************/
+bool BlockSystem::IsRotationValid(const Block& aBlock, int aRotation)
+{
+  bool success = true;
+
+  // Check each tile at the new rotation to see if it's out of bounds or
+  // if that space is already occupied.
+  const auto& tiles = aBlock.mRotations[aRotation];
+  const auto& position = aBlock.mPosition;
+  for(const auto& tile : tiles)
+  {
+    auto tileX = tile.x + position.x;
+    auto tileY = tile.y + position.y;
 
     if(tileX < 0 || tileX > 9 || tileY < 0 || tileY > 24)
     {
@@ -356,13 +404,15 @@ void BlockSystem::UpdateFallenTileEntities(Kuma3D::Scene& aScene)
       if(mFallenTiles[row][column])
       {
         auto& entity = mFallenTileEntities[row][column];
-        auto& transform = aScene.GetComponentForEntity<Kuma3D::Transform>(entity);
+        auto& movable = aScene.GetComponentForEntity<Movable>(entity);
 
-        transform.mPosition.x = (column * mTileSizeInPixels) + (mTileSizeInPixels / 2.0);
-        transform.mPosition.y = (row * mTileSizeInPixels) + (mTileSizeInPixels / 2.0);
+        movable.mTargetPosition.x = (column * mTileSizeInPixels) + (mTileSizeInPixels / 2.0);
+        movable.mTargetPosition.y = (row * mTileSizeInPixels) + (mTileSizeInPixels / 2.0);
+        movable.mMoveSpeed = 0.5;
+        movable.mFinishedMoving = false;
       }
     }
   }
 }
 
-} // namespace Tetris
+} // namespace KumaTetris

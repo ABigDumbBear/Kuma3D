@@ -10,7 +10,7 @@ int main()
 {
   // Initialize the engine.
   Kuma3D::WindowOptions options;
-  options.mTitle = "Tetris";
+  options.mTitle = "KumaTetris";
   options.mWidth = 320;
   options.mHeight = 800;
 
@@ -27,7 +27,7 @@ int main()
 
   // Create a Game and load a Scene.
   Kuma3D::Game game;
-  game.SetScene(Tetris::CreateScene());
+  game.SetScene(KumaTetris::CreateScene());
   game.Run();
 
   // Clean up.

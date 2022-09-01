@@ -3,7 +3,7 @@
 
 #include <Vec3.hpp>
 
-namespace Tetris {
+namespace KumaTetris {
 
 struct GridPosition
 {
@@ -266,6 +266,6 @@ const Block ZBlock
   {1.0, 0.0, 0.0}
 };
 
-} // namespace Tetris
+} // namespace KumaTetris
 
 #endif

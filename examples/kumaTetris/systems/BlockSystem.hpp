@@ -11,7 +11,7 @@
 
 #include "Block.hpp"
 
-namespace Tetris {
+namespace KumaTetris {
 
 class BlockSystem : public Kuma3D::System
 {
@@ -71,6 +71,15 @@ class BlockSystem : public Kuma3D::System
     bool IsMoveValid(const Block& aBlock, const GridPosition& aPosition);
 
     /**
+     * Checks if it is possible to rotate a given Block at is current position.
+     *
+     * @param aBlock The Block to move.
+     * @param aRotation The rotation to check.
+     * @return Whether it's possible to rotate the Block.
+     */
+    bool IsRotationValid(const Block& aBlock, int aRotation);
+
+    /**
      * Checks for filled rows and removes them.
      */
     void RemoveFilledRows();
@@ -100,6 +109,6 @@ class BlockSystem : public Kuma3D::System
     static const float mFallSpeed;
 };
 
-} // namespace Tetris
+} // namespace KumaTetris
 
 #endif

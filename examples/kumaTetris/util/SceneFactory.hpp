@@ -13,8 +13,9 @@
 #include <Transform.hpp>
 
 #include "BlockSystem.hpp"
+#include "MovementSystem.hpp"
 
-namespace Tetris {
+namespace KumaTetris {
 
 /**
  * Creates a mesh for a 2D grid of the given dimensions.
@@ -92,6 +93,9 @@ inline std::unique_ptr<Kuma3D::Scene> CreateScene()
   // Create and add a BlockSystem.
   newScene->AddSystem(std::make_unique<BlockSystem>());
 
+  // Create and add a MovementSystem
+  newScene->AddSystem(std::make_unique<MovementSystem>());
+
   // Create and add a RenderSystem.
   auto renderSystem = std::make_unique<Kuma3D::RenderSystem>();
 
@@ -116,6 +120,6 @@ inline std::unique_ptr<Kuma3D::Scene> CreateScene()
   return std::move(newScene);
 }
 
-} // namespace Tetris
+} // namespace KumaTetris
 
 #endif
