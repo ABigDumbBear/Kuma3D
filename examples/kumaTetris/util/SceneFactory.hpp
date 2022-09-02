@@ -4,10 +4,13 @@
 #include <Scene.hpp>
 #include <Types.hpp>
 
+#include <AudioSystem.hpp>
 #include <RenderSystem.hpp>
 
+#include <AudioLoader.hpp>
 #include <ShaderLoader.hpp>
 
+#include <Audio.hpp>
 #include <Camera.hpp>
 #include <Mesh.hpp>
 #include <Transform.hpp>
@@ -96,6 +99,9 @@ inline std::unique_ptr<Kuma3D::Scene> CreateScene()
   // Create and add a MovementSystem
   newScene->AddSystem(std::make_unique<MovementSystem>());
 
+  // Create and add an AudioSystem.
+  newScene->AddSystem(std::make_unique<Kuma3D::AudioSystem>());
+
   // Create and add a RenderSystem.
   auto renderSystem = std::make_unique<Kuma3D::RenderSystem>();
 
@@ -116,6 +122,16 @@ inline std::unique_ptr<Kuma3D::Scene> CreateScene()
   gridMesh.mShaders.emplace_back(shaderID);
   newScene->AddComponentToEntity<Kuma3D::Mesh>(gridEntity, gridMesh);
   newScene->AddComponentToEntity<Kuma3D::Transform>(gridEntity);
+
+  // Create an audio player for the background music.
+  auto bgmID = Kuma3D::AudioLoader::LoadAudioFromFile("resources/BGM.wav");
+
+  auto bgmEntity = newScene->CreateEntity();
+  Kuma3D::Audio bgm;
+  bgm.mSoundID = bgmID;
+  bgm.mVolume = 0.5;
+  bgm.mLooping = true;
+  newScene->AddComponentToEntity<Kuma3D::Audio>(bgmEntity, bgm);
 
   return std::move(newScene);
 }

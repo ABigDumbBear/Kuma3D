@@ -39,7 +39,8 @@ install(TARGETS Kuma3D LIBRARY DESTINATION ${LIB_INSTALL_DIR})
 
 # Install the engine header files.
 set(INCLUDE_INSTALL_DIR ${ENGINE_INSTALL_DIR}/include)
-file(GLOB ENGINE_INCLUDES core/*.hpp
+file(GLOB ENGINE_INCLUDES audio/*.hpp
+                          core/*.hpp
                           components/*.hpp
                           math/*.hpp
                           renderer/*.hpp)

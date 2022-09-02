@@ -53,6 +53,14 @@ class BlockSystem : public Kuma3D::System
     void HandleKeyPressed(const Kuma3D::KeyCode& aKey, int aMods);
 
     /**
+     * A handler function that gets called whenever a key is released.
+     *
+     * @param aKey The key that was released.
+     * @param aMods Any mods active on the key when it was pressed.
+     */
+    void HandleKeyReleased(const Kuma3D::KeyCode& aKey, int aMods);
+
+    /**
      * Checks a given Block against the list of fallen tiles to check
      * if there's a collision.
      *
@@ -99,14 +107,15 @@ class BlockSystem : public Kuma3D::System
     bool mFallenTiles[25][10];
     Kuma3D::Entity mFallenTileEntities[25][10];
 
-    Kuma3D::KeyCode mKeyPress { Kuma3D::KeyCode::eKEY_UNKNOWN };
+    std::vector<Kuma3D::KeyCode> mLastFrameKeyPresses;
+    std::vector<Kuma3D::KeyCode> mPressedKeys;
 
     float mTimeSinceLastFall { 0.0 };
 
     Kuma3D::Observer mObserver;
 
     static const int mTileSizeInPixels { 32 };
-    static const float mFallSpeed;
+    static const float mDefaultFallSpeed;
 };
 
 } // namespace KumaTetris

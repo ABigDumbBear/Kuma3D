@@ -17,7 +17,7 @@
 
 namespace KumaTetris {
 
-const float BlockSystem::mFallSpeed = 0.2;
+const float BlockSystem::mDefaultFallSpeed = 0.5;
 
 /******************************************************************************/
 void BlockSystem::Initialize(Kuma3D::Scene& aScene)
@@ -53,6 +53,12 @@ void BlockSystem::Initialize(Kuma3D::Scene& aScene)
                                                int aMods)
   {
     this->HandleKeyPressed(aKey, aMods);
+  });
+
+  Kuma3D::KeyReleased.Connect(mObserver, [this](const Kuma3D::KeyCode& aKey,
+                                                int aMods)
+  {
+    this->HandleKeyReleased(aKey, aMods);
   });
 
   // Initialize the fallen tile grid.
@@ -112,49 +118,59 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     auto& row = block.mPosition.y;
 
     // Handle input, either moving the block left/right or rotating it.
-    switch(mKeyPress)
+    for(const auto& keyPress : mLastFrameKeyPresses)
     {
-      case Kuma3D::KeyCode::eKEY_LEFT:
+      switch(keyPress)
       {
-        GridPosition newPos { column - 1, row };
-        if(IsMoveValid(block, newPos))
+        case Kuma3D::KeyCode::eKEY_LEFT:
         {
-          column -= 1;
+          GridPosition newPos { column - 1, row };
+          if(IsMoveValid(block, newPos))
+          {
+            column -= 1;
+          }
+          break;
         }
-        break;
-      }
-      case Kuma3D::KeyCode::eKEY_RIGHT:
-      {
-        GridPosition newPos { column + 1, row };
-        if(IsMoveValid(block, newPos))
+        case Kuma3D::KeyCode::eKEY_RIGHT:
         {
-          column += 1;
+          GridPosition newPos { column + 1, row };
+          if(IsMoveValid(block, newPos))
+          {
+            column += 1;
+          }
+          break;
         }
-        break;
-      }
-      case Kuma3D::KeyCode::eKEY_UP:
-      {
-        auto newRotation = block.mCurrentRotation + 1;
-        if(newRotation > 3)
+        case Kuma3D::KeyCode::eKEY_UP:
         {
-          newRotation = 0;
-        }
+          auto newRotation = block.mCurrentRotation + 1;
+          if(newRotation > 3)
+          {
+            newRotation = 0;
+          }
 
-        if(IsRotationValid(block, newRotation))
-        {
-          block.mCurrentRotation = newRotation;
+          if(IsRotationValid(block, newRotation))
+          {
+            block.mCurrentRotation = newRotation;
+          }
+          break;
         }
-        break;
-      }
-      default:
-      {
-        break;
+        default:
+        {
+          break;
+        }
       }
     }
+    mLastFrameKeyPresses.clear();
+
+    // Change the falling speed if the down key is pressed.
+    auto foundKey = std::find(mPressedKeys.begin(),
+                              mPressedKeys.end(),
+                              Kuma3D::KeyCode::eKEY_DOWN);
+    float fallSpeed = (foundKey != mPressedKeys.end() ? 0.1 : mDefaultFallSpeed);
 
     // Move the Block down if enough time has passed.
     bool blockFallen = false;
-    if(dt >= mFallSpeed)
+    if(dt >= fallSpeed)
     {
       // If the block can move down 1 row, then do so. Otherwise,
       // the block has landed.
@@ -174,6 +190,9 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
           blockFallen = true;
         }
       }
+
+      // Reset the fall timer.
+      mTimeSinceLastFall = aTime;
     }
 
     // For each tile in the Block, update the position of the corresponding 3D cube.
@@ -231,14 +250,8 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
   }
   mEntitiesToRemove.clear();
 
-  // Reset the fall timer.
-  if(dt >= mFallSpeed)
-  {
-    mTimeSinceLastFall = aTime;
-  }
-
-  // Reset the previously pressed key.
-  mKeyPress = Kuma3D::KeyCode::eKEY_UNKNOWN;
+  // Reset the previously pressed keys.
+  mLastFrameKeyPresses.clear();
 }
 
 /******************************************************************************/
@@ -250,7 +263,14 @@ void BlockSystem::HandleEntityBecameEligible(const Kuma3D::Entity& aEntity)
 /******************************************************************************/
 void BlockSystem::HandleKeyPressed(const Kuma3D::KeyCode& aKey, int aMods)
 {
-  mKeyPress = aKey;
+  mLastFrameKeyPresses.emplace_back(aKey);
+  mPressedKeys.emplace_back(aKey);
+}
+
+/******************************************************************************/
+void BlockSystem::HandleKeyReleased(const Kuma3D::KeyCode& aKey, int aMods)
+{
+  mPressedKeys.erase(std::find(mPressedKeys.begin(), mPressedKeys.end(), aKey));
 }
 
 /******************************************************************************/
