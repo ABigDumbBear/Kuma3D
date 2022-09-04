@@ -254,7 +254,16 @@ void RenderSystem::DrawEntities(Scene& aScene,
       // Set the model matrix.
       if(ShaderLoader::IsUniformDefined(shader, "modelMatrix"))
       {
-        auto matrix = CalculateModelMatrix(entityTransform);
+        // If the Entity's Transform component has a parent Transform,
+        // calculate the model matrix for the parent.
+        Mat4 parentMatrix;
+        if(entityTransform.mUseParent)
+        {
+          auto& parentTransform = aScene.GetComponentForEntity<Transform>(entityTransform.mParent);
+          parentMatrix = CalculateModelMatrix(parentTransform);
+        }
+
+        auto matrix = CalculateModelMatrix(entityTransform) * parentMatrix;
         ShaderLoader::SetMat4(shader, "modelMatrix", matrix);
       }
 

@@ -1,6 +1,7 @@
 #include <Game.hpp>
 #include <WindowOptions.hpp>
 
+#include <ModelLoader.hpp>
 #include <ShaderLoader.hpp>
 
 #include "SceneFactory.hpp"
@@ -14,6 +15,9 @@ int main()
   options.mHeight = 720;
 
   Kuma3D::Game::Initialize(options);
+
+  // Load the model.
+  Kuma3D::ModelLoader::LoadModel("resources/StarShip.obj");
 
   // Load the shaders.
   Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/ShipShader.vert",

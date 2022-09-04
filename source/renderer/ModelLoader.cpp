@@ -111,6 +111,8 @@ void ModelLoader::ProcessMesh(const ID& aID, aiMesh& aMesh, const aiScene& aScen
     }
   }
 
+  mesh.mDirty = true;
+
   mModelMap[aID].emplace_back(mesh);
 }
 

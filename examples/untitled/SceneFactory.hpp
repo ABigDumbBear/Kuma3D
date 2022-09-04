@@ -4,44 +4,14 @@
 #include <Scene.hpp>
 
 #include <RenderSystem.hpp>
+
+#include <ModelLoader.hpp>
 #include <ShaderLoader.hpp>
 
 #include <Mesh.hpp>
 #include <Transform.hpp>
 
 namespace Untitled {
-
-inline Kuma3D::Mesh CreateShipMesh()
-{
-  Kuma3D::Mesh mesh;
-
-  Kuma3D::MeshVertex vertex;
-  vertex.mPosition = Kuma3D::Vec3(0.0, 0.0, 0.0);
-  vertex.mColor = Kuma3D::Vec3(1.0, 1.0, 1.0);
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0.5, 0.0, 1.0);
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0.0, 0.0, -1.0);
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.0, 1.0);
-  mesh.mVertices.emplace_back(vertex);
-
-  mesh.mIndices.emplace_back(0);
-  mesh.mIndices.emplace_back(1);
-  mesh.mIndices.emplace_back(2);
-  mesh.mIndices.emplace_back(0);
-  mesh.mIndices.emplace_back(3);
-  mesh.mIndices.emplace_back(2);
-
-  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/ShipShader.vert",
-                                                            "resources/shaders/ShipShader.frag");
-  mesh.mShaders.emplace_back(shaderID);
-
-  mesh.mRenderMode = Kuma3D::RenderMode::eLINE_LOOP;
-  mesh.mDirty = true;
-
-  return mesh;
-}
 
 inline std::unique_ptr<Kuma3D::Scene> CreateScene()
 {
@@ -54,12 +24,32 @@ inline std::unique_ptr<Kuma3D::Scene> CreateScene()
 
   // Create and add a ship.
   auto shipEntity = scene->CreateEntity();
-  auto shipMesh = CreateShipMesh();
-  scene->AddComponentToEntity<Kuma3D::Mesh>(shipEntity, shipMesh);
+
   Kuma3D::Transform shipTransform;
-  shipTransform.mPosition = Kuma3D::Vec3(0.0, 0.0, -5.0);
-  shipTransform.mRotation = Kuma3D::Vec3(0.0, 0.0, 0.0);
+  shipTransform.mPosition = Kuma3D::Vec3(0.0, 0.0, -25.0);
+  shipTransform.mRotation = Kuma3D::Vec3(25.0, 35.0, 17.0);
   scene->AddComponentToEntity<Kuma3D::Transform>(shipEntity, shipTransform);
+
+  // Load the ship model and create an Entity for each Mesh.
+  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/ShipShader.vert",
+                                                            "resources/shaders/ShipShader.frag");
+
+  auto modelID = Kuma3D::ModelLoader::LoadModel("resources/StarShip.obj");
+  auto modelMeshes = Kuma3D::ModelLoader::GetModel(modelID);
+  for(auto& mesh : modelMeshes)
+  {
+    // Create an entity for this mesh.
+    auto meshEntity = scene->CreateEntity();
+
+    // Add the Mesh and a Transform to the entity.
+    mesh.mShaders.emplace_back(shaderID);
+    scene->AddComponentToEntity<Kuma3D::Mesh>(meshEntity, mesh);
+
+    Kuma3D::Transform meshTransform;
+    meshTransform.mParent = shipEntity;
+    meshTransform.mUseParent = true;
+    scene->AddComponentToEntity<Kuma3D::Transform>(meshEntity, meshTransform);
+  }
 
   return std::move(scene);
 }
