@@ -1,67 +1,21 @@
-#ifndef BLOCKUTIL_HPP
-#define BLOCKUTIL_HPP
+#ifndef SCENEFACTORY_HPP
+#define SCENEFACTORY_HPP
 
-#include "Block.hpp"
+#include <Scene.hpp>
 
+#include <RenderSystem.hpp>
+
+#include <ModelLoader.hpp>
 #include <ShaderLoader.hpp>
-#include <TextureLoader.hpp>
 
 #include <Mesh.hpp>
+#include <Transform.hpp>
 
-namespace KumaTetris {
+#include "ShipControlSystem.hpp"
+#include "ShipControl.hpp"
 
-/**
- * Creates and returns a random Block.
- *
- * @return A random Block.
- */
-inline Block CreateBlock()
-{
-  Block block;
+namespace StarBear {
 
-  int blockType = rand() % 7;
-  if(blockType == 0)
-  {
-    block = IBlock;
-  }
-  else if(blockType == 1)
-  {
-    block = JBlock;
-  }
-  else if(blockType == 2)
-  {
-    block = LBlock;
-  }
-  else if(blockType == 3)
-  {
-    block = OBlock;
-  }
-  else if(blockType == 4)
-  {
-    block = SBlock;
-  }
-  else if(blockType == 5)
-  {
-    block = TBlock;
-  }
-  else if(blockType == 6)
-  {
-    block = ZBlock;
-  }
-
-  block.mPosition.x = 3;
-  block.mPosition.y = 25;
-
-  return block;
-}
-
-/**
- * Creates and returns a cube mesh for a given size.
- *
- * @param aSize The cube size in pixels.
- * @param aColor The color of the cube.
- * @return A cube mesh for the given size.
- */
 inline Kuma3D::Mesh CreateCube(int aSize, const Kuma3D::Vec3& aColor)
 {
   Kuma3D::Mesh mesh;
@@ -230,20 +184,62 @@ inline Kuma3D::Mesh CreateCube(int aSize, const Kuma3D::Vec3& aColor)
   mesh.mIndices.emplace_back(23);
 
   // Add the shader.
-  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/TileShader.vert",
-                                                            "resources/shaders/TileShader.frag");
+  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/ShipShader.vert",
+                                                            "resources/shaders/ShipShader.frag");
   mesh.mShaders.emplace_back(shaderID);
 
-  // Add the texture.
-  auto textureID = Kuma3D::TextureLoader::LoadTextureFromFile("resources/tileTexture.png");
-  mesh.mTextures.emplace_back(textureID);
-
-  mesh.mSystem = Kuma3D::CoordinateSystem::eSCREEN_SPACE;
   mesh.mDirty = true;
 
   return mesh;
 }
 
-} // namespace KumaTetris
+inline std::unique_ptr<Kuma3D::Scene> CreateScene()
+{
+  auto scene = std::make_unique<Kuma3D::Scene>();
+
+  scene->AddSystem(std::make_unique<ShipControlSystem>());
+
+  // Create and add a RenderSystem.
+  auto renderSystem = std::make_unique<Kuma3D::RenderSystem>();
+  renderSystem->CreateCamera(*scene);
+  scene->AddSystem(std::move(renderSystem));
+
+  // Create and add a ship.
+  auto shipEntity = scene->CreateEntity();
+
+  Kuma3D::Transform shipTransform;
+  shipTransform.mPosition = Kuma3D::Vec3(0.0, 0.0, -65.0);
+  shipTransform.mPosition.x = 7.5;
+  scene->AddComponentToEntity<Kuma3D::Transform>(shipEntity, shipTransform);
+  scene->AddComponentToEntity<ShipControl>(shipEntity);
+
+  //auto mesh = CreateCube(15, Kuma3D::Vec3(1.0, 1.0, 0.0));
+  //scene->AddComponentToEntity<Kuma3D::Mesh>(shipEntity, mesh);
+
+  // Load the ship model and create an Entity for each Mesh.
+  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/ShipShader.vert",
+                                                            "resources/shaders/ShipShader.frag");
+
+  auto modelID = Kuma3D::ModelLoader::LoadModel("resources/GalleonOGA.obj");
+  auto modelMeshes = Kuma3D::ModelLoader::GetModel(modelID);
+  for(auto& mesh : modelMeshes)
+  {
+    // Create an entity for this mesh.
+    auto meshEntity = scene->CreateEntity();
+
+    // Add the Mesh and a Transform to the entity.
+    mesh.mShaders.emplace_back(shaderID);
+    scene->AddComponentToEntity<Kuma3D::Mesh>(meshEntity, mesh);
+
+    Kuma3D::Transform meshTransform;
+    meshTransform.mParent = shipEntity;
+    meshTransform.mUseParent = true;
+    scene->AddComponentToEntity<Kuma3D::Transform>(meshEntity, meshTransform);
+  }
+
+  return std::move(scene);
+}
+
+} // namespace StarBear
 
 #endif

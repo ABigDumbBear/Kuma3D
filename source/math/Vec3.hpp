@@ -45,6 +45,14 @@ class Vec3
       return (*this);
     }
 
+    Vec3& operator*=(float rhs)
+    {
+      x *= rhs;
+      y *= rhs;
+      z *= rhs;
+      return (*this);
+    }
+
     float x, y, z;
 };
 
@@ -66,6 +74,12 @@ inline Vec3 operator-(const Vec3& lhs, const Vec3& rhs)
 {
   return Vec3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
 };
+
+/******************************************************************************/
+inline Vec3 operator*(const Vec3& lhs, float rhs)
+{
+  return Vec3(lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
+}
 
 } // namespace Kuma3D
 

@@ -27,12 +27,13 @@ ID ModelLoader::LoadModel(const std::string& aFilePath)
   else
   {
     // Generate an ID for the model.
-    auto newID = mIDGenerator.GenerateID();
+    modelID = mIDGenerator.GenerateID();
 
     Assimp::Importer importer;
     auto modelScene = importer.ReadFile(aFilePath, aiProcess_Triangulate | aiProcess_FlipUVs);
+    ProcessNode(modelID, *modelScene->mRootNode, *modelScene);
 
-    ProcessNode(newID, *modelScene->mRootNode, *modelScene);
+    mModelFileMap.emplace(aFilePath, modelID);
   }
 
   return modelID;

@@ -10,7 +10,7 @@ int main()
 {
   // Initialize the engine.
   Kuma3D::WindowOptions options;
-  options.mTitle = "Untitled";
+  options.mTitle = "StarBear";
   options.mWidth = 1280;
   options.mHeight = 720;
 
@@ -25,7 +25,7 @@ int main()
 
   // Create a Game and load a Scene.
   Kuma3D::Game game;
-  game.SetScene(Untitled::CreateScene());
+  game.SetScene(StarBear::CreateScene());
   game.Run();
 
   // Clean up.
