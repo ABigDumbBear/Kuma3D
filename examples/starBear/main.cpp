@@ -1,6 +1,7 @@
 #include <Game.hpp>
 #include <WindowOptions.hpp>
 
+#include <AudioLoader.hpp>
 #include <ModelLoader.hpp>
 #include <ShaderLoader.hpp>
 
@@ -17,7 +18,7 @@ int main()
   Kuma3D::Game::Initialize(options);
 
   // Load the model.
-  Kuma3D::ModelLoader::LoadModel("resources/StarShip.obj");
+  Kuma3D::ModelLoader::LoadModel("resources/ship.obj");
 
   // Load the shaders.
   Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/ShipShader.vert",

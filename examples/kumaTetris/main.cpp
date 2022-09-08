@@ -26,9 +26,6 @@ int main()
   // Load the textures.
   Kuma3D::TextureLoader::LoadTextureFromFile("resources/tileTexture.png");
 
-  // Load the audio.
-  Kuma3D::AudioLoader::LoadAudioFromFile("resources/BGM.wav");
-
   // Create a Game and load a Scene.
   Kuma3D::Game game;
   game.SetScene(KumaTetris::CreateScene());

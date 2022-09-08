@@ -11,6 +11,7 @@ target_link_libraries(StarBear PUBLIC
 
 # Include the engine headers from the install directory.
 target_include_directories(StarBear PUBLIC
+                           ${CMAKE_CURRENT_SOURCE_DIR}
                            ${INCLUDE_INSTALL_DIR}
                            components
                            systems)

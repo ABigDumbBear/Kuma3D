@@ -3,7 +3,7 @@
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Freetype REQUIRED)
-find_package(Assimp REQUIRED)
+find_package(assimp REQUIRED)
 
 # Set the directory for single header third-party libraries.
 set(3RD_PARTY_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rd_party)

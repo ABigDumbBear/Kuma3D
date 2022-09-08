@@ -6,6 +6,8 @@
 #include <InputSignals.hpp>
 #include <Observer.hpp>
 
+#include <Vec3.hpp>
+
 namespace StarBear {
 
 class ShipControlSystem : public Kuma3D::System
@@ -45,9 +47,18 @@ class ShipControlSystem : public Kuma3D::System
      */
     void HandleKeyReleased(const Kuma3D::KeyCode& aKey, int aMods);
 
+    /**
+     * Spawns a bullet and adds it to the given Scene.
+     *
+     * @param aScene The Scene to add the bullet to.
+     * @param aPosition The spawn position of the bullet.
+     */
+    void SpawnBullet(Kuma3D::Scene& aScene, const Kuma3D::Vec3& aPosition);
+
     std::vector<Kuma3D::KeyCode> mPressedKeys;
 
     double mTimeSinceLastUpdate { 0.0 };
+    double mTimeSinceLastBullet { 0.0 };
 
     Kuma3D::Observer mObserver;
 };

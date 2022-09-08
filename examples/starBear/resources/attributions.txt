@@ -1,4 +1,1 @@
-Model:
-
-StarShip by IllusionOfMana (https://opengameart.org/content/star-ship-low-poly)
-License: CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
+Models by quaternius (https://www.patreon.com/quaternius)
