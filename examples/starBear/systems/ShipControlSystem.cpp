@@ -5,6 +5,8 @@
 #include <Scene.hpp>
 #include <MathUtil.hpp>
 
+#include <Audio.hpp>
+#include <AudioLoader.hpp>
 #include <Transform.hpp>
 
 #include "Bullet.hpp"
@@ -16,6 +18,11 @@ namespace StarBear {
 /******************************************************************************/
 void ShipControlSystem::Initialize(Kuma3D::Scene& aScene)
 {
+  if(!aScene.IsComponentTypeRegistered<Kuma3D::Audio>())
+  {
+    aScene.RegisterComponentType<Kuma3D::Audio>();
+  }
+
   if(!aScene.IsComponentTypeRegistered<Kuma3D::Transform>())
   {
     aScene.RegisterComponentType<Kuma3D::Transform>();
@@ -182,6 +189,10 @@ void ShipControlSystem::SpawnBullet(Kuma3D::Scene& aScene, const Kuma3D::Vec3& a
 
   auto bulletMesh = CreateCube(1, Kuma3D::Vec3(1.0, 1.0, 1.0));
   aScene.AddComponentToEntity<Kuma3D::Mesh>(bullet, bulletMesh);
+
+  Kuma3D::Audio bulletAudio;
+  bulletAudio.mSoundID = Kuma3D::AudioLoader::LoadAudioFromFile("resources/shot.wav");
+  aScene.AddComponentToEntity<Kuma3D::Audio>(bullet, bulletAudio);
 
   aScene.AddComponentToEntity<Bullet>(bullet);
 }

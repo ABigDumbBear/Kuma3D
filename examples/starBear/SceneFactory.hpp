@@ -3,6 +3,7 @@
 
 #include <Scene.hpp>
 
+#include <AudioSystem.hpp>
 #include <RenderSystem.hpp>
 
 #include <ModelLoader.hpp>
@@ -23,6 +24,8 @@ inline std::unique_ptr<Kuma3D::Scene> CreateScene()
 
   scene->AddSystem(std::make_unique<BulletSystem>());
   scene->AddSystem(std::make_unique<ShipControlSystem>());
+
+  scene->AddSystem(std::make_unique<Kuma3D::AudioSystem>());
 
   // Create and add a RenderSystem.
   auto renderSystem = std::make_unique<Kuma3D::RenderSystem>();

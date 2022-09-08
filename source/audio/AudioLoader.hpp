@@ -52,7 +52,7 @@ class AudioLoader
 
     static ma_engine mAudioEngine;
     static std::map<std::string, ID> mAudioFileMap;
-    static std::map<ID, std::unique_ptr<ma_sound>> mAudioMap;
+    static std::map<ID, ma_sound> mAudioMap;
 
     static IDGenerator mIDGenerator;
     static bool mInitialized;
