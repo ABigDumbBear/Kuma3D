@@ -9,11 +9,12 @@
 namespace Kuma3D {
 
 /******************************************************************************/
-std::unique_ptr<ma_engine> AudioLoader::mAudioEngine = nullptr;
+ma_engine AudioLoader::mAudioEngine;
 std::map<std::string, ID> AudioLoader::mAudioFileMap;
 std::map<ID, std::unique_ptr<ma_sound>> AudioLoader::mAudioMap;
 
 IDGenerator AudioLoader::mIDGenerator;
+bool AudioLoader::mInitialized = false;
 
 /******************************************************************************/
 ID AudioLoader::LoadAudioFromFile(const std::string& aFilePath)
@@ -21,13 +22,11 @@ ID AudioLoader::LoadAudioFromFile(const std::string& aFilePath)
   ID audioID = 0;
 
   // Initialize the Miniaudio library if it isn't already.
-  if(mAudioEngine == nullptr)
+  if(!mInitialized)
   {
-    mAudioEngine = std::make_unique<ma_engine>();
-    auto errorCode = ma_engine_init(nullptr, mAudioEngine.get());
+    auto errorCode = ma_engine_init(nullptr, &mAudioEngine);
     if(errorCode != MA_SUCCESS)
     {
-      mAudioEngine.reset(nullptr);
       std::stringstream error;
       error << "Failed to initialize audio library! Miniaudio error code: " << errorCode;
       throw std::runtime_error(error.str());
@@ -44,7 +43,7 @@ ID AudioLoader::LoadAudioFromFile(const std::string& aFilePath)
   {
     // Load the audio file.
     auto newSound = std::make_unique<ma_sound>();
-    auto errorCode = ma_sound_init_from_file(mAudioEngine.get(),
+    auto errorCode = ma_sound_init_from_file(&mAudioEngine,
                                              aFilePath.c_str(),
                                              0,
                                              nullptr,
@@ -80,8 +79,7 @@ void AudioLoader::UnloadAudio()
   mAudioMap.clear();
 
   // Uninitialize the audio engine.
-  ma_engine_uninit(mAudioEngine.get());
-  mAudioEngine.reset(nullptr);
+  ma_engine_uninit(&mAudioEngine);
 }
 
 /******************************************************************************/

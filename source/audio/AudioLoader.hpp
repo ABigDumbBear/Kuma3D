@@ -50,11 +50,12 @@ class AudioLoader
      */
     static ma_sound& GetSound(const ID& aID);
 
-    static std::unique_ptr<ma_engine> mAudioEngine;
+    static ma_engine mAudioEngine;
     static std::map<std::string, ID> mAudioFileMap;
     static std::map<ID, std::unique_ptr<ma_sound>> mAudioMap;
 
     static IDGenerator mIDGenerator;
+    static bool mInitialized;
 };
 
 } // namespace Kuma3D
