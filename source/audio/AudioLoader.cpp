@@ -12,7 +12,6 @@ namespace Kuma3D {
 
 /******************************************************************************/
 ma_engine AudioLoader::mAudioEngine;
-std::map<std::string, ID> AudioLoader::mAudioFileMap;
 std::map<ID, ma_sound> AudioLoader::mAudioMap;
 
 IDGenerator AudioLoader::mIDGenerator;
@@ -37,36 +36,25 @@ ID AudioLoader::LoadAudioFromFile(const std::string& aFilePath)
     mInitialized = true;
   }
 
-  // Don't load the same audio file twice.
-  auto foundID = mAudioFileMap.find(aFilePath);
-  if(foundID != mAudioFileMap.end())
+  // Generate a new ID and a new sound object.
+  audioID = mIDGenerator.GenerateID();
+  mAudioMap.emplace(audioID, ma_sound());
+
+  // Attempt to load the audio file.
+  auto errorCode = ma_sound_init_from_file(&mAudioEngine,
+                                           aFilePath.c_str(),
+                                           0,
+                                           nullptr,
+                                           nullptr,
+                                           &mAudioMap[audioID]);
+  if(errorCode != MA_SUCCESS)
   {
-    audioID = foundID->second;
-  }
-  else
-  {
-    // Generate a new ID and a new sound object.
-    audioID = mIDGenerator.GenerateID();
-    mAudioMap.emplace(audioID, ma_sound());
+    mIDGenerator.RemoveID(audioID);
+    mAudioMap.erase(audioID);
 
-    // Attempt to load the audio file.
-    auto errorCode = ma_sound_init_from_file(&mAudioEngine,
-                                             aFilePath.c_str(),
-                                             0,
-                                             nullptr,
-                                             nullptr,
-                                             &mAudioMap[audioID]);
-    if(errorCode != MA_SUCCESS)
-    {
-      mIDGenerator.RemoveID(audioID);
-      mAudioMap.erase(audioID);
-
-      std::stringstream error;
-      error << "Failed to load audio file! Miniaudio error code: " << errorCode;
-      throw std::runtime_error(error.str());
-    }
-
-    mAudioFileMap.emplace(aFilePath, audioID);
+    std::stringstream error;
+    error << "Failed to load audio file! Miniaudio error code: " << errorCode;
+    throw std::runtime_error(error.str());
   }
 
   return audioID;
@@ -100,6 +88,22 @@ ma_sound& AudioLoader::GetSound(const ID& aID)
   }
 
   return foundSound->second;
+}
+
+/******************************************************************************/
+void AudioLoader::RemoveSound(const ID& aID)
+{
+  auto foundSound = mAudioMap.find(aID);
+  if(foundSound == mAudioMap.end())
+  {
+    std::stringstream error;
+    error << "No sound with ID " << aID << " exists!";
+    throw std::invalid_argument(error.str());
+  }
+
+  mIDGenerator.RemoveID(aID);
+  ma_sound_uninit(&mAudioMap[aID]);
+  mAudioMap.erase(aID);
 }
 
 } // namespace Kuma3D

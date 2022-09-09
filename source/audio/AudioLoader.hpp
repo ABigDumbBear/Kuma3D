@@ -25,8 +25,7 @@ class AudioLoader
   public:
 
     /**
-     * Loads the audio data from a given file. If the file has already been
-     * loaded, this function does nothing but return the ID of the audio data.
+     * Loads the audio data from a given file.
      *
      * @param aFilePath The path to an audio file.
      * @return The ID of the stored audio data.
@@ -50,8 +49,14 @@ class AudioLoader
      */
     static ma_sound& GetSound(const ID& aID);
 
+    /**
+     * Removes the ma_sound object associated with the given ID.
+     *
+     * @param aID The ID of the sound object.
+     */
+    static void RemoveSound(const ID& aID);
+
     static ma_engine mAudioEngine;
-    static std::map<std::string, ID> mAudioFileMap;
     static std::map<ID, ma_sound> mAudioMap;
 
     static IDGenerator mIDGenerator;

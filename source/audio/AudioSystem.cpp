@@ -46,6 +46,7 @@ void AudioSystem::Operate(Scene& aScene, double aTime)
     if(ma_sound_at_end(&sound) && !audio.mLooping)
     {
       aScene.RemoveComponentFromEntity<Audio>(entity);
+      AudioLoader::RemoveSound(audio.mSoundID);
     }
   }
 }

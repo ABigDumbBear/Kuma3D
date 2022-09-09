@@ -17,7 +17,7 @@ class BulletSystem : public Kuma3D::System
     void Initialize(Kuma3D::Scene& aScene) override;
 
     /**
-     * Moves each Entity with a ShipControl and a Transform component.
+     * Moves each Entity with a Bullet and a Transform component.
      *
      * @param aScene The Scene containing the Entities' component data.
      * @param aTime The start time of the current frame.
