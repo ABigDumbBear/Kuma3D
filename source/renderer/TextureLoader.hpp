@@ -10,6 +10,8 @@
 
 namespace Kuma3D {
 
+using TextureDimensions = std::pair<int, int>;
+
 /**
  * A static class that handles loading and manipulating OpenGL textures.
  */
@@ -46,12 +48,6 @@ class TextureLoader
                                   GLint aFormat = GL_RGBA);
 
     /**
-     * Unloads all OpenGL textures. If you load any textures, be sure
-     * to call this before the program terminates to avoid memory leaks.
-     */
-    static void UnloadTextures();
-
-    /**
      * Adds image data to a texture. Remember that the texture's origin
      * is at the bottom left of the image. The x-axis is positive to the
      * right, and the y-axis is positive in the up direction.
@@ -75,10 +71,28 @@ class TextureLoader
                                 unsigned int aHeight,
                                 GLint aFormat = GL_RGBA);
 
+    /**
+     * Retrieves the dimensions of a loaded texture. The first entry is the
+     * width, and the second entry is the height.
+     *
+     * @param aID The ID of the texture.
+     * @return The dimensions of the texture.
+     */
+    static TextureDimensions GetTextureDimensions(const ID& aID);
+
+    /**
+     * Unloads all OpenGL textures. If you load any textures, be sure
+     * to call this before the program terminates to avoid memory leaks.
+     */
+    static void UnloadTextures();
+
   private:
 
     // Maps file names to OpenGL texture IDs.
     static std::map<std::string, ID> mTextureMap;
+
+    // Maps texture IDs to width and height values.
+    static std::map<ID, TextureDimensions> mTextureDimensionMap;
 };
 
 } // namespace Kuma3D

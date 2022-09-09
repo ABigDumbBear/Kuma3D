@@ -10,8 +10,6 @@
 
 #include "TextureLoader.hpp"
 
-#include <iostream>
-
 namespace Kuma3D {
 
 bool FontLoader::mInitialized = false;
@@ -200,39 +198,10 @@ void FontLoader::UpdateMeshToDisplayText(Mesh& aMesh,
     aMesh.mIndices.clear();
     aMesh.mTextures.clear();
 
-    // Next, calculate the total height and width of the font atlas.
-    float atlasWidth = 0;
-    float atlasHeight = 0;
-    for(const auto& glyphPair : glyphMap)
-    {
-      atlasWidth += glyphPair.second.mWidth;
-      atlasHeight = glyphPair.second.mHeight > atlasHeight ? glyphPair.second.mHeight : atlasHeight;
-    }
-
-      /*MeshVertex vertex;
-      vertex.mPosition = Vec3(0.0, 0.0, 0.0);
-      vertex.mTexCoords[0] = 0.0;
-      vertex.mTexCoords[1] = 0.0;
-      aMesh.mVertices.emplace_back(vertex);
-      vertex.mPosition = Vec3(atlasWidth, 0.0, 0.0);
-      vertex.mTexCoords[0] = 1.0;
-      vertex.mTexCoords[1] = 0.0;
-      aMesh.mVertices.emplace_back(vertex);
-      vertex.mPosition = Vec3(atlasWidth, -atlasHeight, 0.0);
-      vertex.mTexCoords[0] = 1.0;
-      vertex.mTexCoords[1] = 1.0;
-      aMesh.mVertices.emplace_back(vertex);
-      vertex.mPosition = Vec3(0.0, -atlasHeight, 0.0);
-      vertex.mTexCoords[0] = 0.0;
-      vertex.mTexCoords[1] = 1.0;
-      aMesh.mVertices.emplace_back(vertex);
-
-      aMesh.mIndices.emplace_back(0);
-      aMesh.mIndices.emplace_back(1);
-      aMesh.mIndices.emplace_back(3);
-      aMesh.mIndices.emplace_back(3);
-      aMesh.mIndices.emplace_back(1);
-      aMesh.mIndices.emplace_back(2);*/
+    // Next, retrieve the total height and width of the font atlas.
+    auto dimensions = TextureLoader::GetTextureDimensions(foundTexture->second);
+    float atlasWidth = dimensions.first;
+    float atlasHeight = dimensions.second;
 
     // Next, for each character in the text, use the loaded glyph information
     // (if available) to create a vertex quad for that glyph.
@@ -327,11 +296,6 @@ void FontLoader::UpdateMeshToDisplayText(Mesh& aMesh,
 
     aMesh.mHasTransparency = true;
     aMesh.mDirty = true;
-
-    /*for(const auto& fuck : aMesh.mVertices)
-    {
-      std::cout << fuck.mPosition << std::endl;
-    }*/
   }
 }
 
