@@ -3,7 +3,6 @@
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(Freetype REQUIRED)
-find_package(assimp REQUIRED)
 
 # Set the directory for single header third-party libraries.
 set(3RD_PARTY_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rd_party)
@@ -20,8 +19,7 @@ add_library(Kuma3D SHARED ${ENGINE_SOURCES})
 target_link_libraries(Kuma3D PUBLIC
                       glfw
                       ${GLEW_LIBRARIES}
-                      ${FREETYPE_LIBRARIES}
-                      ${ASSIMP_LIBRARIES})
+                      ${FREETYPE_LIBRARIES})
 
 # Set the include directories for the engine.
 target_include_directories(Kuma3D PUBLIC
@@ -32,8 +30,7 @@ target_include_directories(Kuma3D PUBLIC
                            renderer
                            ${3RD_PARTY_INCLUDE_DIR}
                            ${GLEW_INCLUDE_DIRS}
-                           ${FREETYPE_INCLUDE_DIRS}
-                           ${ASSIMP_INCLUDE_DIRS})
+                           ${FREETYPE_INCLUDE_DIRS})
 
 # Install the engine library.
 set(ENGINE_INSTALL_DIR ${CMAKE_SOURCE_DIR}/install)
