@@ -57,6 +57,7 @@ class SpriteSystem : public System
      */
     void UpdateMeshToDisplaySprite(Mesh& aMesh, const Sprite& aSprite);
 
+    std::vector<Entity> mNewEntities;
     std::map<Entity, double> mEntityTimeMap;
 };
 

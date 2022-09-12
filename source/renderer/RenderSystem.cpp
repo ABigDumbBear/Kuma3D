@@ -263,7 +263,7 @@ void RenderSystem::DrawEntities(Scene& aScene,
           parentMatrix = CalculateModelMatrix(parentTransform);
         }
 
-        auto matrix = CalculateModelMatrix(entityTransform) * parentMatrix;
+        auto matrix = parentMatrix * CalculateModelMatrix(entityTransform);
         ShaderLoader::SetMat4(shader, "modelMatrix", matrix);
       }
 

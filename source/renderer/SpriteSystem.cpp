@@ -31,12 +31,23 @@ void SpriteSystem::Initialize(Scene& aScene)
 /******************************************************************************/
 void SpriteSystem::Operate(Scene& aScene, double aTime)
 {
+  // For each newly added Entity, update the Mesh immediately.
+  for(const auto& entity : mNewEntities)
+  {
+    auto& sprite = aScene.GetComponentForEntity<Sprite>(entity);
+    auto& mesh = aScene.GetComponentForEntity<Mesh>(entity);
+    UpdateMeshToDisplaySprite(mesh, sprite);
+
+    mEntityTimeMap[entity] = aTime;
+  }
+  mNewEntities.clear();
+
   for(const auto& entity : GetEntities())
   {
     auto& sprite = aScene.GetComponentForEntity<Sprite>(entity);
     auto dt = aTime - mEntityTimeMap[entity];
 
-    if(dt > sprite.mAnimationSpeed)
+    if(dt > (1.0 / sprite.mAnimationSpeed))
     {
       // Move the next frame of the animation (or back to the first).
       auto& animation = sprite.mAnimations[sprite.mCurrentAnimation];
@@ -60,12 +71,19 @@ void SpriteSystem::Operate(Scene& aScene, double aTime)
 /******************************************************************************/
 void SpriteSystem::HandleEntityBecameEligible(const Entity& aEntity)
 {
+  mNewEntities.emplace_back(aEntity);
   mEntityTimeMap.emplace(aEntity, 0);
 }
 
 /******************************************************************************/
 void SpriteSystem::HandleEntityBecameIneligible(const Entity& aEntity)
 {
+  auto foundEntity = std::find(mNewEntities.begin(), mNewEntities.end(), aEntity);
+  if(foundEntity != mNewEntities.end())
+  {
+    mNewEntities.erase(foundEntity);
+  }
+
   mEntityTimeMap.erase(aEntity);
 }
 
@@ -83,6 +101,8 @@ void SpriteSystem::UpdateMeshToDisplaySprite(Mesh& aMesh, const Sprite& aSprite)
   auto dimensions = TextureLoader::GetTextureDimensions(aSprite.mSpritesheetTextureID);
   float textureWidth = dimensions.first;
   float textureHeight = dimensions.second;
+  float meshWidth = textureClip.mRight - textureClip.mLeft;
+  float meshHeight = textureClip.mTop - textureClip.mBottom;
 
   // Create a 2D quad to display the sprite with.
   MeshVertex vertex;
@@ -92,17 +112,17 @@ void SpriteSystem::UpdateMeshToDisplaySprite(Mesh& aMesh, const Sprite& aSprite)
   vertex.mTexCoords[1] = textureClip.mBottom / textureHeight;
   aMesh.mVertices.emplace_back(vertex);
 
-  vertex.mPosition = Vec3(textureClip.mRight, 0, 0);
+  vertex.mPosition = Vec3(meshWidth, 0, 0);
   vertex.mTexCoords[0] = textureClip.mRight / textureWidth;
   vertex.mTexCoords[1] = textureClip.mBottom / textureHeight;
   aMesh.mVertices.emplace_back(vertex);
 
-  vertex.mPosition = Vec3(textureClip.mRight, textureClip.mTop, 0);
+  vertex.mPosition = Vec3(meshWidth, meshHeight, 0);
   vertex.mTexCoords[0] = textureClip.mRight / textureWidth;
   vertex.mTexCoords[1] = textureClip.mTop / textureHeight;
   aMesh.mVertices.emplace_back(vertex);
 
-  vertex.mPosition = Vec3(0, textureClip.mTop, 0);
+  vertex.mPosition = Vec3(0, meshHeight, 0);
   vertex.mTexCoords[0] = textureClip.mLeft / textureWidth;
   vertex.mTexCoords[1] = textureClip.mTop / textureHeight;
   aMesh.mVertices.emplace_back(vertex);
