@@ -25,6 +25,7 @@ struct Animation
 {
   std::vector<TextureClip> mFrames;
   unsigned int mCurrentFrame { 0 };
+  bool mLoop { true };
 };
 
 struct Sprite

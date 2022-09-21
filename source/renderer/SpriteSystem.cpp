@@ -49,10 +49,20 @@ void SpriteSystem::Operate(Scene& aScene, double aTime)
 
     if(dt > (1.0 / sprite.mAnimationSpeed))
     {
-      // Move the next frame of the animation (or back to the first).
+      // Move to the next frame of the animation (or back to the first).
       auto& animation = sprite.mAnimations[sprite.mCurrentAnimation];
       auto& frame = animation.mCurrentFrame;
-      frame == animation.mFrames.size() - 1 ? frame = 0 : ++frame;
+      if(frame == animation.mFrames.size() - 1)
+      {
+        if(animation.mLoop)
+        {
+          frame = 0;
+        }
+      }
+      else
+      {
+        ++frame;
+      }
 
       // Retrieve the Mesh and update its vertices according to the next
       // frame of the animation.
