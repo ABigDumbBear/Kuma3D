@@ -32,8 +32,8 @@ Mat4 CalculateModelMatrix(const Transform& aTransform)
 }
 
 /******************************************************************************/
-Mat4 CalculateViewMatrix(const Kuma3D::Camera& aCamera,
-                         const Kuma3D::Transform& aTransform)
+Mat4 CalculateViewMatrix(const Camera& aCamera,
+                         const Transform& aTransform)
 {
   // To calculate the view matrix, we need three things: a direction vector,
   // a right vector, and an up vector.
@@ -60,8 +60,8 @@ Mat4 CalculateViewMatrix(const Kuma3D::Camera& aCamera,
 }
 
 /******************************************************************************/
-Mat4 CalculateProjectionMatrix(const Kuma3D::CoordinateSystem& aSystem,
-                               const Kuma3D::Camera& aCamera)
+Mat4 CalculateProjectionMatrix(const CoordinateSystem& aSystem,
+                               const Camera& aCamera)
 {
   Mat4 projectionMatrix;
 
