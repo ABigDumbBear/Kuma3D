@@ -35,6 +35,11 @@ struct Sprite
   std::map<std::string, Animation> mAnimations;
   std::string mCurrentAnimation;
   float mAnimationSpeed { 1 };
+
+  bool mFlipX { false };
+  bool mFlipY { false };
+
+  bool mDirty { false };
 };
 
 } // namespace Kuma3D

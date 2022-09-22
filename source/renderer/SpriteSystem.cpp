@@ -47,7 +47,7 @@ void SpriteSystem::Operate(Scene& aScene, double aTime)
     auto& sprite = aScene.GetComponentForEntity<Sprite>(entity);
     auto dt = aTime - mEntityTimeMap[entity];
 
-    if(dt > (1.0 / sprite.mAnimationSpeed))
+    if(dt > (1.0 / sprite.mAnimationSpeed) || sprite.mDirty)
     {
       // Move to the next frame of the animation (or back to the first).
       auto& animation = sprite.mAnimations[sprite.mCurrentAnimation];
@@ -74,6 +74,8 @@ void SpriteSystem::Operate(Scene& aScene, double aTime)
         // Update the time map for this Entity.
         mEntityTimeMap[entity] = aTime;
       }
+
+      sprite.mDirty = false;
     }
   }
 }
@@ -117,24 +119,29 @@ void SpriteSystem::UpdateMeshToDisplaySprite(Mesh& aMesh, const Sprite& aSprite)
   // Create a 2D quad to display the sprite with.
   MeshVertex vertex;
 
+  auto leftTexCoord = textureClip.mLeft / textureWidth;
+  auto rightTexCoord = textureClip.mRight / textureWidth;
+  auto bottomTexCoord = textureClip.mBottom / textureHeight;
+  auto topTexCoord = textureClip.mTop / textureHeight;
+
   vertex.mPosition = Vec3(0, 0, 0);
-  vertex.mTexCoords[0] = textureClip.mLeft / textureWidth;
-  vertex.mTexCoords[1] = textureClip.mBottom / textureHeight;
+  vertex.mTexCoords[0] = aSprite.mFlipX ? rightTexCoord : leftTexCoord;
+  vertex.mTexCoords[1] = aSprite.mFlipY ? topTexCoord : bottomTexCoord;
   aMesh.mVertices.emplace_back(vertex);
 
   vertex.mPosition = Vec3(meshWidth, 0, 0);
-  vertex.mTexCoords[0] = textureClip.mRight / textureWidth;
-  vertex.mTexCoords[1] = textureClip.mBottom / textureHeight;
+  vertex.mTexCoords[0] = aSprite.mFlipX ? leftTexCoord : rightTexCoord;
+  vertex.mTexCoords[1] = aSprite.mFlipY ? topTexCoord : bottomTexCoord;
   aMesh.mVertices.emplace_back(vertex);
 
   vertex.mPosition = Vec3(meshWidth, meshHeight, 0);
-  vertex.mTexCoords[0] = textureClip.mRight / textureWidth;
-  vertex.mTexCoords[1] = textureClip.mTop / textureHeight;
+  vertex.mTexCoords[0] = aSprite.mFlipX ? leftTexCoord : rightTexCoord;
+  vertex.mTexCoords[1] = aSprite.mFlipY ? bottomTexCoord : topTexCoord;
   aMesh.mVertices.emplace_back(vertex);
 
   vertex.mPosition = Vec3(0, meshHeight, 0);
-  vertex.mTexCoords[0] = textureClip.mLeft / textureWidth;
-  vertex.mTexCoords[1] = textureClip.mTop / textureHeight;
+  vertex.mTexCoords[0] = aSprite.mFlipX ? rightTexCoord : leftTexCoord;
+  vertex.mTexCoords[1] = aSprite.mFlipY ? bottomTexCoord : topTexCoord;
   aMesh.mVertices.emplace_back(vertex);
 
   // Add the vertex indices.
