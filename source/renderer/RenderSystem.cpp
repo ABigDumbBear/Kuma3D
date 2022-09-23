@@ -85,6 +85,33 @@ Mat4 CalculateProjectionMatrix(const CoordinateSystem& aSystem,
 }
 
 /******************************************************************************/
+void SortEntitiesByCameraDistance(Scene& aScene, const Entity& aCamera, std::vector<Entity>& aEntities)
+{
+  auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
+
+  Vec3 forwardVector(0.0, 0.0, 1.0);
+  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), cameraTransform.mRotation.x);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), cameraTransform.mRotation.y);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), cameraTransform.mRotation.z);
+  forwardVector = rotationMatrix * forwardVector;
+
+  // Sort the entities in order from furthest to nearest along the
+  // camera's forward vector.
+  auto sortFunction = [&aScene, &forwardVector, &cameraTransform](const Entity& aEntityA,
+                                                                  const Entity& aEntityB)
+  {
+    auto& transformA = aScene.GetComponentForEntity<Transform>(aEntityA);
+    auto& transformB = aScene.GetComponentForEntity<Transform>(aEntityB);
+
+    auto distanceA = Dot(forwardVector, (transformA.mPosition - cameraTransform.mPosition));
+    auto distanceB = Dot(forwardVector, (transformB.mPosition - cameraTransform.mPosition));
+
+    return distanceA < distanceB;
+  };
+  std::sort(aEntities.begin(), aEntities.end(), sortFunction);
+}
+
+/******************************************************************************/
 void RenderSystem::Initialize(Scene& aScene)
 {
   // Register the Mesh and Transform components.
@@ -155,26 +182,7 @@ void RenderSystem::Operate(Scene& aScene, double aTime)
   {
     DrawEntities(aScene, cameraEntity, opaqueEntities);
 
-    // Sort the transparent entities by their distance along the camera's
-    // forward axis.
-    auto sortFunction = [&aScene, &cameraEntity](const Entity& aEntityA, const Entity& aEntityB)
-    {
-      auto& transformA = aScene.GetComponentForEntity<Transform>(aEntityA);
-      auto& transformB = aScene.GetComponentForEntity<Transform>(aEntityB);
-      auto& cameraTransform = aScene.GetComponentForEntity<Transform>(cameraEntity);
-
-      Vec3 directionVector(0.0, 0.0, 1.0);
-      auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), cameraTransform.mRotation.x);
-      rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), cameraTransform.mRotation.y);
-      rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), cameraTransform.mRotation.z);
-      directionVector = rotationMatrix * directionVector;
-
-      auto distanceA = Dot(directionVector, (transformA.mPosition - cameraTransform.mPosition));
-      auto distanceB = Dot(directionVector, (transformB.mPosition - cameraTransform.mPosition));
-
-      return distanceA < distanceB;
-    };
-    std::sort(transparentEntities.begin(), transparentEntities.end(), sortFunction);
+    SortEntitiesByCameraDistance(aScene, cameraEntity, transparentEntities);
     DrawEntities(aScene, cameraEntity, transparentEntities);
   }
 }
