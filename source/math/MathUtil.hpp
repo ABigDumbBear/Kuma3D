@@ -47,6 +47,22 @@ inline Vec3 Cross(const Vec3& aVectorA, const Vec3& aVectorB)
 }
 
 /**
+ * Calculates the distance between two vectors and returns it.
+ *
+ * @param aVectorA The first vector.
+ * @param aVectorB The second vector.
+ * @return The distance between the two vectors.
+ */
+inline float Distance(const Vec3& aVectorA, const Vec3& aVectorB)
+{
+  auto xVal = aVectorB.x - aVectorA.x;
+  auto yVal = aVectorB.y - aVectorA.y;
+  auto zVal = aVectorB.z - aVectorA.z;
+
+  return std::sqrt(std::pow(xVal, 2) + std::pow(yVal, 2) + std::pow(zVal, 2));
+}
+
+/**
  * Creates and returns a scalar transformation matrix for the
  * given scalar vector.
  *
