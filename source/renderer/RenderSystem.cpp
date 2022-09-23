@@ -85,16 +85,6 @@ Mat4 CalculateProjectionMatrix(const CoordinateSystem& aSystem,
 }
 
 /******************************************************************************/
-RenderSystem::RenderSystem()
-  : System()
-{
-  GamePendingExit.Connect(mObserver, [this](double aTime)
-  {
-    this->HandleGamePendingExit(aTime);
-  });
-}
-
-/******************************************************************************/
 void RenderSystem::Initialize(Scene& aScene)
 {
   // Register the Mesh and Transform components.
@@ -113,6 +103,19 @@ void RenderSystem::Initialize(Scene& aScene)
   signature[aScene.GetComponentIndex<Mesh>()] = true;
   signature[aScene.GetComponentIndex<Transform>()] = true;
   SetSignature(signature);
+
+  // Before the game exits, delete all OpenGL buffers.
+  GamePendingExit.Connect(mObserver, [this](double aTime)
+  {
+    this->HandleGamePendingExit(aTime);
+  });
+
+  // Enable OpenGL blending.
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  // Enable depth testing.
+  glEnable(GL_DEPTH_TEST);
 }
 
 /******************************************************************************/
@@ -151,6 +154,27 @@ void RenderSystem::Operate(Scene& aScene, double aTime)
   for(const auto& cameraEntity : mCameraEntities)
   {
     DrawEntities(aScene, cameraEntity, opaqueEntities);
+
+    // Sort the transparent entities by their distance along the camera's
+    // forward axis.
+    auto sortFunction = [&aScene, &cameraEntity](const Entity& aEntityA, const Entity& aEntityB)
+    {
+      auto& transformA = aScene.GetComponentForEntity<Transform>(aEntityA);
+      auto& transformB = aScene.GetComponentForEntity<Transform>(aEntityB);
+      auto& cameraTransform = aScene.GetComponentForEntity<Transform>(cameraEntity);
+
+      Vec3 directionVector(0.0, 0.0, 1.0);
+      auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), cameraTransform.mRotation.x);
+      rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), cameraTransform.mRotation.y);
+      rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), cameraTransform.mRotation.z);
+      directionVector = rotationMatrix * directionVector;
+
+      auto distanceA = Dot(directionVector, (transformA.mPosition - cameraTransform.mPosition));
+      auto distanceB = Dot(directionVector, (transformB.mPosition - cameraTransform.mPosition));
+
+      return distanceA < distanceB;
+    };
+    std::sort(transparentEntities.begin(), transparentEntities.end(), sortFunction);
     DrawEntities(aScene, cameraEntity, transparentEntities);
   }
 }

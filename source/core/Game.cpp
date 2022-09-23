@@ -145,13 +145,6 @@ void Game::Initialize(const WindowOptions& aOptions)
                 << glewGetErrorString(glewError) << std::endl;
       mInitialized = false;
     }
-
-    // Enable OpenGL blending.
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Enable depth testing.
-    glEnable(GL_DEPTH_TEST);
   }
 }
 

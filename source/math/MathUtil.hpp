@@ -47,6 +47,22 @@ inline Vec3 Cross(const Vec3& aVectorA, const Vec3& aVectorB)
 }
 
 /**
+ * Calculates the dot product of two vectors and returns it.
+ *
+ * @param aVectorA The first vector in the equation.
+ * @param aVectorB The second vector in the equation.
+ * @return The dot product of the two vectors.
+ */
+inline float Dot(const Vec3& aVectorA, const Vec3& aVectorB)
+{
+  auto xx = aVectorA.x * aVectorB.x;
+  auto yy = aVectorA.y * aVectorB.y;
+  auto zz = aVectorA.z * aVectorB.z;
+
+  return (xx + yy + zz);
+}
+
+/**
  * Calculates the distance between two vectors and returns it.
  *
  * @param aVectorA The first vector.
