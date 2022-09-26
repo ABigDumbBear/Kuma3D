@@ -5,11 +5,13 @@
 
 #include <GL/glew.h>
 
-#include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 namespace Kuma3D {
 
 std::map<std::string, ID> TextureLoader::mTextureMap;
+std::map<ID, TextureDimensions> TextureLoader::mTextureDimensionMap;
 
 /*****************************************************************************/
 ID TextureLoader::LoadTextureFromFile(const std::string& aFilePath,
@@ -63,18 +65,11 @@ ID TextureLoader::LoadTextureFromData(unsigned char* aData,
   // Create a mipmap for this texture; used on small/far away objects.
   glGenerateMipmap(GL_TEXTURE_2D);
 
+  // Store the texture dimensions.
+  TextureDimensions dimensions(aWidth, aHeight);
+  mTextureDimensionMap.emplace(textureID, dimensions);
+
   return textureID;
-}
-
-/*****************************************************************************/
-void TextureLoader::UnloadTextures()
-{
-  for(const auto& texturePair : mTextureMap)
-  {
-    glDeleteTextures(1, &texturePair.second);
-  }
-
-  mTextureMap.clear();
 }
 
 /*****************************************************************************/
@@ -102,6 +97,31 @@ void TextureLoader::AddSubImageData(const ID& aID,
 
   // Recreate the texture mipmap with the new data.
   glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+/*****************************************************************************/
+TextureDimensions TextureLoader::GetTextureDimensions(const ID& aID)
+{
+  auto foundTexture = mTextureDimensionMap.find(aID);
+  if(foundTexture == mTextureDimensionMap.end())
+  {
+    std::stringstream error;
+    error << "No texture with ID " << aID << " exists!" << std::endl;
+    throw(std::invalid_argument(error.str()));
+  }
+
+  return mTextureDimensionMap[aID];
+}
+
+/*****************************************************************************/
+void TextureLoader::UnloadTextures()
+{
+  for(const auto& texturePair : mTextureMap)
+  {
+    glDeleteTextures(1, &texturePair.second);
+  }
+
+  mTextureMap.clear();
 }
 
 } // namespace Kuma3D

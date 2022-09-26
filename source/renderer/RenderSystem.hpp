@@ -13,7 +13,6 @@ namespace Kuma3D {
 class RenderSystem : public System
 {
   public:
-    RenderSystem();
 
     /**
      * Initializes the System by registering the Mesh and Transform component

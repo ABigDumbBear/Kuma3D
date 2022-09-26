@@ -32,8 +32,8 @@ Mat4 CalculateModelMatrix(const Transform& aTransform)
 }
 
 /******************************************************************************/
-Mat4 CalculateViewMatrix(const Kuma3D::Camera& aCamera,
-                         const Kuma3D::Transform& aTransform)
+Mat4 CalculateViewMatrix(const Camera& aCamera,
+                         const Transform& aTransform)
 {
   // To calculate the view matrix, we need three things: a direction vector,
   // a right vector, and an up vector.
@@ -60,8 +60,8 @@ Mat4 CalculateViewMatrix(const Kuma3D::Camera& aCamera,
 }
 
 /******************************************************************************/
-Mat4 CalculateProjectionMatrix(const Kuma3D::CoordinateSystem& aSystem,
-                               const Kuma3D::Camera& aCamera)
+Mat4 CalculateProjectionMatrix(const CoordinateSystem& aSystem,
+                               const Camera& aCamera)
 {
   Mat4 projectionMatrix;
 
@@ -85,13 +85,30 @@ Mat4 CalculateProjectionMatrix(const Kuma3D::CoordinateSystem& aSystem,
 }
 
 /******************************************************************************/
-RenderSystem::RenderSystem()
-  : System()
+void SortEntitiesByCameraDistance(Scene& aScene, const Entity& aCamera, std::vector<Entity>& aEntities)
 {
-  GamePendingExit.Connect(mObserver, [this](double aTime)
+  auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
+
+  Vec3 forwardVector(0.0, 0.0, 1.0);
+  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), cameraTransform.mRotation.x);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), cameraTransform.mRotation.y);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), cameraTransform.mRotation.z);
+  forwardVector = rotationMatrix * forwardVector;
+
+  // Sort the entities in order from furthest to nearest along the
+  // camera's forward vector.
+  auto sortFunction = [&aScene, &forwardVector, &cameraTransform](const Entity& aEntityA,
+                                                                  const Entity& aEntityB)
   {
-    this->HandleGamePendingExit(aTime);
-  });
+    auto& transformA = aScene.GetComponentForEntity<Transform>(aEntityA);
+    auto& transformB = aScene.GetComponentForEntity<Transform>(aEntityB);
+
+    auto distanceA = Dot(forwardVector, (transformA.mPosition - cameraTransform.mPosition));
+    auto distanceB = Dot(forwardVector, (transformB.mPosition - cameraTransform.mPosition));
+
+    return distanceA < distanceB;
+  };
+  std::sort(aEntities.begin(), aEntities.end(), sortFunction);
 }
 
 /******************************************************************************/
@@ -113,6 +130,19 @@ void RenderSystem::Initialize(Scene& aScene)
   signature[aScene.GetComponentIndex<Mesh>()] = true;
   signature[aScene.GetComponentIndex<Transform>()] = true;
   SetSignature(signature);
+
+  // Before the game exits, delete all OpenGL buffers.
+  GamePendingExit.Connect(mObserver, [this](double aTime)
+  {
+    this->HandleGamePendingExit(aTime);
+  });
+
+  // Enable OpenGL blending.
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  // Enable depth testing.
+  glEnable(GL_DEPTH_TEST);
 }
 
 /******************************************************************************/
@@ -151,6 +181,8 @@ void RenderSystem::Operate(Scene& aScene, double aTime)
   for(const auto& cameraEntity : mCameraEntities)
   {
     DrawEntities(aScene, cameraEntity, opaqueEntities);
+
+    SortEntitiesByCameraDistance(aScene, cameraEntity, transparentEntities);
     DrawEntities(aScene, cameraEntity, transparentEntities);
   }
 }
@@ -263,7 +295,7 @@ void RenderSystem::DrawEntities(Scene& aScene,
           parentMatrix = CalculateModelMatrix(parentTransform);
         }
 
-        auto matrix = CalculateModelMatrix(entityTransform) * parentMatrix;
+        auto matrix = parentMatrix * CalculateModelMatrix(entityTransform);
         ShaderLoader::SetMat4(shader, "modelMatrix", matrix);
       }
 
