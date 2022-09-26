@@ -10,6 +10,7 @@ set(3RD_PARTY_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rd_party)
 # Gather the source files for the engine.
 file(GLOB ENGINE_SOURCES audio/*.?pp
                          core/*.?pp
+                         core/signals/*.?pp
                          components/*.?pp
                          math/*.?pp
                          renderer/*.?pp)
@@ -25,6 +26,7 @@ target_link_libraries(Kuma3D PUBLIC
 target_include_directories(Kuma3D PUBLIC
                            audio
                            core
+                           core/signals
                            components
                            math
                            renderer
