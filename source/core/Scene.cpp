@@ -78,6 +78,13 @@ void Scene::RemoveEntity(const Entity& aEntity)
 }
 
 /******************************************************************************/
+bool Scene::IsEntityScheduledForRemoval(const Entity& aEntity)
+{
+  auto foundEntity = std::find(mEntitiesToRemove.begin(), mEntitiesToRemove.end(), aEntity);
+  return foundEntity != mEntitiesToRemove.end();
+}
+
+/******************************************************************************/
 Signature Scene::CreateSignature() const
 {
   return Signature(mComponentLists.size(), false);
