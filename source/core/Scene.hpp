@@ -56,6 +56,15 @@ class Scene
     void RemoveEntity(const Entity& aEntity);
 
     /**
+     * Returns whether an Entity is scheduled for removal at the end of the
+     * current frame.
+     *
+     * @param aEntity The Entity to check.
+     * @return Whether the Entity is scheduled for removal.
+     */
+    bool IsEntityScheduledForRemoval(const Entity& aEntity);
+
+    /**
      * Takes ownership of a System and asks it to operate on each of its
      * Entities during OperateSystems().
      *

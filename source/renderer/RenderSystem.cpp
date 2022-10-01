@@ -6,7 +6,6 @@
 
 #include "Scene.hpp"
 
-#include "Mat4.hpp"
 #include "MathUtil.hpp"
 #include "Vec3.hpp"
 
@@ -15,7 +14,6 @@
 #include "ShaderLoader.hpp"
 
 #include "Camera.hpp"
-#include "Transform.hpp"
 
 namespace Kuma3D {
 
@@ -286,17 +284,9 @@ void RenderSystem::DrawEntities(Scene& aScene,
       // Set the model matrix.
       if(ShaderLoader::IsUniformDefined(shader, "modelMatrix"))
       {
-        // If the Entity's Transform component has a parent Transform,
-        // calculate the model matrix for the parent.
-        Mat4 parentMatrix;
-        if(entityTransform.mUseParent)
-        {
-          auto& parentTransform = aScene.GetComponentForEntity<Transform>(entityTransform.mParent);
-          parentMatrix = CalculateModelMatrix(parentTransform);
-        }
-
-        auto matrix = parentMatrix * CalculateModelMatrix(entityTransform);
-        ShaderLoader::SetMat4(shader, "modelMatrix", matrix);
+        Mat4 modelMatrix;
+        modelMatrix = CalculateModelMatrixRecursive(aScene, entityTransform, modelMatrix);
+        ShaderLoader::SetMat4(shader, "modelMatrix", modelMatrix);
       }
 
       // Set the view matrix.
@@ -321,6 +311,22 @@ void RenderSystem::DrawEntities(Scene& aScene,
       glBindVertexArray(0);
     }
   }
+}
+
+/******************************************************************************/
+Mat4 RenderSystem::CalculateModelMatrixRecursive(Scene& aScene,
+                                                 const Transform& aTransform,
+                                                 const Mat4& aMatrix)
+{
+  auto modelMatrix = CalculateModelMatrix(aTransform);
+
+  if(!aTransform.mUseParent)
+  {
+    return modelMatrix * aMatrix;
+  }
+
+  auto& parentTransform = aScene.GetComponentForEntity<Transform>(aTransform.mParent);
+  return CalculateModelMatrixRecursive(aScene, parentTransform, modelMatrix) * aMatrix;
 }
 
 /******************************************************************************/

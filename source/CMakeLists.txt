@@ -46,6 +46,7 @@ install(TARGETS Kuma3D LIBRARY DESTINATION ${LIB_INSTALL_DIR})
 set(INCLUDE_INSTALL_DIR ${ENGINE_INSTALL_DIR}/include)
 file(GLOB ENGINE_INCLUDES audio/*.hpp
                           core/*.hpp
+                          core/signals/*.hpp
                           components/*.hpp
                           math/*.hpp
                           renderer/*.hpp)
