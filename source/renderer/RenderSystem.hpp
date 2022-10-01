@@ -5,8 +5,12 @@
 
 #include <map>
 
-#include "Observer.hpp"
 #include "Mesh.hpp"
+#include "Transform.hpp"
+
+#include "Mat4.hpp"
+
+#include "Observer.hpp"
 
 namespace Kuma3D {
 
@@ -79,6 +83,18 @@ class RenderSystem : public System
     void DrawEntities(Scene& aScene,
                       const Entity& aCamera,
                       const std::vector<Entity>& aEntities);
+
+    /**
+     * A recursive function that calculates the model matrix for
+     * a Transform, taking any parent Transforms into account.
+     *
+     * @param aScene The Scene containing the Transform.
+     * @param aTransform The Transform whose model matrix to calculate.
+     * @param aMatrix The model matrix to perform calculations with.
+     */
+    Mat4 CalculateModelMatrixRecursive(Scene& aScene,
+                                       const Transform& aTransform,
+                                       const Mat4& aMatrix);
 
     /**
      * Updates the OpenGL buffer data (vertices and indices) for the given
