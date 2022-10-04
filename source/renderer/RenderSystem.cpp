@@ -17,22 +17,13 @@
 #include "Camera.hpp"
 #include "Transform.hpp"
 
+#include <iostream>
+
 namespace Kuma3D {
 
 /******************************************************************************/
-Mat4 CalculateModelMatrix(const Transform& aTransform)
-{
-  auto translationMatrix = Translate(aTransform.mPosition);
-  auto scalarMatrix = Scale(aTransform.mScalar);
-  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), aTransform.mRotation.x);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), aTransform.mRotation.y);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), aTransform.mRotation.z);
-
-  return (translationMatrix * rotationMatrix * scalarMatrix);
-}
-
-/******************************************************************************/
-Mat4 CalculateViewMatrix(const Camera& aCamera,
+Mat4 CalculateViewMatrix(Scene& aScene,
+                         const Camera& aCamera,
                          const Transform& aTransform)
 {
   // To calculate the view matrix, we need three things: a direction vector,
@@ -45,9 +36,7 @@ Mat4 CalculateViewMatrix(const Camera& aCamera,
   // To get the true direction vector, we need to calculate the rotation
   // transformation matrix of the camera and use it to rotate the default
   // direction vector.
-  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), aTransform.mRotation.x);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), aTransform.mRotation.y);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), aTransform.mRotation.z);
+  auto& rotationMatrix = aTransform.GetRotationMatrix();
   directionVector = rotationMatrix * directionVector;
 
   // Now that we have a direction vector, we can calculate a right vector by
@@ -56,7 +45,7 @@ Mat4 CalculateViewMatrix(const Camera& aCamera,
   auto rightVector = Cross(Vec3(0.0, 1.0, 0.0), directionVector);
 
   // Finally, we can construct the view matrix.
-  return View(directionVector, rightVector, aTransform.mPosition);
+  return View(directionVector, rightVector, aTransform.GetWorldPosition(aScene));
 }
 
 /******************************************************************************/
@@ -90,9 +79,7 @@ void SortEntitiesByCameraDistance(Scene& aScene, const Entity& aCamera, std::vec
   auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
 
   Vec3 forwardVector(0.0, 0.0, 1.0);
-  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), cameraTransform.mRotation.x);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), cameraTransform.mRotation.y);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), cameraTransform.mRotation.z);
+  auto& rotationMatrix = cameraTransform.GetRotationMatrix();
   forwardVector = rotationMatrix * forwardVector;
 
   // Sort the entities in order from furthest to nearest along the
@@ -103,8 +90,12 @@ void SortEntitiesByCameraDistance(Scene& aScene, const Entity& aCamera, std::vec
     auto& transformA = aScene.GetComponentForEntity<Transform>(aEntityA);
     auto& transformB = aScene.GetComponentForEntity<Transform>(aEntityB);
 
-    auto distanceA = Dot(forwardVector, (transformA.mPosition - cameraTransform.mPosition));
-    auto distanceB = Dot(forwardVector, (transformB.mPosition - cameraTransform.mPosition));
+    auto positionA = transformA.GetWorldPosition(aScene);
+    auto positionB = transformB.GetWorldPosition(aScene);
+    auto cameraPosition = cameraTransform.GetWorldPosition(aScene);
+
+    auto distanceA = Dot(forwardVector, (positionA - cameraPosition));
+    auto distanceB = Dot(forwardVector, (positionB - cameraPosition));
 
     return distanceA < distanceB;
   };
@@ -264,7 +255,7 @@ void RenderSystem::DrawEntities(Scene& aScene,
 
   glViewport(0.0, 0.0, camera.mViewportX, camera.mViewportY);
 
-  auto viewMatrix = CalculateViewMatrix(camera, cameraTransform);
+  auto viewMatrix = CalculateViewMatrix(aScene, camera, cameraTransform);
 
   for(const auto& entity : aEntities)
   {
@@ -288,7 +279,7 @@ void RenderSystem::DrawEntities(Scene& aScene,
       {
         // If the Entity's Transform component has a parent Transform,
         // calculate the model matrix for the parent.
-        Mat4 parentMatrix;
+        /*Mat4 parentMatrix;
         if(entityTransform.mUseParent)
         {
           auto& parentTransform = aScene.GetComponentForEntity<Transform>(entityTransform.mParent);
@@ -296,7 +287,9 @@ void RenderSystem::DrawEntities(Scene& aScene,
         }
 
         auto matrix = parentMatrix * CalculateModelMatrix(entityTransform);
-        ShaderLoader::SetMat4(shader, "modelMatrix", matrix);
+        ShaderLoader::SetMat4(shader, "modelMatrix", matrix);*/
+        auto& localToWorld = entityTransform.GetLocalToWorld();
+        ShaderLoader::SetMat4(shader, "modelMatrix", localToWorld);
       }
 
       // Set the view matrix.
