@@ -8,8 +8,6 @@
 #include "Mat4.hpp"
 #include "Vec3.hpp"
 
-#include <iostream>
-
 namespace Kuma3D {
 
 class Transform
@@ -73,7 +71,16 @@ class Transform
     const Mat4& GetRotationMatrix() const { return mRotationMatrix; }
     const Mat4& GetScalarMatrix() const { return mScalarMatrix; }
 
-    const Mat4& GetLocalToWorld() const { return mLocalToWorld; }
+    Mat4 GetLocalToWorld(Scene& aScene) const
+    {
+      Mat4 matrix = mLocalToWorld;
+      if(mUseParent)
+      {
+        auto& parentTransform = aScene.GetComponentForEntity<Transform>(mParent);
+        matrix = parentTransform.GetLocalToWorld(aScene) * matrix;
+      }
+      return matrix;
+    }
 
     Entity mParent { 0 };
     bool mUseParent { false };

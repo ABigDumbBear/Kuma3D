@@ -288,7 +288,7 @@ void RenderSystem::DrawEntities(Scene& aScene,
 
         auto matrix = parentMatrix * CalculateModelMatrix(entityTransform);
         ShaderLoader::SetMat4(shader, "modelMatrix", matrix);*/
-        auto& localToWorld = entityTransform.GetLocalToWorld();
+        auto localToWorld = entityTransform.GetLocalToWorld(aScene);
         ShaderLoader::SetMat4(shader, "modelMatrix", localToWorld);
       }
 
