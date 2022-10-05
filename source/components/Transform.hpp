@@ -8,6 +8,8 @@
 #include "Mat4.hpp"
 #include "Vec3.hpp"
 
+#include <iostream>
+
 namespace Kuma3D {
 
 class Transform

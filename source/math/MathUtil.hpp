@@ -79,6 +79,35 @@ inline float Distance(const Vec3& aVectorA, const Vec3& aVectorB)
 }
 
 /**
+ * Calculates and returns the linear interpolation between two values
+ * and a third percentage value.
+ *
+ * @param aStart The starting value.
+ * @param aTarget The target value.
+ * @param aPercent The percentage to interpolate by, between 0.0 and 1.0.
+ * @return The value that is aPercent of the way towards aTarget from aStart.
+ */
+inline float Lerp(float aStart, float aTarget, float aPercent)
+{
+  return (aStart + (aTarget - aStart) * aPercent);
+}
+
+/**
+ * Performs linear interpolation on each component of a Vec3.
+ *
+ * @param aStart The staring Vec3.
+ * @param aTarget The target Vec3.
+ * @param aPercent The percentage to interpolate by, between 0.0 and 1.0.
+ * @return The Vec3 that is aPercent of the way towards aTarget from aStart.
+ */
+inline Vec3 Lerp(const Vec3& aStart, const Vec3& aTarget, float aPercent)
+{
+  return Vec3(Lerp(aStart.x, aTarget.x, aPercent),
+              Lerp(aStart.y, aTarget.y, aPercent),
+              Lerp(aStart.z, aTarget.z, aPercent));
+}
+
+/**
  * Creates and returns a scalar transformation matrix for the
  * given scalar vector.
  *
@@ -204,35 +233,6 @@ inline Mat4 Orthographic(const Camera& aCamera)
               0.0, 2.0 / top, 0.0, -1.0,
               0.0, 0.0, 1.0 / (far - near), -near / (far - near),
               0.0, 0.0, 0.0, 1.0);
-}
-
-/**
- * Calculates and returns the linear interpolation between two values
- * and a third percentage value.
- *
- * @param aStart The starting value.
- * @param aTarget The target value.
- * @param aPercent The percentage to interpolate by, between 0.0 and 1.0.
- * @return The value that is aPercent of the way towards aTarget from aStart.
- */
-inline float Lerp(float aStart, float aTarget, float aPercent)
-{
-  return (aStart + (aTarget - aStart) * aPercent);
-}
-
-/**
- * Performs linear interpolation on each component of a Vec3.
- *
- * @param aStart The staring Vec3.
- * @param aTarget The target Vec3.
- * @param aPercent The percentage to interpolate by, between 0.0 and 1.0.
- * @return The Vec3 that is aPercent of the way towards aTarget from aStart.
- */
-inline Vec3 Lerp(const Vec3& aStart, const Vec3& aTarget, float aPercent)
-{
-  return Vec3(Lerp(aStart.x, aTarget.x, aPercent),
-              Lerp(aStart.y, aTarget.y, aPercent),
-              Lerp(aStart.z, aTarget.z, aPercent));
 }
 
 } // namespace Kuma3D

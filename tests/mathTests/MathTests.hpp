@@ -77,6 +77,23 @@ inline void TestMat4MultiplicationWithVec3()
   assert(c.z == 770.0);
 }
 
+inline void TestLerp()
+{
+  assert(Lerp(5.0, 15.0, 0.5) == 10.0);
+}
+
+inline void TestMat4Scaling()
+{
+  Vec3 pos(1.0, 2.0, 3.0);
+
+  auto scalarMatrix = Scale(Vec3(4.0, 5.0, 6.0));
+  pos = scalarMatrix * pos;
+
+  assert(pos.x == 4.0);
+  assert(pos.y == 10.0);
+  assert(pos.z == 18.0);
+}
+
 inline void TestMat4Translation()
 {
   Vec3 pos(1.0, 2.0, 3.0);
@@ -123,23 +140,6 @@ inline void TestMat4Rotation()
   assert(pos.x == 3.0);
   assert(pos.y == 2.0);
   assert(pos.z == -1.0);
-}
-
-inline void TestMat4Scaling()
-{
-  Vec3 pos(1.0, 2.0, 3.0);
-
-  auto scalarMatrix = Scale(Vec3(4.0, 5.0, 6.0));
-  pos = scalarMatrix * pos;
-
-  assert(pos.x == 4.0);
-  assert(pos.y == 10.0);
-  assert(pos.z == 18.0);
-}
-
-inline void TestLerp()
-{
-  assert(Lerp(5.0, 15.0, 0.5) == 10.0);
 }
 
 } // namespace Kuma3D
