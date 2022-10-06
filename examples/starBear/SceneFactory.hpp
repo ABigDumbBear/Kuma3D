@@ -36,7 +36,7 @@ inline std::unique_ptr<Kuma3D::Scene> CreateScene()
   auto shipEntity = scene->CreateEntity();
 
   Kuma3D::Transform shipTransform;
-  shipTransform.mPosition = Kuma3D::Vec3(0.0, 0.0, -45.0);
+  shipTransform.SetPosition(Kuma3D::Vec3(0.0, 0.0, -45.0));
   scene->AddComponentToEntity<Kuma3D::Transform>(shipEntity, shipTransform);
   scene->AddComponentToEntity<ShipControl>(shipEntity);
 
