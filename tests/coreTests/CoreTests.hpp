@@ -7,22 +7,23 @@
 #include <Scene.hpp>
 #include <Types.hpp>
 
-namespace Kuma3D {
+#include <Transform.hpp>
 
-struct TestComponent { int mValue { 0 }; };
+namespace Kuma3D {
 
 inline void TestComponentListAddition()
 {
-  ComponentListT<TestComponent> list;
+  ComponentListT<Transform> list;
+  Transform transform;
+  transform.mPosition.x = 55.0;
 
-  TestComponent component { 42 };
-  list.AddComponentToEntity(0, component);
+  list.AddComponentToEntity(0, transform);
 
   bool accessFailed = false;
   try
   {
-    auto& c = list.GetComponentForEntity(0);
-    assert(c.mValue == 42);
+    transform = list.GetComponentForEntity(0);
+    assert(transform.mPosition.x == 55.0);
   }
   catch(const std::invalid_argument& e)
   {
@@ -34,16 +35,16 @@ inline void TestComponentListAddition()
 
 inline void TestComponentListRemoval()
 {
-  ComponentListT<TestComponent> list;
+  ComponentListT<Transform> list;
 
-  TestComponent component { 42 };
-  list.AddComponentToEntity(0, component);
+  Transform transform;
+  list.AddComponentToEntity(0, transform);
   list.RemoveComponentFromEntity(0);
 
   bool accessFailed = false;
   try
   {
-    list.GetComponentForEntity(0);
+    transform = list.GetComponentForEntity(0);
   }
   catch(const std::invalid_argument& e)
   {
@@ -56,10 +57,10 @@ inline void TestComponentListRemoval()
 inline void TestEntityRemoval()
 {
   Scene scene;
-  scene.RegisterComponentType<TestComponent>();
+  scene.RegisterComponentType<Transform>();
 
   auto entity = scene.CreateEntity();
-  scene.AddComponentToEntity<TestComponent>(entity);
+  scene.AddComponentToEntity<Transform>(entity);
   scene.RemoveEntity(entity);
 
   scene.OperateSystems(0.0);
@@ -67,7 +68,7 @@ inline void TestEntityRemoval()
   bool accessFailed = false;
   try
   {
-    scene.GetComponentForEntity<TestComponent>(entity);
+    auto& transform = scene.GetComponentForEntity<Transform>(entity);
   }
   catch(const std::invalid_argument& e)
   {

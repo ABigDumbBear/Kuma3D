@@ -96,9 +96,8 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 
       auto cubeMesh = CreateCube(mTileSizeInPixels, block.mColor);
       Kuma3D::Transform cubeTransform;
-      Kuma3D::Vec3 cubePos;
-      cubePos.x = (mTileSizeInPixels * (column + tiles[i].x)) + (mTileSizeInPixels / 2.0);
-      cubePos.y = (mTileSizeInPixels * (row + tiles[i].y)) + (mTileSizeInPixels / 2.0);
+      cubeTransform.mPosition.x = (mTileSizeInPixels * (column + tiles[i].x)) + (mTileSizeInPixels / 2.0);
+      cubeTransform.mPosition.y = (mTileSizeInPixels * (row + tiles[i].y)) + (mTileSizeInPixels / 2.0);
 
       aScene.AddComponentToEntity<Kuma3D::Mesh>(tileEntity, cubeMesh);
       aScene.AddComponentToEntity<Kuma3D::Transform>(tileEntity, cubeTransform);
@@ -244,7 +243,7 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     auto& movable = aScene.GetComponentForEntity<Movable>(entity);
     auto& transform = aScene.GetComponentForEntity<Kuma3D::Transform>(entity);
 
-    movable.mTargetPosition = transform.GetWorldPosition(aScene);
+    movable.mTargetPosition = transform.mPosition;
     movable.mTargetPosition.x -= (10 * mTileSizeInPixels);
     movable.mMoveSpeed = 0.3;
     movable.mFinishedMoving = false;

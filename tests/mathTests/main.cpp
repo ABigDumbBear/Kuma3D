@@ -25,11 +25,6 @@ int main()
   std::cout << "Mat4 multiplication with Vec3 successful!" << std::endl;
 
   std::cout << "-------------------------------------" << std::endl;
-  std::cout << "Testing linear interpolation..." << std::endl;
-  Kuma3D::TestLerp();
-  std::cout << "Linear interpolation successful!" << std::endl;
-
-  std::cout << "-------------------------------------" << std::endl;
   std::cout << "Testing Mat4 translation..." << std::endl;
   Kuma3D::TestMat4Translation();
   std::cout << "Mat4 translation successful!" << std::endl;
@@ -43,6 +38,11 @@ int main()
   std::cout << "Testing Mat4 scaling..." << std::endl;
   Kuma3D::TestMat4Scaling();
   std::cout << "Mat4 scaling successful!" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Testing linear interpolation..." << std::endl;
+  Kuma3D::TestLerp();
+  std::cout << "Linear interpolation successful!" << std::endl;
 
   return 0;
 }
