@@ -45,22 +45,6 @@ class Vec3
       return (*this);
     }
 
-    Vec3& operator*=(const Vec3& rhs)
-    {
-      x *= rhs.x;
-      y *= rhs.y;
-      z *= rhs.z;
-      return (*this);
-    }
-
-    Vec3& operator/=(const Vec3& rhs)
-    {
-      x /= rhs.x;
-      y /= rhs.y;
-      z /= rhs.z;
-      return (*this);
-    }
-
     Vec3& operator*=(float rhs)
     {
       x *= rhs;
