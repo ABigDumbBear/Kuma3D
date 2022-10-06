@@ -20,98 +20,6 @@
 namespace Kuma3D {
 
 /******************************************************************************/
-Mat4 CalculateModelMatrix(const Transform& aTransform)
-{
-  auto translationMatrix = Translate(aTransform.mPosition);
-  auto scalarMatrix = Scale(aTransform.mScalar);
-  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), aTransform.mRotation.x);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), aTransform.mRotation.y);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), aTransform.mRotation.z);
-
-  return (translationMatrix * rotationMatrix * scalarMatrix);
-}
-
-/******************************************************************************/
-Mat4 CalculateViewMatrix(const Camera& aCamera,
-                         const Transform& aTransform)
-{
-  // To calculate the view matrix, we need three things: a direction vector,
-  // a right vector, and an up vector.
-
-  // To calculate the direction vector, first we assume the camera is at
-  // the origin (0.0, 0.0, 0.0) and looking forward along the z-axis.
-  Vec3 directionVector = Vec3(0.0, 0.0, 1.0);
-
-  // To get the true direction vector, we need to calculate the rotation
-  // transformation matrix of the camera and use it to rotate the default
-  // direction vector.
-  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), aTransform.mRotation.x);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), aTransform.mRotation.y);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), aTransform.mRotation.z);
-  directionVector = rotationMatrix * directionVector;
-
-  // Now that we have a direction vector, we can calculate a right vector by
-  // taking the cross product of the direction vector and a default up vector
-  // (in this case, (0.0, 1.0, 0.0)).
-  auto rightVector = Cross(Vec3(0.0, 1.0, 0.0), directionVector);
-
-  // Finally, we can construct the view matrix.
-  return View(directionVector, rightVector, aTransform.mPosition);
-}
-
-/******************************************************************************/
-Mat4 CalculateProjectionMatrix(const CoordinateSystem& aSystem,
-                               const Camera& aCamera)
-{
-  Mat4 projectionMatrix;
-
-  switch(aSystem)
-  {
-    case Kuma3D::CoordinateSystem::eSCREEN_SPACE:
-    {
-      // Create an orthographic projection.
-      projectionMatrix = Orthographic(aCamera);
-      break;
-    }
-    case Kuma3D::CoordinateSystem::eWORLD_SPACE:
-    {
-      // Create a perspective projection.
-      projectionMatrix = Perspective(aCamera);
-      break;
-    }
-  }
-
-  return projectionMatrix;
-}
-
-/******************************************************************************/
-void SortEntitiesByCameraDistance(Scene& aScene, const Entity& aCamera, std::vector<Entity>& aEntities)
-{
-  auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
-
-  Vec3 forwardVector(0.0, 0.0, 1.0);
-  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), cameraTransform.mRotation.x);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), cameraTransform.mRotation.y);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), cameraTransform.mRotation.z);
-  forwardVector = rotationMatrix * forwardVector;
-
-  // Sort the entities in order from furthest to nearest along the
-  // camera's forward vector.
-  auto sortFunction = [&aScene, &forwardVector, &cameraTransform](const Entity& aEntityA,
-                                                                  const Entity& aEntityB)
-  {
-    auto& transformA = aScene.GetComponentForEntity<Transform>(aEntityA);
-    auto& transformB = aScene.GetComponentForEntity<Transform>(aEntityB);
-
-    auto distanceA = Dot(forwardVector, (transformA.mPosition - cameraTransform.mPosition));
-    auto distanceB = Dot(forwardVector, (transformB.mPosition - cameraTransform.mPosition));
-
-    return distanceA < distanceB;
-  };
-  std::sort(aEntities.begin(), aEntities.end(), sortFunction);
-}
-
-/******************************************************************************/
 void RenderSystem::Initialize(Scene& aScene)
 {
   // Register the Mesh and Transform components.
@@ -252,6 +160,100 @@ void RenderSystem::HandleGamePendingExit(double aTime)
     glDeleteVertexArrays(1, &elementBufferPair.second);
   }
   mElementBufferMap.clear();
+}
+
+/******************************************************************************/
+Mat4 RenderSystem::CalculateModelMatrix(const Transform& aTransform)
+{
+  auto translationMatrix = Translate(aTransform.mPosition);
+  auto scalarMatrix = Scale(aTransform.mScalar);
+  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), aTransform.mRotation.x);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), aTransform.mRotation.y);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), aTransform.mRotation.z);
+
+  return (translationMatrix * rotationMatrix * scalarMatrix);
+}
+
+/******************************************************************************/
+Mat4 RenderSystem::CalculateViewMatrix(const Camera& aCamera,
+                                       const Transform& aTransform)
+{
+  // To calculate the view matrix, we need three things: a direction vector,
+  // a right vector, and an up vector.
+
+  // To calculate the direction vector, first we assume the camera is at
+  // the origin (0.0, 0.0, 0.0) and looking forward along the z-axis.
+  Vec3 directionVector = Vec3(0.0, 0.0, 1.0);
+
+  // To get the true direction vector, we need to calculate the rotation
+  // transformation matrix of the camera and use it to rotate the default
+  // direction vector.
+  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), aTransform.mRotation.x);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), aTransform.mRotation.y);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), aTransform.mRotation.z);
+  directionVector = rotationMatrix * directionVector;
+
+  // Now that we have a direction vector, we can calculate a right vector by
+  // taking the cross product of the direction vector and a default up vector
+  // (in this case, (0.0, 1.0, 0.0)).
+  auto rightVector = Cross(Vec3(0.0, 1.0, 0.0), directionVector);
+
+  // Finally, we can construct the view matrix.
+  return View(directionVector, rightVector, aTransform.mPosition);
+}
+
+/******************************************************************************/
+Mat4 RenderSystem::CalculateProjectionMatrix(const CoordinateSystem& aSystem,
+                                             const Camera& aCamera)
+{
+  Mat4 projectionMatrix;
+
+  switch(aSystem)
+  {
+    case Kuma3D::CoordinateSystem::eSCREEN_SPACE:
+    {
+      // Create an orthographic projection.
+      projectionMatrix = Orthographic(aCamera);
+      break;
+    }
+    case Kuma3D::CoordinateSystem::eWORLD_SPACE:
+    {
+      // Create a perspective projection.
+      projectionMatrix = Perspective(aCamera);
+      break;
+    }
+  }
+
+  return projectionMatrix;
+}
+
+/******************************************************************************/
+void RenderSystem::SortEntitiesByCameraDistance(Scene& aScene,
+                                                const Entity& aCamera,
+                                                std::vector<Entity>& aEntities)
+{
+  auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
+
+  Vec3 forwardVector(0.0, 0.0, 1.0);
+  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), cameraTransform.mRotation.x);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), cameraTransform.mRotation.y);
+  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), cameraTransform.mRotation.z);
+  forwardVector = rotationMatrix * forwardVector;
+
+  // Sort the entities in order from furthest to nearest along the
+  // camera's forward vector.
+  auto sortFunction = [&aScene, &forwardVector, &cameraTransform](const Entity& aEntityA,
+                                                                  const Entity& aEntityB)
+  {
+    auto& transformA = aScene.GetComponentForEntity<Transform>(aEntityA);
+    auto& transformB = aScene.GetComponentForEntity<Transform>(aEntityB);
+
+    auto distanceA = Dot(forwardVector, (transformA.mPosition - cameraTransform.mPosition));
+    auto distanceB = Dot(forwardVector, (transformB.mPosition - cameraTransform.mPosition));
+
+    return distanceA < distanceB;
+  };
+  std::sort(aEntities.begin(), aEntities.end(), sortFunction);
 }
 
 /******************************************************************************/

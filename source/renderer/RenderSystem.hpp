@@ -5,8 +5,13 @@
 
 #include <map>
 
-#include "Observer.hpp"
+#include "Camera.hpp"
 #include "Mesh.hpp"
+#include "Transform.hpp"
+
+#include "Mat4.hpp"
+
+#include "Observer.hpp"
 
 namespace Kuma3D {
 
@@ -68,6 +73,49 @@ class RenderSystem : public System
      * @param aTime The time of exiting.
      */
     void HandleGamePendingExit(double aTime);
+
+    /**
+     * Calculates and returns a model matrix that converts a point
+     * into the coordinate system defined by the given Transform.
+     *
+     * @param aTransform The Transform to calculate a matrix for.
+     * @return A transformation matrix for the Transform.
+     */
+    Mat4 CalculateModelMatrix(const Transform& aTransform);
+
+    /**
+     * Calculates and returns a view matrix for the given Camera with the
+     * given Transform.
+     *
+     * @param aCamera The Camera to create a matrix for.
+     * @param aTransform The Transform assigned to the Camera.
+     * @return A view matrix for the Camera.
+     */
+    Mat4 CalculateViewMatrix(const Camera& aCamera,
+                             const Transform& aTransform);
+
+    /**
+     * Calculates a projection matrix (either orthographic or perspective) for
+     * the given Camera.
+     *
+     * @param aSystem The coordinate system to use for the projection matrix.
+     * @param aCamera The Camera to create a matrix for.
+     * @return A projection matrix for the Camera.
+     */
+    Mat4 CalculateProjectionMatrix(const CoordinateSystem& aSystem,
+                                   const Camera& aCamera);
+
+    /**
+     * Sorts the given list of Entities by their distance along the given
+     * Camera's forward axis.
+     *
+     * @param aScene The Scene containing the Entities.
+     * @param aCamera The Camera to sort by.
+     * @param aEntities The Entities to sort.
+     */
+    void SortEntitiesByCameraDistance(Scene& aScene,
+                                      const Entity& aCamera,
+                                      std::vector<Entity>& aEntities);
 
     /**
      * Draws a collection of entities from the perspective of a camera.
