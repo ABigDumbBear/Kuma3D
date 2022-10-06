@@ -65,9 +65,6 @@ void ShipControlSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     auto& transform = aScene.GetComponentForEntity<Kuma3D::Transform>(entity);
     auto& control = aScene.GetComponentForEntity<ShipControl>(entity);
 
-    auto shipPosition = transform.GetWorldPosition(aScene);
-    auto shipRotation = transform.GetWorldRotation(aScene);
-
     // Calculate speed and distance.
     auto si = control.mCurrentSpeed;
     auto a = control.mAcceleration;
@@ -86,9 +83,9 @@ void ShipControlSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 
           Kuma3D::Vec3 direction(-1.0, 0.0, 0.0);
           direction *= d;
-          shipPosition += direction;
-          shipPosition.x = std::max(-30.0f, shipPosition.x);
-          shipRotation.z = std::min(control.mMaxRotation, shipRotation.z + d);
+          transform.mPosition += direction;
+          transform.mPosition.x = std::max(-30.0f, transform.mPosition.x);
+          transform.mRotation.z = std::min(control.mMaxRotation, transform.mRotation.z + d);
 
           control.mCurrentSpeed = sf;
 
@@ -100,9 +97,9 @@ void ShipControlSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 
           Kuma3D::Vec3 direction(1.0, 0.0, 0.0);
           direction *= d;
-          shipPosition.x += d;
-          shipPosition.x = std::min(30.0f, shipPosition.x);
-          shipRotation.z = std::max(-control.mMaxRotation, shipRotation.z - d);
+          transform.mPosition.x += d;
+          transform.mPosition.x = std::min(30.0f, transform.mPosition.x);
+          transform.mRotation.z = std::max(-control.mMaxRotation, transform.mRotation.z - d);
 
           control.mCurrentSpeed = sf;
 
@@ -114,8 +111,8 @@ void ShipControlSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 
           Kuma3D::Vec3 direction(0.0, 1.0, 0.0);
           direction *= d;
-          shipPosition += direction;
-          shipPosition.y = std::min(15.0f, shipPosition.y);
+          transform.mPosition += direction;
+          transform.mPosition.y = std::min(15.0f, transform.mPosition.y);
 
           control.mCurrentSpeed = sf;
 
@@ -127,8 +124,8 @@ void ShipControlSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 
           Kuma3D::Vec3 direction(0.0, -1.0, 0.0);
           direction *= d;
-          shipPosition += direction;
-          shipPosition.y = std::max(-15.0f, shipPosition.y);
+          transform.mPosition += direction;
+          transform.mPosition.y = std::max(-15.0f, transform.mPosition.y);
 
           control.mCurrentSpeed = sf;
 
@@ -141,7 +138,7 @@ void ShipControlSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 
           if(bulletDelta >= secondsBetweenBullets)
           {
-            SpawnBullet(aScene, shipPosition);
+            SpawnBullet(aScene, transform.mPosition);
             mTimeSinceLastBullet = aTime;
           }
 
@@ -158,11 +155,8 @@ void ShipControlSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     if(!movingShip)
     {
       control.mCurrentSpeed = 0.0;
-      shipRotation = Kuma3D::Lerp(shipRotation, Kuma3D::Vec3(0, 0, 0), 0.1);
+      transform.mRotation = Kuma3D::Lerp(transform.mRotation, Kuma3D::Vec3(0, 0, 0), 0.1);
     }
-
-    transform.SetPosition(shipPosition);
-    transform.SetRotation(shipRotation);
   }
 
   // Reset the update timer.
@@ -190,7 +184,7 @@ void ShipControlSystem::SpawnBullet(Kuma3D::Scene& aScene, const Kuma3D::Vec3& a
 {
   auto bullet = aScene.CreateEntity();
   Kuma3D::Transform bulletTransform;
-  bulletTransform.SetPosition(aPosition);
+  bulletTransform.mPosition = aPosition;
   aScene.AddComponentToEntity<Kuma3D::Transform>(bullet, bulletTransform);
 
   auto bulletMesh = CreateCube(1, Kuma3D::Vec3(1.0, 1.0, 1.0));

@@ -37,16 +37,14 @@ void BulletSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     auto& transform = aScene.GetComponentForEntity<Kuma3D::Transform>(entity);
     auto& bullet = aScene.GetComponentForEntity<Bullet>(entity);
 
-    auto bulletPosition = transform.GetWorldPosition(aScene);
     Kuma3D::Vec3 direction(0.0, 0.0, -1.0);
     auto d = direction * (bullet.mSpeed * dt);
-    bulletPosition += direction;
+    transform.mPosition += direction;
 
-    if(bulletPosition.z <= -250)
+    if(transform.mPosition.z <= -250)
     {
       aScene.RemoveEntity(entity);
     }
-    //transform.SetPosition(bulletPosition);
   }
 
   mTimeSinceLastUpdate = aTime;
