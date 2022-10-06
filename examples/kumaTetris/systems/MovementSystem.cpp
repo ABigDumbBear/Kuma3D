@@ -45,7 +45,7 @@ void MovementSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     if(!movable.mFinishedMoving)
     {
       // Calculate the new position using linear interpolation.
-      auto newPosition = Kuma3D::Lerp(transform.mPosition,
+      auto newPosition = Kuma3D::Lerp(transform.GetWorldPosition(aScene),
                                       movable.mTargetPosition,
                                       movable.mMoveSpeed);
 
@@ -55,12 +55,12 @@ void MovementSystem::Operate(Kuma3D::Scene& aScene, double aTime)
          std::abs(newPosition.y - movable.mTargetPosition.y) <= mEpsilon &&
          std::abs(newPosition.z - movable.mTargetPosition.z) <= mEpsilon)
       {
-        transform.mPosition = movable.mTargetPosition;
+        transform.SetPosition(movable.mTargetPosition);
         movable.mFinishedMoving = true;
       }
       else
       {
-        transform.mPosition = newPosition;
+        transform.SetPosition(newPosition);
       }
     }
 
@@ -68,7 +68,7 @@ void MovementSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     if(!movable.mFinishedRotating)
     {
       // Calculate the new rotation using linear interpolation.
-      auto newRotation = Kuma3D::Lerp(transform.mRotation,
+      auto newRotation = Kuma3D::Lerp(transform.GetWorldRotation(aScene),
                                       movable.mTargetRotation,
                                       movable.mRotateSpeed);
 
@@ -78,12 +78,12 @@ void MovementSystem::Operate(Kuma3D::Scene& aScene, double aTime)
          std::abs(newRotation.y - movable.mTargetRotation.y) <= mEpsilon &&
          std::abs(newRotation.z - movable.mTargetRotation.z) <= mEpsilon)
       {
-        transform.mRotation = movable.mTargetRotation;
+        transform.SetRotation(movable.mTargetRotation);
         movable.mFinishedRotating = true;
       }
       else
       {
-        transform.mRotation = newRotation;
+        transform.SetRotation(newRotation);
       }
     }
   }
