@@ -48,9 +48,6 @@ void RenderSystem::Initialize(Scene& aScene)
   // Enable OpenGL blending.
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  // Enable depth testing.
-  glEnable(GL_DEPTH_TEST);
 }
 
 /******************************************************************************/
@@ -264,6 +261,7 @@ void RenderSystem::DrawEntities(Scene& aScene,
   auto& camera = aScene.GetComponentForEntity<Camera>(aCamera);
   auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
 
+  // Set the viewport to fit the camera.
   glViewport(0.0, 0.0, camera.mViewportX, camera.mViewportY);
 
   auto viewMatrix = CalculateViewMatrix(camera, cameraTransform);
@@ -272,6 +270,8 @@ void RenderSystem::DrawEntities(Scene& aScene,
   {
     auto& entityMesh = aScene.GetComponentForEntity<Mesh>(entity);
     auto& entityTransform = aScene.GetComponentForEntity<Transform>(entity);
+
+    entityMesh.mUseDepthTesting ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 
     // Bind each texture on this mesh.
     for(int i = 0; i < entityMesh.mTextures.size(); ++i)
@@ -322,6 +322,8 @@ void RenderSystem::DrawEntities(Scene& aScene,
                      0);
       glBindVertexArray(0);
     }
+
+    glEnable(GL_DEPTH_TEST);
   }
 }
 
