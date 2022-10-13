@@ -36,6 +36,13 @@ struct Sprite
   std::string mCurrentAnimation;
   float mAnimationSpeed { 1 };
 
+  // By default, the SpriteSystem resizes sprite meshes to fit the current
+  // frame of animation. If you don't want that, use these variables instead.
+  float mWidth { 0 };
+  float mHeight { 0 };
+  bool mFixedWidth { false };
+  bool mFixedHeight { false };
+
   bool mFlipX { false };
   bool mFlipY { false };
 

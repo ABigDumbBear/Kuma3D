@@ -113,8 +113,8 @@ void SpriteSystem::UpdateMeshToDisplaySprite(Mesh& aMesh, const Sprite& aSprite)
   auto dimensions = TextureLoader::GetTextureDimensions(aSprite.mSpritesheetTextureID);
   float textureWidth = dimensions.first;
   float textureHeight = dimensions.second;
-  float meshWidth = textureClip.mRight - textureClip.mLeft;
-  float meshHeight = textureClip.mTop - textureClip.mBottom;
+  float meshWidth = aSprite.mFixedWidth ? aSprite.mWidth : textureClip.mRight - textureClip.mLeft;
+  float meshHeight = aSprite.mFixedHeight ? aSprite.mHeight : textureClip.mTop - textureClip.mBottom;
 
   // Create a 2D quad to display the sprite with.
   MeshVertex vertex;
