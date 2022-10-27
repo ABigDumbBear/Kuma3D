@@ -73,6 +73,27 @@ class Scene
     void AddSystem(std::unique_ptr<System> aSystem);
 
     /**
+     * Returns whether the Scene already contains a System of the given type.
+     *
+     * @return Whether the Scene already contains a System of the given type.
+     */
+    template<typename T>
+    bool ContainsSystemOfType()
+    {
+      bool containsSystem = false;
+      for(const auto& system : mSystems)
+      {
+        if(dynamic_cast<T*>(system))
+        {
+          containsSystem = true;
+          break;
+        }
+      }
+
+      return containsSystem;
+    }
+
+    /**
      * Creates and returns an empty Signature for use with a System.
      *
      * @return An empty Signature.

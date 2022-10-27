@@ -22,7 +22,6 @@ namespace Kuma3D {
 class Game
 {
   public:
-    Game();
 
     /**
      * Initializes third-party graphics libraries and creates a window
@@ -49,19 +48,19 @@ class Game
      * Begins the game loop. This loop will run until Exit() is called
      * or until the window is closed.
      */
-    void Run();
+    static void Run();
 
     /**
      * Exits the game loop.
      */
-    void Exit();
+    static void Exit();
 
     /**
      * Sets the Scene to update during the game loop.
      *
      * @param aScene The Scene to update during the game loop.
      */
-    void SetScene(std::unique_ptr<Scene> aScene);
+    static void SetScene(std::unique_ptr<Scene> aScene);
 
   private:
 
@@ -73,14 +72,15 @@ class Game
     /**
      * Updates the current scene.
      */
-    void Update();
+    static void Update();
 
     static bool mInitialized;
     static GLFWwindow* mWindow;
 
-    std::unique_ptr<Scene> mScene;
+    static std::unique_ptr<Scene> mScene;
+    static std::unique_ptr<Scene> mNewScene;
 
-    bool mExiting;
+    static bool mExiting;
 };
 
 } // namespace Kuma3D

@@ -11,6 +11,9 @@ namespace Kuma3D {
 
 bool Game::mInitialized = false;
 GLFWwindow* Game::mWindow = nullptr;
+std::unique_ptr<Scene> Game::mScene = nullptr;
+std::unique_ptr<Scene> Game::mNewScene = nullptr;
+bool Game::mExiting = false;
 
 /*****************************************************************************/
 void GLFWErrorCallback(int aError, const char* aDescription)
@@ -98,13 +101,6 @@ void GLFWMouseScrolledCallback(GLFWwindow* aWindow,
                                double aYOffset)
 {
   MouseScrolled.Notify(aXOffset, aYOffset);
-}
-
-/******************************************************************************/
-Game::Game()
-  : mScene(nullptr)
-  , mExiting(false)
-{
 }
 
 /******************************************************************************/
@@ -224,6 +220,13 @@ void Game::Run()
   while(!glfwWindowShouldClose(mWindow) &&
         !mExiting)
   {
+    if(mNewScene != nullptr)
+    {
+      mScene.reset(nullptr);
+      mScene = std::move(mNewScene);
+      mNewScene.reset(nullptr);
+    }
+
     glfwPollEvents();
     Update();
 
@@ -232,6 +235,7 @@ void Game::Run()
   }
 
   GamePendingExit.Notify(glfwGetTime());
+  mScene.reset(nullptr);
   mExiting = false;
 }
 
@@ -244,7 +248,14 @@ void Game::Exit()
 /******************************************************************************/
 void Game::SetScene(std::unique_ptr<Scene> aScene)
 {
-  mScene = std::move(aScene);
+  if(mScene == nullptr)
+  {
+    mScene = std::move(aScene);
+  }
+  else
+  {
+    mNewScene = std::move(aScene);
+  }
 }
 
 /******************************************************************************/
