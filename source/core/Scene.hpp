@@ -250,6 +250,27 @@ class Scene
     };
 
     /**
+     * Returns a vector of Entities that have a component of type T.
+     *
+     * @return A vector of Entities with a component of type T.
+     */
+    template<typename T>
+    std::vector<Entity> GetEntitiesWithComponent()
+    {
+      std::vector<Entity> entities;
+
+      for(const auto& entityPair : mEntityToSignatureMap)
+      {
+        if(DoesEntityHaveComponent<T>(entityPair.first))
+        {
+          entities.emplace_back(entityPair.first);
+        }
+      }
+
+      return entities;
+    }
+
+    /**
      * Returns a component of type T associated with the given Entity.
      *
      * @param aEntity The Entity to retrieve a component for.
