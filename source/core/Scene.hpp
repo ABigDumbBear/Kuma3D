@@ -83,7 +83,7 @@ class Scene
       bool containsSystem = false;
       for(const auto& system : mSystems)
       {
-        if(dynamic_cast<T*>(system))
+        if(dynamic_cast<T*>(system.get()))
         {
           containsSystem = true;
           break;
