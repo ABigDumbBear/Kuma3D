@@ -22,9 +22,15 @@ inline Vec3 Normalize(const Vec3& aVector)
                              std::pow(aVector.y, 2) +
                              std::pow(aVector.z, 2));
 
-  return Vec3(aVector.x / magnitude,
-              aVector.y / magnitude,
-              aVector.z / magnitude);
+  Vec3 result(0, 0, 0);
+  if(magnitude > 0)
+  {
+    result.x = aVector.x / magnitude;
+    result.y = aVector.y / magnitude;
+    result.z = aVector.z / magnitude;
+  }
+
+  return result;
 }
 
 /**

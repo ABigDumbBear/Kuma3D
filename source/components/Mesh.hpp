@@ -62,6 +62,8 @@ struct Mesh
   std::vector<ID> mTextures;
   std::vector<ID> mShaders;
 
+  bool mUseDepthTesting { true };
+
   bool mHasTransparency { false };
   bool mDirty { false };
 };

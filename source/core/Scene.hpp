@@ -73,6 +73,27 @@ class Scene
     void AddSystem(std::unique_ptr<System> aSystem);
 
     /**
+     * Returns whether the Scene already contains a System of the given type.
+     *
+     * @return Whether the Scene already contains a System of the given type.
+     */
+    template<typename T>
+    bool ContainsSystemOfType()
+    {
+      bool containsSystem = false;
+      for(const auto& system : mSystems)
+      {
+        if(dynamic_cast<T*>(system.get()))
+        {
+          containsSystem = true;
+          break;
+        }
+      }
+
+      return containsSystem;
+    }
+
+    /**
      * Creates and returns an empty Signature for use with a System.
      *
      * @return An empty Signature.
@@ -227,6 +248,27 @@ class Scene
     {
       return mEntityToSignatureMap[aEntity][GetComponentIndex<T>()];
     };
+
+    /**
+     * Returns a vector of Entities that have a component of type T.
+     *
+     * @return A vector of Entities with a component of type T.
+     */
+    template<typename T>
+    std::vector<Entity> GetEntitiesWithComponent()
+    {
+      std::vector<Entity> entities;
+
+      for(const auto& entityPair : mEntityToSignatureMap)
+      {
+        if(DoesEntityHaveComponent<T>(entityPair.first))
+        {
+          entities.emplace_back(entityPair.first);
+        }
+      }
+
+      return entities;
+    }
 
     /**
      * Returns a component of type T associated with the given Entity.

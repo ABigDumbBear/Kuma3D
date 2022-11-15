@@ -7,7 +7,7 @@ target_link_libraries(mathTest PUBLIC
 
 # Include the engine headers from the install directory.
 target_include_directories(mathTest PUBLIC
-                           ${INCLUDE_INCLUDE_DIR})
+                           ${INCLUDE_INSTALL_DIR})
 
 # Install the test executable.
 install(TARGETS mathTest DESTINATION ${TESTS_INSTALL_DIR})
