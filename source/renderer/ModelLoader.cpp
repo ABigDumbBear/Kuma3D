@@ -6,17 +6,23 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include "TextureLoader.hpp"
+
 namespace Kuma3D {
 
 /******************************************************************************/
 IDGenerator ModelLoader::mIDGenerator;
 std::map<std::string, ID> ModelLoader::mModelFileMap;
 std::map<ID, std::vector<Mesh>> ModelLoader::mModelMap;
+std::string ModelLoader::mWorkingDirectory;
 
 /******************************************************************************/
 ID ModelLoader::LoadModel(const std::string& aFilePath)
 {
   ID modelID = 0;
+
+  // Set the working directory.
+  mWorkingDirectory = aFilePath.substr(0, aFilePath.find_last_of("/\\"));
 
   // Don't load the same model twice.
   auto foundID = mModelFileMap.find(aFilePath);
@@ -99,6 +105,79 @@ void ModelLoader::ProcessMesh(const ID& aID, aiMesh& aMesh, const aiScene& aScen
       vertex.mTexCoords[1] = texCoords[i].y;
     }
 
+    // Load the textures themselves, if there are any.
+    if(aMesh.mMaterialIndex >= 0)
+    {
+      auto material = aScene.mMaterials[aMesh.mMaterialIndex];
+
+      // Load each texture of each type for the material.
+      auto textureIDs = GetTexturesForMaterial(*material, aiTextureType_NONE);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_DIFFUSE);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_SPECULAR);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_AMBIENT);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_EMISSIVE);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_HEIGHT);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_NORMALS);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_SHININESS);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_OPACITY);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_DISPLACEMENT);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_LIGHTMAP);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_REFLECTION);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+      textureIDs = GetTexturesForMaterial(*material, aiTextureType_UNKNOWN);
+      for(const auto& id : textureIDs)
+      {
+        mesh.mTextures.emplace_back(id);
+      }
+    }
+
     mesh.mVertices.emplace_back(vertex);
   }
 
@@ -115,6 +194,26 @@ void ModelLoader::ProcessMesh(const ID& aID, aiMesh& aMesh, const aiScene& aScen
   mesh.mDirty = true;
 
   mModelMap[aID].emplace_back(mesh);
+}
+
+/******************************************************************************/
+std::vector<ID> ModelLoader::GetTexturesForMaterial(const aiMaterial& aMaterial,
+                                                    const aiTextureType& aType)
+{
+  std::vector<ID> textureIDs;
+
+  for(int i = 0; i < aMaterial.GetTextureCount(aType); ++i)
+  {
+    aiString str;
+    aMaterial.GetTexture(aType, i, &str);
+
+    std::stringstream texturePath;
+    texturePath << mWorkingDirectory << "/" << str.C_Str();
+    auto textureID = TextureLoader::LoadTextureFromFile(texturePath.str());
+    textureIDs.emplace_back(textureID);
+  }
+
+  return textureIDs;
 }
 
 } // namespace Kuma3D

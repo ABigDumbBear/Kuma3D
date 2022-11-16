@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include <assimp/material.h>
 #include <assimp/scene.h>
 
 #include "IDGenerator.hpp"
@@ -61,9 +62,22 @@ class ModelLoader
      */
     static void ProcessMesh(const ID& aID, aiMesh& aMesh, const aiScene& aScene);
 
+    /**
+     * Returns a list of texture IDs for each texture of a given type on a
+     * given material.
+     *
+     * @param aMaterial The material to load textures for.
+     * @param aType The type of texture to load.
+     * @return A list of texture IDs for each texture used by the material.
+     */
+    static std::vector<ID> GetTexturesForMaterial(const aiMaterial& aMaterial,
+                                                  const aiTextureType& aType);
+
     static IDGenerator mIDGenerator;
     static std::map<std::string, ID> mModelFileMap;
     static std::map<ID, std::vector<Mesh>> mModelMap;
+
+    static std::string mWorkingDirectory;
 };
 
 } // namespace Kuma3D

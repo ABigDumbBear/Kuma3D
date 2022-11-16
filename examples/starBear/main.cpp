@@ -18,7 +18,7 @@ int main()
   Kuma3D::Game::Initialize(options);
 
   // Load the model.
-  Kuma3D::ModelLoader::LoadModel("resources/ship.obj");
+  Kuma3D::ModelLoader::LoadModel("resources/Spitfire/OBJ/Spitfire.obj");
 
   // Load the shaders.
   Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/ShipShader.vert",

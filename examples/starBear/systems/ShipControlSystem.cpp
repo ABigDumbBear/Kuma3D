@@ -155,7 +155,7 @@ void ShipControlSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     if(!movingShip)
     {
       control.mCurrentSpeed = 0.0;
-      transform.mRotation = Kuma3D::Lerp(transform.mRotation, Kuma3D::Vec3(0, 0, 0), 0.1);
+      transform.mRotation = Kuma3D::Lerp(transform.mRotation, Kuma3D::Vec3(0, 180, 0), 0.1);
     }
   }
 
