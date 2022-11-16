@@ -50,7 +50,8 @@ file(GLOB ENGINE_INCLUDES audio/*.hpp
                           components/*.hpp
                           math/*.hpp
                           renderer/*.hpp)
-install(FILES ${ENGINE_INCLUDES} DESTINATION ${INCLUDE_INSTALL_DIR})
+install(FILES ${ENGINE_INCLUDES} DESTINATION ${INCLUDE_INSTALL_DIR}/Kuma3D)
+install(DIRECTORY ${3RD_PARTY_INCLUDE_DIR} DESTINATION ${INCLUDE_INSTALL_DIR}/Kuma3D)
 
 # Create the Kuma3DConfig.cmake file, so other projects can
 # easily inlude the engine with a call to find_package.
