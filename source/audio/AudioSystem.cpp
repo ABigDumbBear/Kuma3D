@@ -1,6 +1,6 @@
 #include "AudioSystem.hpp"
 
-#include "miniaudio.h"
+#include <miniaudio/miniaudio.h>
 
 #include "Scene.hpp"
 
