@@ -44,7 +44,7 @@ inline std::unique_ptr<Kuma3D::Scene> CreateScene()
   auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/ShipShader.vert",
                                                             "resources/shaders/ShipShader.frag");
 
-  auto modelID = Kuma3D::ModelLoader::LoadModel("resources/Spitfire/OBJ/Spitfire.obj");
+  auto modelID = Kuma3D::ModelLoader::LoadModel("resources/models/ship/ship.obj");
   auto modelMeshes = Kuma3D::ModelLoader::GetModel(modelID);
   for(auto& mesh : modelMeshes)
   {
