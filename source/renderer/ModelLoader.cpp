@@ -6,23 +6,34 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
-#include "TextureLoader.hpp"
-
 namespace Kuma3D {
 
 /******************************************************************************/
 IDGenerator ModelLoader::mIDGenerator;
 std::map<std::string, ID> ModelLoader::mModelFileMap;
 std::map<ID, std::vector<Mesh>> ModelLoader::mModelMap;
+
 std::string ModelLoader::mWorkingDirectory;
 
+TextureStorageFormat ModelLoader::mFormat;
+TextureWrapOption ModelLoader::mWrapOption;
+TextureFilterOption ModelLoader::mFilterOption;
+
 /******************************************************************************/
-ID ModelLoader::LoadModel(const std::string& aFilePath)
+ID ModelLoader::LoadModel(const std::string& aFilePath,
+                          TextureStorageFormat aFormat,
+                          TextureWrapOption aWrapOption,
+                          TextureFilterOption aFilterOption)
 {
   ID modelID = 0;
 
   // Set the working directory.
   mWorkingDirectory = aFilePath.substr(0, aFilePath.find_last_of("/\\"));
+
+  // Store the texture options.
+  mFormat = aFormat;
+  mWrapOption = aWrapOption;
+  mFilterOption = aFilterOption;
 
   // Don't load the same model twice.
   auto foundID = mModelFileMap.find(aFilePath);
@@ -209,7 +220,10 @@ std::vector<ID> ModelLoader::GetTexturesForMaterial(const aiMaterial& aMaterial,
 
     std::stringstream texturePath;
     texturePath << mWorkingDirectory << "/" << str.C_Str();
-    auto textureID = TextureLoader::LoadTextureFromFile(texturePath.str());
+    auto textureID = TextureLoader::LoadTextureFromFile(texturePath.str(),
+                                                        mFormat,
+                                                        mWrapOption,
+                                                        mFilterOption);
     textureIDs.emplace_back(textureID);
   }
 

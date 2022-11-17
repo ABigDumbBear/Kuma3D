@@ -3,4 +3,3 @@ set(EXAMPLES_INSTALL_DIR "${CMAKE_SOURCE_DIR}/install/examples/")
 
 # Add each example to configure.
 add_subdirectory(kumaTetris)
-add_subdirectory(starBear)

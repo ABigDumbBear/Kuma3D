@@ -103,14 +103,14 @@ ID FontLoader::LoadTextureForFont(const FontTextureIdentifier& aFontTextureID)
     atlasHeight += (mTexturePadding * 2);
 
     // Use the height and width to create an empty texture.
-    // The load format is specified as GL_RED because Freetype stores
+    // The load format is specified as TextureLoadFormat::eR because Freetype stores
     // image data as an 8-bit image, where each color is a single byte.
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     textureID = TextureLoader::LoadTextureFromData(nullptr,
                                                    atlasWidth,
                                                    atlasHeight,
-                                                   GL_RED);
+                                                   TextureStorageFormat::eR);
 
     // Now that we have an empty texture, fill it with the image data
     // for each of the first 128 ASCII characters.
@@ -131,7 +131,7 @@ ID FontLoader::LoadTextureForFont(const FontTextureIdentifier& aFontTextureID)
                                      mTexturePadding,
                                      face->glyph->bitmap.width,
                                      face->glyph->bitmap.rows,
-                                     GL_RED);
+                                     TextureStorageFormat::eR);
 
       xOffset += face->glyph->bitmap.width;
       xOffset += (mTexturePadding * 2);

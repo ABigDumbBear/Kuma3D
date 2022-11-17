@@ -8,6 +8,8 @@
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
+#include "TextureLoader.hpp"
+
 #include "IDGenerator.hpp"
 
 #include "Mesh.hpp"
@@ -29,7 +31,10 @@ class ModelLoader
      * @param aFilePath The path to the model file.
      * @return The ID for a list of Meshes that represent the model.
      */
-    static ID LoadModel(const std::string& aFilePath);
+    static ID LoadModel(const std::string& aFilePath,
+                        TextureStorageFormat aFormat = TextureStorageFormat::eRGBA,
+                        TextureWrapOption aWrapOption = TextureWrapOption::eREPEAT,
+                        TextureFilterOption aFilterOption = TextureFilterOption::eLINEAR);
 
     /**
      * Returns a list of Meshes that represent the model associated with
@@ -78,6 +83,10 @@ class ModelLoader
     static std::map<ID, std::vector<Mesh>> mModelMap;
 
     static std::string mWorkingDirectory;
+
+    static TextureStorageFormat mFormat;
+    static TextureWrapOption mWrapOption;
+    static TextureFilterOption mFilterOption;
 };
 
 } // namespace Kuma3D

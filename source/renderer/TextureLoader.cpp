@@ -15,7 +15,9 @@ std::map<ID, TextureDimensions> TextureLoader::mTextureDimensionMap;
 
 /*****************************************************************************/
 ID TextureLoader::LoadTextureFromFile(const std::string& aFilePath,
-                                      GLint aFormat)
+                                      TextureStorageFormat aFormat,
+                                      TextureWrapOption aWrapOption,
+                                      TextureFilterOption aFilterOption)
 {
   // Only load the texture if it hasn't already been loaded.
   auto foundTexture = mTextureMap.find(aFilePath);
@@ -24,8 +26,17 @@ ID TextureLoader::LoadTextureFromFile(const std::string& aFilePath,
     stbi_set_flip_vertically_on_load(true);
 
     int width, height, channels;
-    auto data = stbi_load(aFilePath.c_str(), &width, &height, &channels, 0);
-    auto textureID = LoadTextureFromData(data, width, height, aFormat);
+    auto data = stbi_load(aFilePath.c_str(),
+                          &width,
+                          &height,
+                          &channels,
+                          0);
+    auto textureID = LoadTextureFromData(data,
+                                         width,
+                                         height,
+                                         aFormat,
+                                         aWrapOption,
+                                         aFilterOption);
     stbi_image_free(data);
 
     mTextureMap.emplace(aFilePath, textureID);
@@ -38,27 +49,51 @@ ID TextureLoader::LoadTextureFromFile(const std::string& aFilePath,
 ID TextureLoader::LoadTextureFromData(unsigned char* aData,
                                       unsigned int aWidth,
                                       unsigned int aHeight,
-                                      GLint aFormat)
+                                      TextureStorageFormat aFormat,
+                                      TextureWrapOption aWrapOption,
+                                      TextureFilterOption aFilterOption)
 {
   // Generate an OpenGL texture.
   ID textureID = 0;
   glGenTextures(1, &textureID);
 
+  GLint loadFormat, wrapOption, filterOption;
+  switch(aFormat)
+  {
+    case TextureStorageFormat::eR: { loadFormat = GL_RED; break; }
+    case TextureStorageFormat::eRGB: { loadFormat = GL_RGB; break; }
+    case TextureStorageFormat::eRGBA: { loadFormat = GL_RGBA; break; }
+  }
+
+  switch(aWrapOption)
+  {
+    case TextureWrapOption::eREPEAT: { wrapOption = GL_REPEAT; break; }
+    case TextureWrapOption::eMIRRORED_REPEAT: { wrapOption = GL_MIRRORED_REPEAT; break; }
+    case TextureWrapOption::eCLAMP_TO_EDGE: { wrapOption = GL_CLAMP_TO_EDGE; break; }
+    case TextureWrapOption::eCLAMP_TO_BORDER: { wrapOption = GL_CLAMP_TO_BORDER; break; }
+  }
+
+  switch(aFilterOption)
+  {
+    case TextureFilterOption::eNEAREST: { filterOption = GL_NEAREST; break; }
+    case TextureFilterOption::eLINEAR: { filterOption = GL_LINEAR; break; }
+  }
+
   // Set default texture wrapping and filtering options.
   glBindTexture(GL_TEXTURE_2D, textureID);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapOption);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapOption);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterOption);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterOption);
 
   // Copy the image data into the currently bound texture.
   glTexImage2D(GL_TEXTURE_2D,
                0,
-               aFormat,
+               loadFormat,
                aWidth,
                aHeight,
                0,
-               aFormat,
+               loadFormat,
                GL_UNSIGNED_BYTE,
                aData);
 
@@ -79,10 +114,18 @@ void TextureLoader::AddSubImageData(const ID& aID,
                                     unsigned int aYOffset,
                                     unsigned int aWidth,
                                     unsigned int aHeight,
-                                    GLint aFormat)
+                                    TextureStorageFormat aFormat)
 {
   // Bind texture for use.
   glBindTexture(GL_TEXTURE_2D, aID);
+
+  GLint loadFormat;
+  switch(aFormat)
+  {
+    case TextureStorageFormat::eR: { loadFormat = GL_RED; break; }
+    case TextureStorageFormat::eRGB: { loadFormat = GL_RGB; break; }
+    case TextureStorageFormat::eRGBA: { loadFormat = GL_RGBA; break; }
+  }
 
   // Add the image data to the existing texture.
   glTexSubImage2D(GL_TEXTURE_2D,
@@ -91,7 +134,7 @@ void TextureLoader::AddSubImageData(const ID& aID,
                   aYOffset,
                   aWidth,
                   aHeight,
-                  aFormat,
+                  loadFormat,
                   GL_UNSIGNED_BYTE,
                   aData);
 
