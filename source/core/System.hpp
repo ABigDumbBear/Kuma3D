@@ -62,7 +62,7 @@ class System
      *
      * @param eEntity The Entity that became eligible.
      */
-    virtual void HandleEntityBecameEligible(const Entity& aEntity) {}
+    virtual void HandleEntityBecameEligible(Entity aEntity) {}
 
     /**
      * A virtual function that gets called whenever an Entity becomes
@@ -70,7 +70,7 @@ class System
      *
      * @param eEntity The Entity that became ineligible.
      */
-    virtual void HandleEntityBecameIneligible(const Entity& aEntity) {}
+    virtual void HandleEntityBecameIneligible(Entity aEntity) {}
 
   private:
 
@@ -83,7 +83,7 @@ class System
      * @param aEntity The Entity whose Signature was changed.
      * @param aSignature The new Signature of the Entity.
      */
-    void HandleEntitySignatureChanged(const Entity& aEntity,
+    void HandleEntitySignatureChanged(Entity aEntity,
                                       const Signature& aSignature);
 
     /**
@@ -92,7 +92,7 @@ class System
      *
      * @param aEntity The Entity that's about to be removed.
      */
-    void HandleEntityPendingDeletion(const Entity& aEntity);
+    void HandleEntityPendingDeletion(Entity aEntity);
 
     /**
      * Returns true if the given Signature contains the System's Signature.

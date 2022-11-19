@@ -53,7 +53,7 @@ Entity Scene::CreateEntity()
 }
 
 /******************************************************************************/
-void Scene::RemoveEntity(const Entity& aEntity)
+void Scene::RemoveEntity(Entity aEntity)
 {
   if(mEntityToSignatureMap.find(aEntity) == mEntityToSignatureMap.end())
   {
@@ -78,7 +78,7 @@ void Scene::RemoveEntity(const Entity& aEntity)
 }
 
 /******************************************************************************/
-bool Scene::IsEntityScheduledForRemoval(const Entity& aEntity)
+bool Scene::IsEntityScheduledForRemoval(Entity aEntity)
 {
   auto foundEntity = std::find(mEntitiesToRemove.begin(), mEntitiesToRemove.end(), aEntity);
   return foundEntity != mEntitiesToRemove.end();

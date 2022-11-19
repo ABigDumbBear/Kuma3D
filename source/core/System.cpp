@@ -10,13 +10,13 @@ namespace Kuma3D {
 /******************************************************************************/
 System::System()
 {
-  EntitySignatureChanged.Connect(mObserver, [this](const Entity& aEntity,
+  EntitySignatureChanged.Connect(mObserver, [this](Entity aEntity,
                                                    const Signature& aSignature)
   {
     this->HandleEntitySignatureChanged(aEntity, aSignature);
   });
 
-  EntityPendingDeletion.Connect(mObserver, [this](const Entity& aEntity)
+  EntityPendingDeletion.Connect(mObserver, [this](Entity aEntity)
   {
     this->HandleEntityPendingDeletion(aEntity);
   });
@@ -30,7 +30,7 @@ void System::SetSignature(const Signature& aSignature)
 }
 
 /******************************************************************************/
-void System::HandleEntitySignatureChanged(const Entity& aEntity,
+void System::HandleEntitySignatureChanged(Entity aEntity,
                                           const Signature& aSignature)
 {
   auto relevant = IsSignatureRelevant(aSignature);
@@ -54,7 +54,7 @@ void System::HandleEntitySignatureChanged(const Entity& aEntity,
 }
 
 /******************************************************************************/
-void System::HandleEntityPendingDeletion(const Entity& aEntity)
+void System::HandleEntityPendingDeletion(Entity aEntity)
 {
   auto foundEntity = std::find(mEntities.begin(), mEntities.end(), aEntity);
   if(foundEntity != mEntities.end())

@@ -40,7 +40,7 @@ class BlockSystem : public Kuma3D::System
      *
      * @param aEntity The Entity that was added.
      */
-    void HandleEntityBecameEligible(const Kuma3D::Entity& aEntity) override;
+    void HandleEntityBecameEligible(Kuma3D::Entity aEntity) override;
 
   private:
 

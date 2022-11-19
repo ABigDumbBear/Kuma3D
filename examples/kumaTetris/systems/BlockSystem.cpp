@@ -255,7 +255,7 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 }
 
 /******************************************************************************/
-void BlockSystem::HandleEntityBecameEligible(const Kuma3D::Entity& aEntity)
+void BlockSystem::HandleEntityBecameEligible(Kuma3D::Entity aEntity)
 {
   mNewEntities.emplace_back(aEntity);
 }

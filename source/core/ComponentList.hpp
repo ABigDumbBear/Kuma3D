@@ -32,7 +32,7 @@ class ComponentList
      *
      * @param aEntity The Entity to remove a component from.
      */
-    virtual void RemoveComponentFromEntity(const Entity& aEntity) = 0;
+    virtual void RemoveComponentFromEntity(Entity aEntity) = 0;
 };
 
 /**
@@ -50,7 +50,7 @@ class ComponentListT : public ComponentList
      * @param aEntity The Entity to associate the component with.
      * @param aComponent The component to add.
      */
-    void AddComponentToEntity(const Entity& aEntity,
+    void AddComponentToEntity(Entity aEntity,
                               T& aComponent)
     {
       if(mEntityToIndexMap.find(aEntity) != mEntityToIndexMap.end())
@@ -71,7 +71,7 @@ class ComponentListT : public ComponentList
      *
      * @param aEntity The Entity to remove a component from.
      */
-    void RemoveComponentFromEntity(const Entity& aEntity) override
+    void RemoveComponentFromEntity(Entity aEntity) override
     {
       if(mEntityToIndexMap.find(aEntity) == mEntityToIndexMap.end())
       {
@@ -106,7 +106,7 @@ class ComponentListT : public ComponentList
      *
      * @return A component of type T.
      */
-    T& GetComponentForEntity(const Entity& aEntity)
+    T& GetComponentForEntity(Entity aEntity)
     {
       if(mEntityToIndexMap.find(aEntity) == mEntityToIndexMap.end())
       {
