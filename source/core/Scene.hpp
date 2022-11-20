@@ -317,6 +317,7 @@ class Scene
     // Keeps track of the components associated with an Entity.
     std::map<Entity, Signature> mEntityToSignatureMap;
 
+    // Keeps track of enttities and components to remove at the end of a frame.
     std::vector<Entity> mEntitiesToRemove;
     std::vector<std::pair<Entity, unsigned int>> mComponentsToRemove;
 

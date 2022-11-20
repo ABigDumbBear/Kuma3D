@@ -12,18 +12,19 @@
 namespace Kuma3D {
 
 /**
- * The base class for the templated ComponentListT. This is necessary because
- * it's not possible to maintain a collection of templated classes in the
- * same data structure; instead, the data structure must maintain a collection
- * of pointers to the base class.
- *
- * This limitation is most relevant in the Scene class, which maintains a
- * vector of ComponentLists.
+ * A base class for a component container. For more info, see the template
+ * class ComponentListT.
  */
 class ComponentList
 {
   public:
     virtual ~ComponentList() = default;
+
+    /**
+     * Moves all components in the buffer into the main component vector,
+     * then clears out the buffer.
+     */
+    virtual void ApplyChanges() = 0;
 
     /**
      * Removes a component from a given Entity. This is made virtual so that
@@ -36,12 +37,37 @@ class ComponentList
 };
 
 /**
- * A data structure that contains a vector of components of type T.
+ * A container object for components of type T. When adding components,
+ * they are first added into a separate buffer and can't be retrieved until
+ * ApplyChanges() is called.
+ *
+ * This is done to ensure that newly added components don't get updated
+ * by a System before the end of the frame in which they were added.
  */
 template<typename T>
 class ComponentListT : public ComponentList
 {
   public:
+
+    /**
+     * Moves all components in the buffer into the main component vector,
+     * then clears out the buffer.
+     */
+    void ApplyChanges() override
+    {
+      for(const auto& entityIndexPair : mEntityToBufferMap)
+      {
+        // Move the component from the buffer to the data.
+        mData.emplace_back(std::move(mBuffer[entityIndexPair.second]));
+
+        // Map the Entity to the data index.
+        mEntityToDataMap.emplace(entityIndexPair.first, entityIndexPair.second);
+      }
+
+      // Clear out the buffer.
+      mEntityToBufferMap.clear();
+      mBuffer.clear();
+    }
 
     /**
      * Adds a component to the list. Note that Entities are not allowed
@@ -120,8 +146,11 @@ class ComponentListT : public ComponentList
     }
 
   private:
-    std::map<Entity, unsigned int> mEntityToIndexMap;
-    std::vector<T> mComponents;
+    std::map<Entity, unsigned int> mEntityToDataMap;
+    std::vector<T> mData;
+
+    std::map<Entity, unsigned int> mEntityToBufferMap;
+    std::vector<T> mBuffer;
 };
 
 } // namespace Kuma3D
