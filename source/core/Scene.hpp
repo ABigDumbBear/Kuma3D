@@ -53,7 +53,7 @@ class Scene
      *
      * @param aEntity The Entity ID to remove.
      */
-    void RemoveEntity(Entity aEntity);
+    void RemoveEntity(const Entity& aEntity);
 
     /**
      * Returns whether an Entity is scheduled for removal at the end of the
@@ -62,7 +62,7 @@ class Scene
      * @param aEntity The Entity to check.
      * @return Whether the Entity is scheduled for removal.
      */
-    bool IsEntityScheduledForRemoval(Entity aEntity);
+    bool IsEntityScheduledForRemoval(const Entity& aEntity);
 
     /**
      * Takes ownership of a System and asks it to operate on each of its
@@ -172,7 +172,7 @@ class Scene
      * @param aComponent The component to add.
      */
     template<typename T>
-    void AddComponentToEntity(Entity aEntity, T& aComponent)
+    void AddComponentToEntity(const Entity& aEntity, T& aComponent)
     {
       auto list = GetComponentListForType<T>();
       if(list == nullptr)
@@ -197,7 +197,7 @@ class Scene
      * @param aEntity The Entity to add a component to.
      */
     template<typename T>
-    void AddComponentToEntity(Entity aEntity)
+    void AddComponentToEntity(const Entity& aEntity)
     {
       auto list = GetComponentListForType<T>();
       if(list == nullptr)
@@ -223,7 +223,7 @@ class Scene
      * @param aEntity The Entity to remove a component from.
      */
     template<typename T>
-    void RemoveComponentFromEntity(Entity aEntity)
+    void RemoveComponentFromEntity(const Entity& aEntity)
     {
       if(GetComponentListForType<T>() == nullptr)
       {
@@ -244,7 +244,7 @@ class Scene
      * @return Whether the Entity has a component of type T.
      */
     template<typename T>
-    bool DoesEntityHaveComponent(Entity aEntity)
+    bool DoesEntityHaveComponent(const Entity& aEntity)
     {
       return mEntityToSignatureMap[aEntity][GetComponentIndex<T>()];
     };
@@ -277,7 +277,7 @@ class Scene
      * @return A component of type T associated with the given Entity.
      */
     template<typename T>
-    T& GetComponentForEntity(Entity aEntity)
+    T& GetComponentForEntity(const Entity& aEntity)
     {
       auto list = GetComponentListForType<T>();
       if(list == nullptr)

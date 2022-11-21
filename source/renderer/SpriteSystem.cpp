@@ -81,14 +81,14 @@ void SpriteSystem::Operate(Scene& aScene, double aTime)
 }
 
 /******************************************************************************/
-void SpriteSystem::HandleEntityBecameEligible(Entity aEntity)
+void SpriteSystem::HandleEntityBecameEligible(const Entity& aEntity)
 {
   mNewEntities.emplace_back(aEntity);
   mEntityTimeMap.emplace(aEntity, 0);
 }
 
 /******************************************************************************/
-void SpriteSystem::HandleEntityBecameIneligible(Entity aEntity)
+void SpriteSystem::HandleEntityBecameIneligible(const Entity& aEntity)
 {
   auto foundEntity = std::find(mNewEntities.begin(), mNewEntities.end(), aEntity);
   if(foundEntity != mNewEntities.end())

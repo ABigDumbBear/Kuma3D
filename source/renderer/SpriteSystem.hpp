@@ -37,7 +37,7 @@ class SpriteSystem : public System
      *
      * @param eEntity The Entity that became eligible.
      */
-    void HandleEntityBecameEligible(Entity aEntity) override;
+    void HandleEntityBecameEligible(const Entity& aEntity) override;
 
     /**
      * A handler function that gets called whenever an Entity becomes
@@ -45,7 +45,7 @@ class SpriteSystem : public System
      *
      * @param eEntity The Entity that became ineligible.
      */
-    void HandleEntityBecameIneligible(Entity aEntity) override;
+    void HandleEntityBecameIneligible(const Entity& aEntity) override;
 
   private:
 

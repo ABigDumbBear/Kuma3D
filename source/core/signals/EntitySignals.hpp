@@ -6,8 +6,8 @@
 
 namespace Kuma3D {
 
-extern SignalT<Entity, const Signature&> EntitySignatureChanged;
-extern SignalT<Entity> EntityPendingDeletion;
+extern SignalT<const Entity&, const Signature&> EntitySignatureChanged;
+extern SignalT<const Entity&> EntityPendingDeletion;
 
 } // namespace Kuma3D
 

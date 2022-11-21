@@ -2,7 +2,7 @@
 
 namespace Kuma3D {
 
-SignalT<Entity, const Signature&> EntitySignatureChanged;
-SignalT<Entity> EntityPendingDeletion;
+SignalT<const Entity&, const Signature&> EntitySignatureChanged;
+SignalT<const Entity&> EntityPendingDeletion;
 
 } // namespace Kuma3D
