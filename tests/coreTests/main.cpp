@@ -20,6 +20,11 @@ int main()
   std::cout << "ComponentList merge successful!" << std::endl;
 
   std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Testing Entity addition..." << std::endl;
+  Kuma3D::TestEntityAddition();
+  std::cout << "Entity addition successful!" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
   std::cout << "Testing Entity removal..." << std::endl;
   Kuma3D::TestEntityRemoval();
   std::cout << "Entity removal successful!" << std::endl;

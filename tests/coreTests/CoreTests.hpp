@@ -86,6 +86,27 @@ inline void TestComponentListMerge()
 }
 
 /******************************************************************************/
+inline void TestEntityAddition()
+{
+  // Create a Scene and register the Transform component.
+  Scene scene;
+  scene.RegisterComponentType<Transform>();
+
+  // Create an Entity, add a Transform to it, and update the Scene.
+  auto entity = scene.CreateEntity();
+  Transform transform;
+  transform.mPosition.x = 55;
+  scene.AddComponentToEntity<Transform>(entity, transform);
+  scene.OperateSystems(0);
+
+  assert(scene.DoesEntityHaveComponent<Transform>(entity));
+
+  // Retrieve the Transform and check it.
+  auto& transformCheck = scene.GetComponentForEntity<Transform>(entity);
+  assert(transformCheck.mPosition.x == 55);
+}
+
+/******************************************************************************/
 inline void TestEntityRemoval()
 {
   // Create a Scene and register the Transform component.
