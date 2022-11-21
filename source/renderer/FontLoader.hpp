@@ -6,7 +6,6 @@
 #include <tuple>
 
 #include "Mesh.hpp"
-#include "Types.hpp"
 
 class FT_LibraryRec_;
 class FT_FaceRec_;

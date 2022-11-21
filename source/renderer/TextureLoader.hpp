@@ -6,7 +6,7 @@
 
 #include <GL/glew.h>
 
-#include "Types.hpp"
+#include "IDGenerator.hpp"
 
 namespace Kuma3D {
 

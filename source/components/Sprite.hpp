@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "Types.hpp"
+#include "IDGenerator.hpp"
 
 namespace Kuma3D {
 

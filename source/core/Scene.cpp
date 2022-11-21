@@ -34,6 +34,20 @@ void Scene::OperateSystems(double aTime)
     mEntityGenerator.RemoveID(entity);
   }
   mEntitiesToRemove.clear();
+
+  // Merge all buffer lists with their corresponding component list.
+  for(int i = 0; i < mBufferLists.size(); ++i)
+  {
+    mComponentLists[i]->Merge(*mBufferLists[i]);
+  }
+
+  // Update the current EntityToSignatureMap.
+  for(const auto& entitySignaturePair : mBufferEntityToSignatureMap)
+  {
+    mEntityToSignatureMap.emplace(entitySignaturePair.first, entitySignaturePair.second);
+    EntitySignatureChanged.Notify(entitySignaturePair.first, entitySignaturePair.second);
+  }
+  mBufferEntityToSignatureMap.clear();
 }
 
 /******************************************************************************/
@@ -48,6 +62,7 @@ Entity Scene::CreateEntity()
 {
   auto newEntity =  mEntityGenerator.GenerateID();
   mEntityToSignatureMap[newEntity] = CreateSignature();
+  mBufferEntityToSignatureMap[newEntity] = CreateSignature();
 
   return newEntity;
 }
@@ -82,6 +97,22 @@ bool Scene::IsEntityScheduledForRemoval(const Entity& aEntity)
 {
   auto foundEntity = std::find(mEntitiesToRemove.begin(), mEntitiesToRemove.end(), aEntity);
   return foundEntity != mEntitiesToRemove.end();
+}
+
+/******************************************************************************/
+std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature)
+{
+  std::vector<Entity> entities;
+
+  for(const auto& entitySignaturePair : mEntityToSignatureMap)
+  {
+    if(IsSignatureRelevant(entitySignaturePair.second, aSignature))
+    {
+      entities.emplace_back(entitySignaturePair.first);
+    }
+  }
+
+  return entities;
 }
 
 /******************************************************************************/

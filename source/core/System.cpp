@@ -33,7 +33,7 @@ void System::SetSignature(const Signature& aSignature)
 void System::HandleEntitySignatureChanged(const Entity& aEntity,
                                           const Signature& aSignature)
 {
-  auto relevant = IsSignatureRelevant(aSignature);
+  auto relevant = IsSignatureRelevant(aSignature, mSignature);
   auto foundEntity = std::find(mEntities.begin(), mEntities.end(), aEntity);
   if(foundEntity != mEntities.end())
   {
@@ -62,23 +62,6 @@ void System::HandleEntityPendingDeletion(const Entity& aEntity)
     HandleEntityBecameIneligible(aEntity);
     mEntities.erase(foundEntity);
   }
-}
-
-/******************************************************************************/
-bool System::IsSignatureRelevant(const Signature& aSignature)
-{
-  bool success = true;
-
-  for(int i = 0; i < mSignature.size(); ++i)
-  {
-    if(mSignature[i] && !aSignature[i])
-    {
-      success = false;
-      break;
-    }
-  }
-
-  return success;
 }
 
 } // namespace Kuma3D

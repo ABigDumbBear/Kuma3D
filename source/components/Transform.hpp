@@ -1,7 +1,8 @@
 #ifndef TRANSFORM_HPP
 #define TRANSFORM_HPP
 
-#include "Types.hpp"
+#include "Entity.hpp"
+
 #include "Vec3.hpp"
 
 namespace Kuma3D {

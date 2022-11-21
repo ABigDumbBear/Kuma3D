@@ -15,9 +15,19 @@ int main()
   std::cout << "ComponentList removal successful!" << std::endl;
 
   std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Testing ComponentList merge..." << std::endl;
+  Kuma3D::TestComponentListMerge();
+  std::cout << "ComponentList merge successful!" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
   std::cout << "Testing Entity removal..." << std::endl;
   Kuma3D::TestEntityRemoval();
   std::cout << "Entity removal successful!" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Testing Signature relevancy check..." << std::endl;
+  Kuma3D::TestSignatureRelevancyCheck();
+  std::cout << "Signature relevancy check successful!" << std::endl;
 
   return 0;
 }

@@ -2,7 +2,6 @@
 #define SCENEFACTORY_HPP
 
 #include <Scene.hpp>
-#include <Types.hpp>
 
 #include <AudioSystem.hpp>
 #include <RenderSystem.hpp>
@@ -103,16 +102,17 @@ inline std::unique_ptr<Kuma3D::Scene> CreateScene()
   newScene->AddSystem(std::make_unique<Kuma3D::AudioSystem>());
 
   // Create and add a RenderSystem.
-  auto renderSystem = std::make_unique<Kuma3D::RenderSystem>();
+  newScene->AddSystem(std::make_unique<Kuma3D::RenderSystem>());
 
   // Create a camera to render with.
-  auto cameraEntity = renderSystem->CreateCamera(*newScene.get());
+  auto cameraEntity = newScene->CreateEntity();
 
   // Set the camera viewport to fit the grid.
-  auto& cameraInfo = newScene->GetComponentForEntity<Kuma3D::Camera>(cameraEntity);
-  cameraInfo.mViewportX = 320;
-  cameraInfo.mViewportY = 800;
-  newScene->AddSystem(std::move(renderSystem));
+  Kuma3D::Camera camera;
+  camera.mViewportX = 320;
+  camera.mViewportY = 800;
+  newScene->AddComponentToEntity<Kuma3D::Camera>(cameraEntity, camera);
+  newScene->AddComponentToEntity<Kuma3D::Transform>(cameraEntity);
 
   // Create the grid.
   auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/GridShader.vert",

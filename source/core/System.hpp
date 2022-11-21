@@ -4,7 +4,9 @@
 #include <vector>
 
 #include "Observer.hpp"
-#include "Types.hpp"
+
+#include "Entity.hpp"
+#include "Signature.hpp"
 
 namespace Kuma3D {
 
@@ -93,13 +95,6 @@ class System
      * @param aEntity The Entity that's about to be removed.
      */
     void HandleEntityPendingDeletion(const Entity& aEntity);
-
-    /**
-     * Returns true if the given Signature contains the System's Signature.
-     *
-     * @return Whether the given Signature contains the System's Signature.
-     */
-    bool IsSignatureRelevant(const Signature& aSignature);
 
     std::vector<Entity> mEntities;
     Signature mSignature;

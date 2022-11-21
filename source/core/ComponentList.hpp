@@ -7,7 +7,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "Types.hpp"
+#include "Entity.hpp"
 
 namespace Kuma3D {
 
@@ -26,6 +26,18 @@ class ComponentList
     virtual ~ComponentList() = default;
 
     /**
+     * Clears out all components in this list.
+     */
+    virtual void Clear() = 0;
+
+    /**
+     * Takes all the components from a given list and adds them into this one.
+     *
+     * @param aList The list to merge.
+     */
+    virtual void Merge(ComponentList& aList) = 0;
+
+    /**
      * Removes a component from a given Entity. This is made virtual so that
      * outside code (specifically a Scene) can remove components without
      * needing to know the type of said component.
@@ -42,6 +54,62 @@ template<typename T>
 class ComponentListT : public ComponentList
 {
   public:
+
+    /**
+     * Retrieves a list of Entities that have a component in this list.
+     *
+     * @return A list of Entities that have a component in this list.
+     */
+    std::vector<Entity> GetEntities() const
+    {
+      std::vector<Entity> entities;
+
+      for(const auto& entityIndexPair : mEntityToIndexMap)
+      {
+        entities.emplace_back(entityIndexPair.first);
+      }
+
+      return entities;
+    }
+
+    /**
+     * Clears out all components in this list.
+     */
+    void Clear() override
+    {
+      mComponents.clear();
+      mEntityToIndexMap.clear();
+    }
+
+    /**
+     * Takes all the components from a given list and adds them into this one.
+     *
+     * @param aList The list to merge.
+     */
+    void Merge(ComponentList& aList) override
+    {
+      auto list = dynamic_cast<ComponentListT<T>*>(&aList);
+      if(list == nullptr)
+      {
+        std::stringstream error;
+        error << "Two ComponentLists of different types can't be merged!";
+        throw std::invalid_argument(error.str());
+      }
+
+      for(const auto& entity : list->GetEntities())
+      {
+        // Retrieve the component for this Entity.
+        auto& component = list->GetComponentForEntity(entity);
+
+        // Update the EntityToIndex map and move the component into this list.
+        int index = mComponents.size();
+        mEntityToIndexMap.emplace(entity, index);
+        mComponents.emplace_back(std::move(component));
+      }
+
+      // Clear out the merged list.
+      aList.Clear();
+    }
 
     /**
      * Adds a component to the list. Note that Entities are not allowed
