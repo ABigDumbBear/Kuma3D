@@ -25,7 +25,7 @@ ID TextureLoader::LoadTextureFromFile(const std::string& aFilePath,
   {
     stbi_set_flip_vertically_on_load(true);
 
-    int width = 0, height = 0, channels = 0;
+    int width, height, channels;
     auto data = stbi_load(aFilePath.c_str(),
                           &width,
                           &height,
