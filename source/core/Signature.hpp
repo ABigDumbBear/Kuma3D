@@ -20,19 +20,12 @@ inline bool IsSignatureRelevant(const Signature& aSignature,
 {
   bool success = true;
 
-  if(aBaseSignature.size() < aSignature.size())
+  for(int i = 0; i < aBaseSignature.size(); ++i)
   {
-    success = false;
-  }
-  else
-  {
-    for(int i = 0; i < aSignature.size(); ++i)
+    if(aSignature[i] && !aBaseSignature[i])
     {
-      if(aSignature[i] && !aBaseSignature[i])
-      {
-        success = false;
-        break;
-      }
+      success = false;
+      break;
     }
   }
 

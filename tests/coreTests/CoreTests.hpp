@@ -8,24 +8,32 @@
 
 #include <Signature.hpp>
 
-#include <Transform.hpp>
-
 namespace Kuma3D {
+
+struct TestComponentA
+{
+  int mValue { 0 };
+};
+
+struct TestComponentB
+{
+  std::string mValue;
+};
 
 /******************************************************************************/
 inline void TestComponentListAddition()
 {
-  ComponentListT<Transform> list;
-  Transform transform;
-  transform.mPosition.x = 55.0;
+  ComponentListT<TestComponentA> list;
+  TestComponentA component;
+  component.mValue = 55;
 
-  list.AddComponentToEntity(0, transform);
+  list.AddComponentToEntity(0, component);
 
   bool accessFailed = false;
   try
   {
-    transform = list.GetComponentForEntity(0);
-    assert(transform.mPosition.x == 55.0);
+    component = list.GetComponentForEntity(0);
+    assert(component.mValue == 55);
   }
   catch(const std::invalid_argument& e)
   {
@@ -38,9 +46,9 @@ inline void TestComponentListAddition()
 /******************************************************************************/
 inline void TestComponentListRemoval()
 {
-  ComponentListT<Transform> list;
+  ComponentListT<TestComponentA> list;
 
-  Transform transform;
+  TestComponentA transform;
   list.AddComponentToEntity(0, transform);
   list.RemoveComponentFromEntity(0);
 
@@ -60,23 +68,23 @@ inline void TestComponentListRemoval()
 /******************************************************************************/
 inline void TestComponentListMerge()
 {
-  ComponentListT<Transform> listA;
-  ComponentListT<Transform> listB;
+  ComponentListT<TestComponentA> listA;
+  ComponentListT<TestComponentA> listB;
 
-  Transform transformA;
-  transformA.mPosition.x = 55;
-  listA.AddComponentToEntity(0, transformA);
+  TestComponentA componentA;
+  componentA.mValue = 55;
+  listA.AddComponentToEntity(0, componentA);
   listB.Merge(listA);
 
-  // Check that the Transform was moved to List B.
-  auto& transformB = listB.GetComponentForEntity(0);
-  assert(transformB.mPosition.x == 55);
+  // Check that the TestComponentA was moved to List B.
+  auto& componentB = listB.GetComponentForEntity(0);
+  assert(componentB.mValue == 55);
 
-  // Check that there is no longer any Transform in List A.
+  // Check that there is no longer any TestComponentA in List A.
   bool accessFailed = false;
   try
   {
-    auto& transformC = listA.GetComponentForEntity(0);
+    auto& componentC = listA.GetComponentForEntity(0);
   }
   catch(const std::invalid_argument& e)
   {
@@ -88,41 +96,72 @@ inline void TestComponentListMerge()
 /******************************************************************************/
 inline void TestEntityAddition()
 {
-  // Create a Scene and register the Transform component.
+  // Create a Scene and register the TestComponentA component.
   Scene scene;
-  scene.RegisterComponentType<Transform>();
+  scene.RegisterComponentType<TestComponentA>();
 
-  // Create an Entity, add a Transform to it, and update the Scene.
+  // Create an Entity, add a TestComponentA to it, and update the Scene.
   auto entity = scene.CreateEntity();
-  Transform transform;
-  transform.mPosition.x = 55;
-  scene.AddComponentToEntity<Transform>(entity, transform);
+  TestComponentA component;
+  component.mValue = 55;
+  scene.AddComponentToEntity<TestComponentA>(entity, component);
   scene.OperateSystems(0);
 
-  assert(scene.DoesEntityHaveComponent<Transform>(entity));
+  assert(scene.DoesEntityHaveComponent<TestComponentA>(entity));
 
-  // Retrieve the Transform and check it.
-  auto& transformCheck = scene.GetComponentForEntity<Transform>(entity);
-  assert(transformCheck.mPosition.x == 55);
+  // Retrieve the TestComponentA and check it.
+  auto& componentCheck = scene.GetComponentForEntity<TestComponentA>(entity);
+  assert(componentCheck.mValue == 55);
 }
 
 /******************************************************************************/
 inline void TestEntityRemoval()
 {
-  // Create a Scene and register the Transform component.
+  // Create a Scene and register the TestComponentA component.
   Scene scene;
-  scene.RegisterComponentType<Transform>();
+  scene.RegisterComponentType<TestComponentA>();
 
-  // Create an Entity, add a Transform to it, and update the Scene.
+  // Create an Entity, add a TestComponentA to it, and update the Scene.
   auto entity = scene.CreateEntity();
-  scene.AddComponentToEntity<Transform>(entity);
+  scene.AddComponentToEntity<TestComponentA>(entity);
   scene.OperateSystems(0);
 
   // Remove the Entity and update the Scene.
   scene.RemoveEntity(entity);
   scene.OperateSystems(0);
 
-  assert(!scene.DoesEntityHaveComponent<Transform>(0));
+  assert(!scene.DoesEntityHaveComponent<TestComponentA>(0));
+}
+
+/******************************************************************************/
+inline void TestEntityQuery()
+{
+  // Create a Scene and register a few components.
+  Scene scene;
+  scene.RegisterComponentType<TestComponentA>();
+  scene.RegisterComponentType<TestComponentB>();
+
+  // Create an Entity and add some components to it.
+  auto entity = scene.CreateEntity();
+  scene.AddComponentToEntity<TestComponentA>(entity);
+  scene.AddComponentToEntity<TestComponentB>(entity);
+
+  // Create some dummy Entities.
+  scene.CreateEntity();
+  scene.CreateEntity();
+  scene.CreateEntity();
+
+  // Update the Scene.
+  scene.OperateSystems(0);
+
+  // Create a Siganture to query with.
+  auto signature = scene.CreateSignature();
+  signature[scene.GetComponentIndex<TestComponentA>()] = true;
+  signature[scene.GetComponentIndex<TestComponentB>()] = true;
+  auto entities = scene.GetEntitiesWithSignature(signature);
+
+  assert(entities.size() == 1);
+  assert(entities[0] == entity);
 }
 
 /******************************************************************************/

@@ -6,8 +6,6 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <iostream>
-
 namespace Kuma3D {
 
 /******************************************************************************/

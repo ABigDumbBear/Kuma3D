@@ -167,15 +167,7 @@ class Scene
       mBufferLists.emplace_back(std::make_unique<ComponentListT<T>>());
 
       // Update the EntityToSignature maps.
-      for(auto& entitySignaturePair : mEntityToSignatureMap)
-      {
-        entitySignaturePair.second.emplace_back(false);
-      }
-
-      for(auto& entitySignaturePair : mBufferEntityToSignatureMap)
-      {
-        entitySignaturePair.second.emplace_back(false);
-      }
+      UpdateSignatures();
     }
 
     /**
@@ -269,7 +261,15 @@ class Scene
     template<typename T>
     bool DoesEntityHaveComponent(const Entity& aEntity)
     {
-      return mEntityToSignatureMap[aEntity][GetComponentIndex<T>()];
+      bool success = false;
+
+      auto foundEntity = mEntityToSignatureMap.find(aEntity);
+      if(foundEntity != mEntityToSignatureMap.end())
+      {
+        success = (*foundEntity).second[GetComponentIndex<T>()];
+      }
+
+      return success;
     };
 
     /**
@@ -337,6 +337,11 @@ class Scene
 
       return componentList;
     }
+
+    /**
+     * Updates the Signature of each Entity.
+     */
+    void UpdateSignatures();
 
     // Contains each System currently in the Scene.
     std::vector<std::unique_ptr<System>> mSystems;

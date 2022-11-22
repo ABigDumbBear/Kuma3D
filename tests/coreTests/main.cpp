@@ -30,6 +30,11 @@ int main()
   std::cout << "Entity removal successful!" << std::endl;
 
   std::cout << "-------------------------------------" << std::endl;
+  std::cout << "Testing Entity query..." << std::endl;
+  Kuma3D::TestEntityQuery();
+  std::cout << "Entity query successful!" << std::endl;
+
+  std::cout << "-------------------------------------" << std::endl;
   std::cout << "Testing Signature relevancy check..." << std::endl;
   Kuma3D::TestSignatureRelevancyCheck();
   std::cout << "Signature relevancy check successful!" << std::endl;

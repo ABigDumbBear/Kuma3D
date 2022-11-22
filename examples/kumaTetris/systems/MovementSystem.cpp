@@ -8,6 +8,8 @@
 
 #include "Movable.hpp"
 
+#include <iostream>
+
 namespace KumaTetris {
 
 const float MovementSystem::mEpsilon = 0.0005;
@@ -15,14 +17,17 @@ const float MovementSystem::mEpsilon = 0.0005;
 /******************************************************************************/
 void MovementSystem::Initialize(Kuma3D::Scene& aScene)
 {
+  std::cout << "------------------------ initializing movable system" << std::endl;
   // Register the relevant components.
   if(!aScene.IsComponentTypeRegistered<Kuma3D::Transform>())
   {
+    std::cout << "------------------------ registering transform" << std::endl;
     aScene.RegisterComponentType<Kuma3D::Transform>();
   }
 
   if(!aScene.IsComponentTypeRegistered<Movable>())
   {
+    std::cout << "------------------------ registering movable" << std::endl;
     aScene.RegisterComponentType<Movable>();
   }
 

@@ -2,6 +2,8 @@
 
 #include "EntitySignals.hpp"
 
+#include <iostream>
+
 namespace Kuma3D {
 
 /******************************************************************************/
@@ -44,8 +46,19 @@ void Scene::OperateSystems(double aTime)
   // Update the current EntityToSignatureMap.
   for(const auto& entitySignaturePair : mBufferEntityToSignatureMap)
   {
-    mEntityToSignatureMap.emplace(entitySignaturePair.first, entitySignaturePair.second);
-    EntitySignatureChanged.Notify(entitySignaturePair.first, entitySignaturePair.second);
+    std::cout << "updating signature of " << entitySignaturePair.first << std::endl;
+    auto entity = entitySignaturePair.first;
+    auto signature = entitySignaturePair.second;
+    mEntityToSignatureMap[entity] = signature;
+
+    std::cout << "new signature: ";
+    for(const auto& fuck : mEntityToSignatureMap[entity])
+    {
+      std::cout << fuck;
+    }
+    std::cout << std::endl;
+
+    EntitySignatureChanged.Notify(entity, mEntityToSignatureMap[entity]);
   }
   mBufferEntityToSignatureMap.clear();
 }
@@ -106,7 +119,7 @@ std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature)
 
   for(const auto& entitySignaturePair : mEntityToSignatureMap)
   {
-    if(IsSignatureRelevant(entitySignaturePair.second, aSignature))
+    if(IsSignatureRelevant(aSignature, entitySignaturePair.second))
     {
       entities.emplace_back(entitySignaturePair.first);
     }
@@ -119,6 +132,46 @@ std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature)
 Signature Scene::CreateSignature() const
 {
   return Signature(mComponentLists.size(), false);
+}
+
+/******************************************************************************/
+void Scene::UpdateSignatures()
+{
+  for(auto& entitySignaturePair : mEntityToSignatureMap)
+  {
+    std::cout << "updating " << entitySignaturePair.first << std::endl;
+    auto currentSignature = entitySignaturePair.second;
+    auto newSignature = CreateSignature();
+    for(int i = 0; i < currentSignature.size(); ++i)
+    {
+      newSignature[i] = currentSignature[i];
+    }
+
+    entitySignaturePair.second = newSignature;
+    for(const auto& fuck : entitySignaturePair.second)
+    {
+      std::cout << fuck;
+    }
+    std::cout << std::endl;
+  }
+
+  for(auto& entitySignaturePair : mBufferEntityToSignatureMap)
+  {
+    std::cout << "updating " << entitySignaturePair.first << " in buffer " << std::endl;
+    auto currentSignature = entitySignaturePair.second;
+    auto newSignature = CreateSignature();
+    for(int i = 0; i < currentSignature.size(); ++i)
+    {
+      newSignature[i] = currentSignature[i];
+    }
+
+    entitySignaturePair.second = newSignature;
+    for(const auto& fuck : entitySignaturePair.second)
+    {
+      std::cout << fuck;
+    }
+    std::cout << std::endl;
+  }
 }
 
 } // namespace Kuma3D
