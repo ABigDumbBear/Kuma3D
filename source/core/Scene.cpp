@@ -119,7 +119,7 @@ std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature)
 
   for(const auto& entitySignaturePair : mEntityToSignatureMap)
   {
-    if(IsSignatureRelevant(aSignature, entitySignaturePair.second))
+    if(IsSignatureRelevant(entitySignaturePair.second, aSignature))
     {
       entities.emplace_back(entitySignaturePair.first);
     }

@@ -22,7 +22,7 @@ inline bool IsSignatureRelevant(const Signature& aSignature,
 
   for(int i = 0; i < aBaseSignature.size(); ++i)
   {
-    if(aSignature[i] && !aBaseSignature[i])
+    if(aBaseSignature[i] && !aSignature[i])
     {
       success = false;
       break;
