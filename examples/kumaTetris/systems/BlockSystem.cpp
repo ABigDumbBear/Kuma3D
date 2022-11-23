@@ -15,8 +15,6 @@
 #include "BlockUtil.hpp"
 #include "Movable.hpp"
 
-#include <iostream>
-
 namespace KumaTetris {
 
 const float BlockSystem::mDefaultFallSpeed = 0.5;
@@ -24,29 +22,24 @@ const float BlockSystem::mDefaultFallSpeed = 0.5;
 /******************************************************************************/
 void BlockSystem::Initialize(Kuma3D::Scene& aScene)
 {
-  std::cout << "------------------------ initializing block system" << std::endl;
   // Register the relevant components.
   if(!aScene.IsComponentTypeRegistered<Kuma3D::Mesh>())
   {
-    std::cout << "------------------------ registering mesh" << std::endl;
     aScene.RegisterComponentType<Kuma3D::Mesh>();
   }
 
   if(!aScene.IsComponentTypeRegistered<Kuma3D::Transform>())
   {
-    std::cout << "------------------------ registering transform" << std::endl;
     aScene.RegisterComponentType<Kuma3D::Transform>();
   }
 
   if(!aScene.IsComponentTypeRegistered<Block>())
   {
-    std::cout << "------------------------ registering block" << std::endl;
     aScene.RegisterComponentType<Block>();
   }
 
   if(!aScene.IsComponentTypeRegistered<Movable>())
   {
-    std::cout << "------------------------ registering movable" << std::endl;
     aScene.RegisterComponentType<Movable>();
   }
 
@@ -82,7 +75,6 @@ void BlockSystem::Initialize(Kuma3D::Scene& aScene)
   auto blockEntity = aScene.CreateEntity();
   auto newBlock = CreateBlock();
   aScene.AddComponentToEntity<Block>(blockEntity, newBlock);
-  std::cout << "created block " << blockEntity << std::endl;
 }
 
 /******************************************************************************/
@@ -265,7 +257,6 @@ void BlockSystem::Operate(Kuma3D::Scene& aScene, double aTime)
 /******************************************************************************/
 void BlockSystem::HandleEntityBecameEligible(const Kuma3D::Entity& aEntity)
 {
-  std::cout << aEntity << std::endl;
   mNewEntities.emplace_back(aEntity);
 }
 

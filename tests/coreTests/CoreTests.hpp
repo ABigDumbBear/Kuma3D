@@ -170,11 +170,11 @@ inline void TestSignatureRelevancyCheck()
   Signature signatureA { false, false, true, false, true, false };
   Signature signatureB { true, true, true, false, true, false };
 
-  assert(IsSignatureRelevant(signatureA, signatureB));
+  assert(IsSignatureRelevant(signatureB, signatureA));
 
   signatureB[2] = false;
 
-  assert(!IsSignatureRelevant(signatureA, signatureB));
+  assert(!IsSignatureRelevant(signatureB, signatureA));
 }
 
 } // namespace Kuma3D

@@ -2,8 +2,6 @@
 
 #include "EntitySignals.hpp"
 
-#include <iostream>
-
 namespace Kuma3D {
 
 /******************************************************************************/
@@ -46,17 +44,9 @@ void Scene::OperateSystems(double aTime)
   // Update the current EntityToSignatureMap.
   for(const auto& entitySignaturePair : mBufferEntityToSignatureMap)
   {
-    std::cout << "updating signature of " << entitySignaturePair.first << std::endl;
     auto entity = entitySignaturePair.first;
     auto signature = entitySignaturePair.second;
     mEntityToSignatureMap[entity] = signature;
-
-    std::cout << "new signature: ";
-    for(const auto& fuck : mEntityToSignatureMap[entity])
-    {
-      std::cout << fuck;
-    }
-    std::cout << std::endl;
 
     EntitySignatureChanged.Notify(entity, mEntityToSignatureMap[entity]);
   }
@@ -139,7 +129,6 @@ void Scene::UpdateSignatures()
 {
   for(auto& entitySignaturePair : mEntityToSignatureMap)
   {
-    std::cout << "updating " << entitySignaturePair.first << std::endl;
     auto currentSignature = entitySignaturePair.second;
     auto newSignature = CreateSignature();
     for(int i = 0; i < currentSignature.size(); ++i)
@@ -148,16 +137,10 @@ void Scene::UpdateSignatures()
     }
 
     entitySignaturePair.second = newSignature;
-    for(const auto& fuck : entitySignaturePair.second)
-    {
-      std::cout << fuck;
-    }
-    std::cout << std::endl;
   }
 
   for(auto& entitySignaturePair : mBufferEntityToSignatureMap)
   {
-    std::cout << "updating " << entitySignaturePair.first << " in buffer " << std::endl;
     auto currentSignature = entitySignaturePair.second;
     auto newSignature = CreateSignature();
     for(int i = 0; i < currentSignature.size(); ++i)
@@ -166,11 +149,6 @@ void Scene::UpdateSignatures()
     }
 
     entitySignaturePair.second = newSignature;
-    for(const auto& fuck : entitySignaturePair.second)
-    {
-      std::cout << fuck;
-    }
-    std::cout << std::endl;
   }
 }
 

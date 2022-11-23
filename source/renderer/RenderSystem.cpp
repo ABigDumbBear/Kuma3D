@@ -17,24 +17,19 @@
 #include "Camera.hpp"
 #include "Transform.hpp"
 
-#include <iostream>
-
 namespace Kuma3D {
 
 /******************************************************************************/
 void RenderSystem::Initialize(Scene& aScene)
 {
-  std::cout << "------------------------ initializing render system" << std::endl;
   // Register the Mesh and Transform components.
   if(!aScene.IsComponentTypeRegistered<Mesh>())
   {
-    std::cout << "------------------------ registering mesh" << std::endl;
     aScene.RegisterComponentType<Mesh>();
   }
 
   if(!aScene.IsComponentTypeRegistered<Transform>())
   {
-    std::cout << "------------------------ registering transform" << std::endl;
     aScene.RegisterComponentType<Transform>();
   }
 
@@ -43,7 +38,6 @@ void RenderSystem::Initialize(Scene& aScene)
   // that have a Camera in order to render Entities.
   if(!aScene.IsComponentTypeRegistered<Camera>())
   {
-    std::cout << "------------------------ registering camera" << std::endl;
     aScene.RegisterComponentType<Camera>();
   }
 

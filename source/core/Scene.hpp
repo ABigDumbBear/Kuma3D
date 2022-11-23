@@ -263,10 +263,21 @@ class Scene
     {
       bool success = false;
 
+      // Check the current map.
       auto foundEntity = mEntityToSignatureMap.find(aEntity);
       if(foundEntity != mEntityToSignatureMap.end())
       {
         success = (*foundEntity).second[GetComponentIndex<T>()];
+      }
+
+      if(!success)
+      {
+        // Check the buffer map.
+        auto foundBufferEntity = mBufferEntityToSignatureMap.find(aEntity);
+        if(foundBufferEntity != mBufferEntityToSignatureMap.end())
+        {
+          success = (*foundBufferEntity).second[GetComponentIndex<T>()];
+        }
       }
 
       return success;
@@ -281,12 +292,33 @@ class Scene
     template<typename T>
     T& GetComponentForEntity(const Entity& aEntity)
     {
-      auto list = GetComponentListForType<T>();
-      if(list == nullptr)
+      if(!IsComponentTypeRegistered<T>())
       {
         std::stringstream error;
         error << "Component type " << typeid(T).name() << " hasn't been registered!";
         throw std::logic_error(error.str());
+      }
+
+      ComponentListT<T>* list = nullptr;
+      auto componentIndex = GetComponentIndex<T>();
+
+      // Determine whether to query the current ComponentList or the
+      // buffer ComponentList.
+      if(mEntityToSignatureMap[aEntity][componentIndex])
+      {
+        list = GetComponentListForType<T>();
+      }
+      else if(mBufferEntityToSignatureMap[aEntity][componentIndex])
+      {
+        list = GetBufferComponentListForType<T>();
+      }
+
+      if(list == nullptr)
+      {
+        std::stringstream error;
+        error << "Entity " << aEntity << " doesn't have a component of type ";
+        error << typeid(T).name();
+        throw std::invalid_argument(error.str());
       }
 
       return list->GetComponentForEntity(aEntity);

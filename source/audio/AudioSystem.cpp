@@ -7,18 +7,14 @@
 #include "Audio.hpp"
 #include "AudioLoader.hpp"
 
-#include <iostream>
-
 namespace Kuma3D {
 
 /******************************************************************************/
 void AudioSystem::Initialize(Scene& aScene)
 {
-  std::cout << "------------------------ initializing audio system" << std::endl;
   // Register the Audio component.
   if(!aScene.IsComponentTypeRegistered<Audio>())
   {
-    std::cout << "------------------------ registering audio" << std::endl;
     aScene.RegisterComponentType<Audio>();
   }
 
