@@ -202,6 +202,10 @@ class Scene
       bufferList->AddComponentToEntity(aEntity, aComponent);
 
       // Update the EntityToSignature map.
+      if(mBufferEntityToSignatureMap[aEntity].empty())
+      {
+        mBufferEntityToSignatureMap[aEntity] = mEntityToSignatureMap[aEntity];
+      }
       mBufferEntityToSignatureMap[aEntity][GetComponentIndex<T>()] = true;
     }
 
@@ -227,6 +231,10 @@ class Scene
       bufferList->AddComponentToEntity(aEntity, component);
 
       // Update the EntityToSignature map.
+      if(mBufferEntityToSignatureMap[aEntity].empty())
+      {
+        mBufferEntityToSignatureMap[aEntity] = mEntityToSignatureMap[aEntity];
+      }
       mBufferEntityToSignatureMap[aEntity][GetComponentIndex<T>()] = true;
     }
 

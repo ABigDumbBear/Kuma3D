@@ -6,16 +6,12 @@ project(Kuma3D VERSION 0.0.1)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Add options to build extra stuff.
-option(BUILD_EXAMPLES "Build the engine examples." ON)
 option(BUILD_TESTS "Build the engine unit tests." ON)
 
 # Add the source directory.
 add_subdirectory(source)
 
 # Add the optional directories.
-if(BUILD_EXAMPLES)
-  add_subdirectory(examples)
-endif(BUILD_EXAMPLES)
 if(BUILD_TESTS)
   add_subdirectory(tests)
 endif(BUILD_TESTS)
