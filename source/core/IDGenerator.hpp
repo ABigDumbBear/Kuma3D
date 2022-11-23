@@ -4,9 +4,9 @@
 #include <limits.h>
 #include <queue>
 
-#include "Types.hpp"
-
 namespace Kuma3D {
+
+using ID = unsigned int;
 
 /**
  * A simple unique ID generator. IDs are unsigned integers, and

@@ -34,6 +34,23 @@ void Scene::OperateSystems(double aTime)
     mEntityGenerator.RemoveID(entity);
   }
   mEntitiesToRemove.clear();
+
+  // Merge all buffer lists with their corresponding component list.
+  for(int i = 0; i < mBufferLists.size(); ++i)
+  {
+    mComponentLists[i]->Merge(*mBufferLists[i]);
+  }
+
+  // Update the current EntityToSignatureMap.
+  for(const auto& entitySignaturePair : mBufferEntityToSignatureMap)
+  {
+    auto entity = entitySignaturePair.first;
+    auto signature = entitySignaturePair.second;
+    mEntityToSignatureMap[entity] = signature;
+
+    EntitySignatureChanged.Notify(entity, mEntityToSignatureMap[entity]);
+  }
+  mBufferEntityToSignatureMap.clear();
 }
 
 /******************************************************************************/
@@ -48,6 +65,7 @@ Entity Scene::CreateEntity()
 {
   auto newEntity =  mEntityGenerator.GenerateID();
   mEntityToSignatureMap[newEntity] = CreateSignature();
+  mBufferEntityToSignatureMap[newEntity] = CreateSignature();
 
   return newEntity;
 }
@@ -85,9 +103,53 @@ bool Scene::IsEntityScheduledForRemoval(const Entity& aEntity)
 }
 
 /******************************************************************************/
+std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature)
+{
+  std::vector<Entity> entities;
+
+  for(const auto& entitySignaturePair : mEntityToSignatureMap)
+  {
+    if(IsSignatureRelevant(entitySignaturePair.second, aSignature))
+    {
+      entities.emplace_back(entitySignaturePair.first);
+    }
+  }
+
+  return entities;
+}
+
+/******************************************************************************/
 Signature Scene::CreateSignature() const
 {
   return Signature(mComponentLists.size(), false);
+}
+
+/******************************************************************************/
+void Scene::UpdateSignatures()
+{
+  for(auto& entitySignaturePair : mEntityToSignatureMap)
+  {
+    auto currentSignature = entitySignaturePair.second;
+    auto newSignature = CreateSignature();
+    for(int i = 0; i < currentSignature.size(); ++i)
+    {
+      newSignature[i] = currentSignature[i];
+    }
+
+    entitySignaturePair.second = newSignature;
+  }
+
+  for(auto& entitySignaturePair : mBufferEntityToSignatureMap)
+  {
+    auto currentSignature = entitySignaturePair.second;
+    auto newSignature = CreateSignature();
+    for(int i = 0; i < currentSignature.size(); ++i)
+    {
+      newSignature[i] = currentSignature[i];
+    }
+
+    entitySignaturePair.second = newSignature;
+  }
 }
 
 } // namespace Kuma3D

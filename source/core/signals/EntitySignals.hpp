@@ -2,7 +2,9 @@
 #define ENTITYSIGNALS_HPP
 
 #include "Signal.hpp"
-#include "Types.hpp"
+
+#include "Entity.hpp"
+#include "Signature.hpp"
 
 namespace Kuma3D {
 

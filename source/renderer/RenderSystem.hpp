@@ -37,16 +37,6 @@ class RenderSystem : public System
      */
     void Operate(Scene& aScene, double aTime) override;
 
-    /**
-     * Creates a new Entity and attaches a Camera component to it.
-     * This function also registers the Camera component in the given Scene
-     * if it isn't already registered.
-     *
-     * @param aScene The Scene to add a camera to.
-     * @return The Entity ID of the camera.
-     */
-    Entity CreateCamera(Scene& aScene);
-
   protected:
 
     /**
@@ -139,8 +129,6 @@ class RenderSystem : public System
     void UpdateBuffersForEntity(const Entity& aEntity,
                                 const std::vector<MeshVertex>& aVertices,
                                 const std::vector<unsigned int>& aIndices);
-
-    std::vector<Entity> mCameraEntities;
 
     std::map<Entity, unsigned int> mVertexArrayMap;
     std::map<Entity, unsigned int> mVertexBufferMap;

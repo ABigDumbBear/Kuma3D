@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "Vec3.hpp"
-#include "Types.hpp"
+#include "IDGenerator.hpp"
 
 namespace Kuma3D {
 

@@ -33,6 +33,14 @@ void RenderSystem::Initialize(Scene& aScene)
     aScene.RegisterComponentType<Transform>();
   }
 
+  // Register the Camera component as well. Even though this System doesn't
+  // operate on Entities with a Camera, it does query the Scene for Entities
+  // that have a Camera in order to render Entities.
+  if(!aScene.IsComponentTypeRegistered<Camera>())
+  {
+    aScene.RegisterComponentType<Camera>();
+  }
+
   // Set the signature to care about entities with Meshes and Transforms.
   auto signature = aScene.CreateSignature();
   signature[aScene.GetComponentIndex<Mesh>()] = true;
@@ -83,34 +91,17 @@ void RenderSystem::Operate(Scene& aScene, double aTime)
 
   // Finally, for each camera, draw each entity. The opaque entities are drawn
   // first, and the transparent entities are drawn second.
-  for(const auto& cameraEntity : mCameraEntities)
+  auto cameraSignature = aScene.CreateSignature();
+  cameraSignature[aScene.GetComponentIndex<Camera>()] = true;
+  cameraSignature[aScene.GetComponentIndex<Transform>()] = true;
+  auto cameraEntities = aScene.GetEntitiesWithSignature(cameraSignature);
+  for(const auto& cameraEntity : cameraEntities)
   {
     DrawEntities(aScene, cameraEntity, opaqueEntities);
 
     SortEntitiesByCameraDistance(aScene, cameraEntity, transparentEntities);
     DrawEntities(aScene, cameraEntity, transparentEntities);
   }
-}
-
-/******************************************************************************/
-Entity RenderSystem::CreateCamera(Scene& aScene)
-{
-  if(!aScene.IsComponentTypeRegistered<Camera>())
-  {
-    aScene.RegisterComponentType<Camera>();
-  }
-
-  if(!aScene.IsComponentTypeRegistered<Transform>())
-  {
-    aScene.RegisterComponentType<Transform>();
-  }
-
-  auto cameraEntity = aScene.CreateEntity();
-  aScene.AddComponentToEntity<Camera>(cameraEntity);
-  aScene.AddComponentToEntity<Transform>(cameraEntity);
-
-  mCameraEntities.emplace_back(cameraEntity);
-  return mCameraEntities.back();
 }
 
 /******************************************************************************/

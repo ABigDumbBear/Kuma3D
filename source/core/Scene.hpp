@@ -12,9 +12,9 @@
 #include "ComponentList.hpp"
 #include "IDGenerator.hpp"
 #include "System.hpp"
-#include "Types.hpp"
 
-#include "EntitySignals.hpp"
+#include "Entity.hpp"
+#include "Signature.hpp"
 
 namespace Kuma3D {
 
@@ -26,6 +26,17 @@ namespace Kuma3D {
  * More specifically, a Scene contains a separate list of components for
  * each type of component needed, as well as a map of Entity IDs to indexes,
  * which can be used to look up a component for a specific Entity.
+ *
+ * When adding a component, the component is kept in a buffer until the
+ * end of the frame in which it was added. While it is in the buffer, it
+ * can't be accessed, and the Entity it's associated with is treated as
+ * not having that component. This ensures that no System operates on the
+ * component until the next frame.
+ *
+ * Removing Entities and components works the same way; it doesn't get
+ * removed until the end of the frame in which RemoveEntity() or
+ * RemoveComponentFromEntity() was called. This ensures that no Entities
+ * or components are skipped by any Systems.
  */
 class Scene
 {
@@ -63,6 +74,14 @@ class Scene
      * @return Whether the Entity is scheduled for removal.
      */
     bool IsEntityScheduledForRemoval(const Entity& aEntity);
+
+    /**
+     * Returns a list of Entities that fit a given Signature.
+     *
+     * @param aSignature The Signature to retrieve Entities for.
+     * @return A list of Entities that fit the Signature.
+     */
+    std::vector<Entity> GetEntitiesWithSignature(const Signature& aSignature);
 
     /**
      * Takes ownership of a System and asks it to operate on each of its
@@ -143,14 +162,12 @@ class Scene
         throw std::logic_error(error.str());
       }
 
-      // Create a new ComponentList.
+      // Create two new ComponentLists.
       mComponentLists.emplace_back(std::make_unique<ComponentListT<T>>());
+      mBufferLists.emplace_back(std::make_unique<ComponentListT<T>>());
 
-      // Update the EntityToSignature map.
-      for(auto& entitySignaturePair : mEntityToSignatureMap)
-      {
-        entitySignaturePair.second.emplace_back(false);
-      }
+      // Update the EntityToSignature maps.
+      UpdateSignatures();
     }
 
     /**
@@ -174,19 +191,18 @@ class Scene
     template<typename T>
     void AddComponentToEntity(const Entity& aEntity, T& aComponent)
     {
-      auto list = GetComponentListForType<T>();
-      if(list == nullptr)
+      auto bufferList = GetBufferComponentListForType<T>();
+      if(bufferList == nullptr)
       {
         std::stringstream error;
         error << "Component type " << typeid(T).name() << " hasn't been registered!";
         throw std::logic_error(error.str());
       }
 
-      list->AddComponentToEntity(aEntity, aComponent);
+      bufferList->AddComponentToEntity(aEntity, aComponent);
 
       // Update the EntityToSignature map.
-      mEntityToSignatureMap[aEntity][GetComponentIndex<T>()] = true;
-      EntitySignatureChanged.Notify(aEntity, mEntityToSignatureMap[aEntity]);
+      mBufferEntityToSignatureMap[aEntity][GetComponentIndex<T>()] = true;
     }
 
     /**
@@ -199,8 +215,8 @@ class Scene
     template<typename T>
     void AddComponentToEntity(const Entity& aEntity)
     {
-      auto list = GetComponentListForType<T>();
-      if(list == nullptr)
+      auto bufferList = GetBufferComponentListForType<T>();
+      if(bufferList == nullptr)
       {
         std::stringstream error;
         error << "Component type " << typeid(T).name() << " hasn't been registered!";
@@ -208,11 +224,10 @@ class Scene
       }
 
       T component;
-      list->AddComponentToEntity(aEntity, component);
+      bufferList->AddComponentToEntity(aEntity, component);
 
       // Update the EntityToSignature map.
-      mEntityToSignatureMap[aEntity][GetComponentIndex<T>()] = true;
-      EntitySignatureChanged.Notify(aEntity, mEntityToSignatureMap[aEntity]);
+      mBufferEntityToSignatureMap[aEntity][GetComponentIndex<T>()] = true;
     }
 
     /**
@@ -246,29 +261,27 @@ class Scene
     template<typename T>
     bool DoesEntityHaveComponent(const Entity& aEntity)
     {
-      return mEntityToSignatureMap[aEntity][GetComponentIndex<T>()];
-    };
+      bool success = false;
 
-    /**
-     * Returns a vector of Entities that have a component of type T.
-     *
-     * @return A vector of Entities with a component of type T.
-     */
-    template<typename T>
-    std::vector<Entity> GetEntitiesWithComponent()
-    {
-      std::vector<Entity> entities;
-
-      for(const auto& entityPair : mEntityToSignatureMap)
+      // Check the current map.
+      auto foundEntity = mEntityToSignatureMap.find(aEntity);
+      if(foundEntity != mEntityToSignatureMap.end())
       {
-        if(DoesEntityHaveComponent<T>(entityPair.first))
+        success = (*foundEntity).second[GetComponentIndex<T>()];
+      }
+
+      if(!success)
+      {
+        // Check the buffer map.
+        auto foundBufferEntity = mBufferEntityToSignatureMap.find(aEntity);
+        if(foundBufferEntity != mBufferEntityToSignatureMap.end())
         {
-          entities.emplace_back(entityPair.first);
+          success = (*foundBufferEntity).second[GetComponentIndex<T>()];
         }
       }
 
-      return entities;
-    }
+      return success;
+    };
 
     /**
      * Returns a component of type T associated with the given Entity.
@@ -279,12 +292,33 @@ class Scene
     template<typename T>
     T& GetComponentForEntity(const Entity& aEntity)
     {
-      auto list = GetComponentListForType<T>();
-      if(list == nullptr)
+      if(!IsComponentTypeRegistered<T>())
       {
         std::stringstream error;
         error << "Component type " << typeid(T).name() << " hasn't been registered!";
         throw std::logic_error(error.str());
+      }
+
+      ComponentListT<T>* list = nullptr;
+      auto componentIndex = GetComponentIndex<T>();
+
+      // Determine whether to query the current ComponentList or the
+      // buffer ComponentList.
+      if(mEntityToSignatureMap[aEntity][componentIndex])
+      {
+        list = GetComponentListForType<T>();
+      }
+      else if(mBufferEntityToSignatureMap[aEntity][componentIndex])
+      {
+        list = GetBufferComponentListForType<T>();
+      }
+
+      if(list == nullptr)
+      {
+        std::stringstream error;
+        error << "Entity " << aEntity << " doesn't have a component of type ";
+        error << typeid(T).name();
+        throw std::invalid_argument(error.str());
       }
 
       return list->GetComponentForEntity(aEntity);
@@ -314,14 +348,48 @@ class Scene
       return componentList;
     }
 
-    // Keeps track of the components associated with an Entity.
-    std::map<Entity, Signature> mEntityToSignatureMap;
+    /**
+     * Returns a list of buffer components for a given type.
+     *
+     * @return A list of buffer components for a given type, or nullptr if
+     *         no such list exists.
+     */
+    template<typename T>
+    ComponentListT<T>* GetBufferComponentListForType()
+    {
+      ComponentListT<T>* componentList = nullptr;
+      for(auto& list : mBufferLists)
+      {
+        componentList = dynamic_cast<ComponentListT<T>*>(list.get());
+        if(componentList != nullptr)
+        {
+          break;
+        }
+      }
 
+      return componentList;
+    }
+
+    /**
+     * Updates the Signature of each Entity.
+     */
+    void UpdateSignatures();
+
+    // Contains each System currently in the Scene.
+    std::vector<std::unique_ptr<System>> mSystems;
+
+    // Represents the current state of each Entity in the Scene.
+    std::map<Entity, Signature> mEntityToSignatureMap;
+    std::vector<std::unique_ptr<ComponentList>> mComponentLists;
+
+    // Represents the buffered state of each Entity in the Scene,
+    // which will become current at the end of each frame.
+    std::map<Entity, Signature> mBufferEntityToSignatureMap;
+    std::vector<std::unique_ptr<ComponentList>> mBufferLists;
+
+    // Contains all data to remove at the end of each frame.
     std::vector<Entity> mEntitiesToRemove;
     std::vector<std::pair<Entity, unsigned int>> mComponentsToRemove;
-
-    std::vector<std::unique_ptr<ComponentList>> mComponentLists;
-    std::vector<std::unique_ptr<System>> mSystems;
 
     IDGenerator mEntityGenerator;
 };
