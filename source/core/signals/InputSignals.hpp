@@ -245,8 +245,8 @@ extern SignalT<MouseButton, int> MouseButtonPressed;
 extern SignalT<MouseButton, int> MouseButtonReleased;
 extern SignalT<double, double> MouseScrolled;
 
-extern SignalT<int> JoystickConnected;
-extern SignalT<int> JoystickDisconnected;
+extern SignalT<int> GamepadConnected;
+extern SignalT<int> GamepadDisconnected;
 
 extern SignalT<int, GamepadButton> ButtonPressed;
 extern SignalT<int, GamepadButton> ButtonReleased;

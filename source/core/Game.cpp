@@ -13,7 +13,7 @@ namespace Kuma3D {
 bool Game::mInitialized = false;
 GLFWwindow* Game::mWindow = nullptr;
 
-std::map<int, std::vector<GamepadButton>> Game::mJoystickButtonMap;
+std::map<int, std::vector<GamepadButton>> Game::mGamepadButtonMap;
 
 std::unique_ptr<Scene> Game::mScene = nullptr;
 std::unique_ptr<Scene> Game::mNewScene = nullptr;
@@ -235,8 +235,8 @@ void Game::Run()
     // Process the GLFW event queue.
     glfwPollEvents();
 
-    // GLFW doesn't use events for joystick/gamepad input, so do that here.
-    PollJoystickButtons();
+    // GLFW doesn't use events for gamepad/gamepad input, so do that here.
+    PollGamepadButtons();
 
     // Update the current Scene.
     mScene->OperateSystems(glfwGetTime());
@@ -270,6 +270,20 @@ void Game::SetScene(std::unique_ptr<Scene> aScene)
 }
 
 /******************************************************************************/
+float Game::GetGamepadAxisValue(int aID, const GamepadAxis& aAxis)
+{
+  float value = 0;
+
+  GLFWgamepadstate state;
+  if(glfwGetGamepadState(aID, &state))
+  {
+    value = state.axes[static_cast<int>(aAxis)];
+  }
+
+  return value;
+}
+
+/******************************************************************************/
 void Game::CreateWindow(const WindowOptions& aOptions)
 {
   // Destroy the current window.
@@ -288,7 +302,7 @@ void Game::CreateWindow(const WindowOptions& aOptions)
   glfwSetCursorEnterCallback(mWindow, GLFWMouseEnteredOrLeftCallback);
   glfwSetMouseButtonCallback(mWindow, GLFWMouseButtonPressedCallback);
   glfwSetScrollCallback(mWindow, GLFWMouseScrolledCallback);
-  glfwSetJoystickCallback(HandleJoystickEvent);
+  glfwSetJoystickCallback(HandleGamepadEvent);
 
   // Create the OpenGL context.
   glfwMakeContextCurrent(mWindow);
@@ -298,41 +312,41 @@ void Game::CreateWindow(const WindowOptions& aOptions)
 }
 
 /*****************************************************************************/
-void Game::PollJoystickButtons()
+void Game::PollGamepadButtons()
 {
   GLFWgamepadstate state;
 
-  for(auto& joystickButtonPair : mJoystickButtonMap)
+  for(auto& gamepadButtonPair : mGamepadButtonMap)
   {
-    if(glfwGetGamepadState(joystickButtonPair.first, &state))
+    if(glfwGetGamepadState(gamepadButtonPair.first, &state))
     {
       // For each button, determine if it was pressed or released this frame.
       for(int i = 0; i < 15; ++i)
       {
-        // Find the button in the joystick's button list.
+        // Find the button in the gamepad's button list.
         auto button = static_cast<GamepadButton>(i);
-        auto foundButton = std::find(joystickButtonPair.second.begin(),
-                                     joystickButtonPair.second.end(),
+        auto foundButton = std::find(gamepadButtonPair.second.begin(),
+                                     gamepadButtonPair.second.end(),
                                      button);
 
         if(state.buttons[i])
         {
           // The button is pressed, so check if it's already in the button list.
           // If it isn't, put it there and notify the ButtonPressed signal.
-          if(foundButton == joystickButtonPair.second.end())
+          if(foundButton == gamepadButtonPair.second.end())
           {
-            joystickButtonPair.second.emplace_back(button);
-            ButtonPressed.Notify(joystickButtonPair.first, button);
+            gamepadButtonPair.second.emplace_back(button);
+            ButtonPressed.Notify(gamepadButtonPair.first, button);
           }
         }
         else
         {
           // The button is not pressed, so check if it's in the button list.
           // If it is, remove it and notify the ButtonReleased signal.
-          if(foundButton != joystickButtonPair.second.end())
+          if(foundButton != gamepadButtonPair.second.end())
           {
-            joystickButtonPair.second.erase(foundButton);
-            ButtonReleased.Notify(joystickButtonPair.first, button);
+            gamepadButtonPair.second.erase(foundButton);
+            ButtonReleased.Notify(gamepadButtonPair.first, button);
           }
         }
       }
@@ -341,20 +355,20 @@ void Game::PollJoystickButtons()
 }
 
 /*****************************************************************************/
-void Game::HandleJoystickEvent(int aID, int aEvent)
+void Game::HandleGamepadEvent(int aID, int aEvent)
 {
-  auto foundJoystick = mJoystickButtonMap.find(aID);
+  auto foundGamepad = mGamepadButtonMap.find(aID);
 
-  if(aEvent == GLFW_CONNECTED && foundJoystick == mJoystickButtonMap.end())
+  if(aEvent == GLFW_CONNECTED && foundGamepad == mGamepadButtonMap.end())
   {
     std::vector<GamepadButton> buttons;
-    mJoystickButtonMap.emplace(aID, buttons);
-    JoystickConnected.Notify(aID);
+    mGamepadButtonMap.emplace(aID, buttons);
+    GamepadConnected.Notify(aID);
   }
-  else if(aEvent == GLFW_DISCONNECTED && foundJoystick != mJoystickButtonMap.end())
+  else if(aEvent == GLFW_DISCONNECTED && foundGamepad != mGamepadButtonMap.end())
   {
-    mJoystickButtonMap.erase(aID);
-    JoystickDisconnected.Notify(aID);
+    mGamepadButtonMap.erase(aID);
+    GamepadDisconnected.Notify(aID);
   }
 }
 

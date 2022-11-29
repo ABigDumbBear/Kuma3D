@@ -66,6 +66,15 @@ class Game
      */
     static void SetScene(std::unique_ptr<Scene> aScene);
 
+    /**
+     * Returns the value of a gamepad axis (between -1 and 1).
+     *
+     * @param aID The ID of the gamepad.
+     * @param aAxis The axis to check.
+     * @return The value of the axis.
+     */
+    static float GetGamepadAxisValue(int aID, const GamepadAxis& aAxis);
+
   private:
 
     /**
@@ -74,23 +83,23 @@ class Game
     static void CreateWindow(const WindowOptions& aOptions);
 
     /**
-     * Polls GLFW for the button state of each connected joystick and notifies
+     * Polls GLFW for the button state of each connected gamepad and notifies
      * the ButtonPressed or ButtonReleased signal accordingly.
      */
-    static void PollJoystickButtons();
+    static void PollGamepadButtons();
 
     /**
-     * Gets called whenever a joystick is connected or disconnected.
+     * Gets called whenever a gamepad is connected or disconnected.
      *
-     * @param aID The ID of the joystick.
-     * @param aEvent Whether the joystick was connected or disconnected.
+     * @param aID The ID of the gamepad.
+     * @param aEvent Whether the gamepad was connected or disconnected.
      */
-    static void HandleJoystickEvent(int aID, int aEvent);
+    static void HandleGamepadEvent(int aID, int aEvent);
 
     static bool mInitialized;
     static GLFWwindow* mWindow;
 
-    static std::map<int, std::vector<GamepadButton>> mJoystickButtonMap;
+    static std::map<int, std::vector<GamepadButton>> mGamepadButtonMap;
 
     static std::unique_ptr<Scene> mScene;
     static std::unique_ptr<Scene> mNewScene;
