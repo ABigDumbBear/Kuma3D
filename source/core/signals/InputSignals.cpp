@@ -327,4 +327,10 @@ SignalT<MouseButton, int> MouseButtonPressed;
 SignalT<MouseButton, int> MouseButtonReleased;
 SignalT<double, double> MouseScrolled;
 
+SignalT<int> JoystickConnected;
+SignalT<int> JoystickDisconnected;
+
+SignalT<int, GamepadButton> ButtonPressed;
+SignalT<int, GamepadButton> ButtonReleased;
+
 } // namespace Kuma3D

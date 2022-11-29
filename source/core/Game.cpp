@@ -1,5 +1,6 @@
 #include "Game.hpp"
 
+#include <algorithm>
 #include <iostream>
 
 #include <stdexcept>
@@ -11,8 +12,12 @@ namespace Kuma3D {
 
 bool Game::mInitialized = false;
 GLFWwindow* Game::mWindow = nullptr;
+
+std::map<int, std::vector<GamepadButton>> Game::mJoystickButtonMap;
+
 std::unique_ptr<Scene> Game::mScene = nullptr;
 std::unique_ptr<Scene> Game::mNewScene = nullptr;
+
 bool Game::mExiting = false;
 
 /*****************************************************************************/
@@ -227,8 +232,14 @@ void Game::Run()
       mNewScene.reset(nullptr);
     }
 
+    // Process the GLFW event queue.
     glfwPollEvents();
-    Update();
+
+    // GLFW doesn't use events for joystick/gamepad input, so do that here.
+    PollJoystickButtons();
+
+    // Update the current Scene.
+    mScene->OperateSystems(glfwGetTime());
 
     // Swap the front/back buffers.
     glfwSwapBuffers(mWindow);
@@ -277,6 +288,7 @@ void Game::CreateWindow(const WindowOptions& aOptions)
   glfwSetCursorEnterCallback(mWindow, GLFWMouseEnteredOrLeftCallback);
   glfwSetMouseButtonCallback(mWindow, GLFWMouseButtonPressedCallback);
   glfwSetScrollCallback(mWindow, GLFWMouseScrolledCallback);
+  glfwSetJoystickCallback(HandleJoystickEvent);
 
   // Create the OpenGL context.
   glfwMakeContextCurrent(mWindow);
@@ -285,10 +297,65 @@ void Game::CreateWindow(const WindowOptions& aOptions)
   ApplyOptionsToWindow(aOptions);
 }
 
-/******************************************************************************/
-void Game::Update()
+/*****************************************************************************/
+void Game::PollJoystickButtons()
 {
-  mScene->OperateSystems(glfwGetTime());
+  GLFWgamepadstate state;
+
+  for(auto& joystickButtonPair : mJoystickButtonMap)
+  {
+    if(glfwGetGamepadState(joystickButtonPair.first, &state))
+    {
+      // For each button, determine if it was pressed or released this frame.
+      for(int i = 0; i < 15; ++i)
+      {
+        // Find the button in the joystick's button list.
+        auto button = static_cast<GamepadButton>(i);
+        auto foundButton = std::find(joystickButtonPair.second.begin(),
+                                     joystickButtonPair.second.end(),
+                                     button);
+
+        if(state.buttons[i])
+        {
+          // The button is pressed, so check if it's already in the button list.
+          // If it isn't, put it there and notify the ButtonPressed signal.
+          if(foundButton == joystickButtonPair.second.end())
+          {
+            joystickButtonPair.second.emplace_back(button);
+            ButtonPressed.Notify(joystickButtonPair.first, button);
+          }
+        }
+        else
+        {
+          // The button is not pressed, so check if it's in the button list.
+          // If it is, remove it and notify the ButtonReleased signal.
+          if(foundButton != joystickButtonPair.second.end())
+          {
+            joystickButtonPair.second.erase(foundButton);
+            ButtonReleased.Notify(joystickButtonPair.first, button);
+          }
+        }
+      }
+    }
+  }
+}
+
+/*****************************************************************************/
+void Game::HandleJoystickEvent(int aID, int aEvent)
+{
+  auto foundJoystick = mJoystickButtonMap.find(aID);
+
+  if(aEvent == GLFW_CONNECTED && foundJoystick == mJoystickButtonMap.end())
+  {
+    std::vector<GamepadButton> buttons;
+    mJoystickButtonMap.emplace(aID, buttons);
+    JoystickConnected.Notify(aID);
+  }
+  else if(aEvent == GLFW_DISCONNECTED && foundJoystick != mJoystickButtonMap.end())
+  {
+    mJoystickButtonMap.erase(aID);
+    JoystickDisconnected.Notify(aID);
+  }
 }
 
 } // namespace Kuma3D

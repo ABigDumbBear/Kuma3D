@@ -1,13 +1,17 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include <map>
 #include <memory>
+#include <vector>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include "Scene.hpp"
 #include "WindowOptions.hpp"
+
+#include "InputSignals.hpp"
 
 namespace Kuma3D {
 
@@ -70,12 +74,23 @@ class Game
     static void CreateWindow(const WindowOptions& aOptions);
 
     /**
-     * Updates the current scene.
+     * Polls GLFW for the button state of each connected joystick and notifies
+     * the ButtonPressed or ButtonReleased signal accordingly.
      */
-    static void Update();
+    static void PollJoystickButtons();
+
+    /**
+     * Gets called whenever a joystick is connected or disconnected.
+     *
+     * @param aID The ID of the joystick.
+     * @param aEvent Whether the joystick was connected or disconnected.
+     */
+    static void HandleJoystickEvent(int aID, int aEvent);
 
     static bool mInitialized;
     static GLFWwindow* mWindow;
+
+    static std::map<int, std::vector<GamepadButton>> mJoystickButtonMap;
 
     static std::unique_ptr<Scene> mScene;
     static std::unique_ptr<Scene> mNewScene;

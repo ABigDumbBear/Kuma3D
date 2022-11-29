@@ -181,6 +181,43 @@ enum class MouseButton
 };
 
 /**
+ * An enumeration for each supported GLFW gamepad button, defined
+ * in the same order as GLFW and assigned the same value.
+ */
+enum class GamepadButton
+{
+  eGAMEPAD_BUTTON_A = 0,
+  eGAMEPAD_BUTTON_B = 1,
+  eGAMEPAD_BUTTON_X = 2,
+  eGAMEPAD_BUTTON_Y = 3,
+  eGAMEPAD_BUTTON_LEFT_BUMPER = 4,
+  eGAMEPAD_BUTTON_RIGHT_BUMPER = 5,
+  eGAMEPAD_BUTTON_BACK = 6,
+  eGAMEPAD_BUTTON_START = 7,
+  eGAMEPAD_BUTTON_GUIDE = 8,
+  eGAMEPAD_BUTTON_LEFT_THUMB = 9,
+  eGAMEPAD_BUTTON_RIGHT_THUMB = 10,
+  eGAMEPAD_BUTTON_DPAD_UP = 11,
+  eGAMEPAD_BUTTON_DPAD_RIGHT = 12,
+  eGAMEPAD_BUTTON_DOWN = 13,
+  eGAMEPAD_BUTTON_LEFT = 14
+};
+
+/**
+ * An enumeration for each supported GLFW gamepad joystick axis, defined
+ * in the same order as GLFW and assigned the same value.
+ */
+enum class GamepadAxis
+{
+  eGAMEPAD_AXIS_LEFT_X = 0,
+  eGAMEPAD_AXIS_LEFT_Y = 1,
+  eGAMEPAD_AXIS_RIGHT_X = 2,
+  eGAMEPAD_AXIS_RIGHT_Y = 3,
+  eGAMEPAD_AXIS_LEFT_TRIGGER = 4,
+  eGAMEPAD_AXIS_RIGHT_TRIGGER = 5
+};
+
+/**
  * Returns a string representing the given key.
  *
  * @param aCode The KeyCode of the key in question.
@@ -207,6 +244,12 @@ extern SignalT<bool> MouseEnteredOrLeft;
 extern SignalT<MouseButton, int> MouseButtonPressed;
 extern SignalT<MouseButton, int> MouseButtonReleased;
 extern SignalT<double, double> MouseScrolled;
+
+extern SignalT<int> JoystickConnected;
+extern SignalT<int> JoystickDisconnected;
+
+extern SignalT<int, GamepadButton> ButtonPressed;
+extern SignalT<int, GamepadButton> ButtonReleased;
 
 } // namespace Kuma3D
 
