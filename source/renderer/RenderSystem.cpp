@@ -286,6 +286,13 @@ void RenderSystem::DrawEntities(Scene& aScene,
         {
           auto& parentTransform = aScene.GetComponentForEntity<Transform>(entityTransform.mParent);
           parentMatrix = CalculateModelMatrix(parentTransform);
+
+          // If the parent is scheduled for removal, schedule this
+          // entity for removal as well.
+          if(aScene.IsEntityScheduledForRemoval(entityTransform.mParent))
+          {
+            aScene.RemoveEntity(entity);
+          }
         }
 
         auto matrix = parentMatrix * CalculateModelMatrix(entityTransform);
