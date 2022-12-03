@@ -1,5 +1,6 @@
 #include "Game.hpp"
 
+#include <algorithm>
 #include <iostream>
 
 #include <stdexcept>
@@ -11,8 +12,12 @@ namespace Kuma3D {
 
 bool Game::mInitialized = false;
 GLFWwindow* Game::mWindow = nullptr;
+
+std::map<int, std::vector<GamepadButton>> Game::mGamepadButtonMap;
+
 std::unique_ptr<Scene> Game::mScene = nullptr;
 std::unique_ptr<Scene> Game::mNewScene = nullptr;
+
 bool Game::mExiting = false;
 
 /*****************************************************************************/
@@ -227,8 +232,14 @@ void Game::Run()
       mNewScene.reset(nullptr);
     }
 
+    // Process the GLFW event queue.
     glfwPollEvents();
-    Update();
+
+    // GLFW doesn't use events for gamepad/gamepad input, so do that here.
+    PollGamepadButtons();
+
+    // Update the current Scene.
+    mScene->OperateSystems(glfwGetTime());
 
     // Swap the front/back buffers.
     glfwSwapBuffers(mWindow);
@@ -259,6 +270,20 @@ void Game::SetScene(std::unique_ptr<Scene> aScene)
 }
 
 /******************************************************************************/
+float Game::GetGamepadAxisValue(int aID, const GamepadAxis& aAxis)
+{
+  float value = 0;
+
+  GLFWgamepadstate state;
+  if(glfwGetGamepadState(aID, &state))
+  {
+    value = state.axes[static_cast<int>(aAxis)];
+  }
+
+  return value;
+}
+
+/******************************************************************************/
 void Game::CreateWindow(const WindowOptions& aOptions)
 {
   // Destroy the current window.
@@ -277,6 +302,7 @@ void Game::CreateWindow(const WindowOptions& aOptions)
   glfwSetCursorEnterCallback(mWindow, GLFWMouseEnteredOrLeftCallback);
   glfwSetMouseButtonCallback(mWindow, GLFWMouseButtonPressedCallback);
   glfwSetScrollCallback(mWindow, GLFWMouseScrolledCallback);
+  glfwSetJoystickCallback(HandleGamepadEvent);
 
   // Create the OpenGL context.
   glfwMakeContextCurrent(mWindow);
@@ -285,10 +311,65 @@ void Game::CreateWindow(const WindowOptions& aOptions)
   ApplyOptionsToWindow(aOptions);
 }
 
-/******************************************************************************/
-void Game::Update()
+/*****************************************************************************/
+void Game::PollGamepadButtons()
 {
-  mScene->OperateSystems(glfwGetTime());
+  GLFWgamepadstate state;
+
+  for(auto& gamepadButtonPair : mGamepadButtonMap)
+  {
+    if(glfwGetGamepadState(gamepadButtonPair.first, &state))
+    {
+      // For each button, determine if it was pressed or released this frame.
+      for(int i = 0; i < 15; ++i)
+      {
+        // Find the button in the gamepad's button list.
+        auto button = static_cast<GamepadButton>(i);
+        auto foundButton = std::find(gamepadButtonPair.second.begin(),
+                                     gamepadButtonPair.second.end(),
+                                     button);
+
+        if(state.buttons[i])
+        {
+          // The button is pressed, so check if it's already in the button list.
+          // If it isn't, put it there and notify the ButtonPressed signal.
+          if(foundButton == gamepadButtonPair.second.end())
+          {
+            gamepadButtonPair.second.emplace_back(button);
+            ButtonPressed.Notify(gamepadButtonPair.first, button);
+          }
+        }
+        else
+        {
+          // The button is not pressed, so check if it's in the button list.
+          // If it is, remove it and notify the ButtonReleased signal.
+          if(foundButton != gamepadButtonPair.second.end())
+          {
+            gamepadButtonPair.second.erase(foundButton);
+            ButtonReleased.Notify(gamepadButtonPair.first, button);
+          }
+        }
+      }
+    }
+  }
+}
+
+/*****************************************************************************/
+void Game::HandleGamepadEvent(int aID, int aEvent)
+{
+  auto foundGamepad = mGamepadButtonMap.find(aID);
+
+  if(aEvent == GLFW_CONNECTED && foundGamepad == mGamepadButtonMap.end())
+  {
+    std::vector<GamepadButton> buttons;
+    mGamepadButtonMap.emplace(aID, buttons);
+    GamepadConnected.Notify(aID);
+  }
+  else if(aEvent == GLFW_DISCONNECTED && foundGamepad != mGamepadButtonMap.end())
+  {
+    mGamepadButtonMap.erase(aID);
+    GamepadDisconnected.Notify(aID);
+  }
 }
 
 } // namespace Kuma3D

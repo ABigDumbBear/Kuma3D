@@ -1,13 +1,17 @@
 #ifndef GAME_HPP
 #define GAME_HPP
 
+#include <map>
 #include <memory>
+#include <vector>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include "Scene.hpp"
 #include "WindowOptions.hpp"
+
+#include "InputSignals.hpp"
 
 namespace Kuma3D {
 
@@ -62,6 +66,15 @@ class Game
      */
     static void SetScene(std::unique_ptr<Scene> aScene);
 
+    /**
+     * Returns the value of a gamepad axis (between -1 and 1).
+     *
+     * @param aID The ID of the gamepad.
+     * @param aAxis The axis to check.
+     * @return The value of the axis.
+     */
+    static float GetGamepadAxisValue(int aID, const GamepadAxis& aAxis);
+
   private:
 
     /**
@@ -70,12 +83,23 @@ class Game
     static void CreateWindow(const WindowOptions& aOptions);
 
     /**
-     * Updates the current scene.
+     * Polls GLFW for the button state of each connected gamepad and notifies
+     * the ButtonPressed or ButtonReleased signal accordingly.
      */
-    static void Update();
+    static void PollGamepadButtons();
+
+    /**
+     * Gets called whenever a gamepad is connected or disconnected.
+     *
+     * @param aID The ID of the gamepad.
+     * @param aEvent Whether the gamepad was connected or disconnected.
+     */
+    static void HandleGamepadEvent(int aID, int aEvent);
 
     static bool mInitialized;
     static GLFWwindow* mWindow;
+
+    static std::map<int, std::vector<GamepadButton>> mGamepadButtonMap;
 
     static std::unique_ptr<Scene> mScene;
     static std::unique_ptr<Scene> mNewScene;
