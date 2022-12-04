@@ -80,19 +80,23 @@ void Scene::RemoveEntity(const Entity& aEntity)
     throw std::invalid_argument(error.str());
   }
 
-  // Schedule each component on this entity for removal.
-  auto signature = mEntityToSignatureMap[aEntity];
-  for(int i = 0; i < signature.size(); ++i)
+  // Don't add the Entity to the removal list twice.
+  if(!IsEntityScheduledForRemoval(aEntity))
   {
-    if(signature[i])
+    // Schedule each component on this entity for removal.
+    auto signature = mEntityToSignatureMap[aEntity];
+    for(int i = 0; i < signature.size(); ++i)
     {
-      std::pair<Entity, unsigned int> entityComponentPair(aEntity, i);
-      mComponentsToRemove.emplace_back(entityComponentPair);
+      if(signature[i])
+      {
+        std::pair<Entity, unsigned int> entityComponentPair(aEntity, i);
+        mComponentsToRemove.emplace_back(entityComponentPair);
+      }
     }
-  }
 
-  // Schedule the Entity itself for removal.
-  mEntitiesToRemove.emplace_back(aEntity);
+    // Schedule the Entity itself for removal.
+    mEntitiesToRemove.emplace_back(aEntity);
+  }
 }
 
 /******************************************************************************/

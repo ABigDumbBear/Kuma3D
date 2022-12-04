@@ -128,7 +128,10 @@ inline void TestEntityRemoval()
 
   // Remove the Entity and update the Scene.
   scene.RemoveEntity(entity);
+
+  assert(scene.IsEntityScheduledForRemoval(entity));
   scene.OperateSystems(0);
+  assert(!scene.IsEntityScheduledForRemoval(entity));
 
   assert(!scene.DoesEntityHaveComponent<TestComponentA>(0));
 }
