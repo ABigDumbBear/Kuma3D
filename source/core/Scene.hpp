@@ -84,6 +84,14 @@ class Scene
     std::vector<Entity> GetEntitiesWithSignature(const Signature& aSignature);
 
     /**
+     * Returns the Signature for a given Entity.
+     *
+     * @param aEntity The Entity to retrieve the Signature for.
+     * @return The Signature for the Entity.
+     */
+    Signature GetSignatureForEntity(const Entity& aEntity);
+
+    /**
      * Takes ownership of a System and asks it to operate on each of its
      * Entities during OperateSystems().
      *

@@ -123,6 +123,20 @@ std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature)
 }
 
 /******************************************************************************/
+Signature Scene::GetSignatureForEntity(const Entity& aEntity)
+{
+  auto foundEntity = mEntityToSignatureMap.find(aEntity);
+  if(foundEntity == mEntityToSignatureMap.end())
+  {
+    std::stringstream error;
+    error << "Entity " << aEntity << " doesn't exist!";
+    throw std::invalid_argument(error.str());
+  }
+
+  return mEntityToSignatureMap[aEntity];
+}
+
+/******************************************************************************/
 Signature Scene::CreateSignature() const
 {
   return Signature(mComponentLists.size(), false);
