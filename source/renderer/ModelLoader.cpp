@@ -6,6 +6,9 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include "Model.hpp"
+#include "Transform.hpp"
+
 namespace Kuma3D {
 
 /******************************************************************************/
@@ -57,7 +60,7 @@ ID ModelLoader::LoadModel(const std::string& aFilePath,
 }
 
 /******************************************************************************/
-std::vector<Mesh> ModelLoader::GetModel(const ID& aID)
+Entity ModelLoader::CreateModel(ID aID, Scene& aScene)
 {
   auto foundModel = mModelMap.find(aID);
   if(foundModel == mModelMap.end())
@@ -67,7 +70,47 @@ std::vector<Mesh> ModelLoader::GetModel(const ID& aID)
     throw(std::invalid_argument(error.str()));
   }
 
-  return foundModel->second;
+  // Register the appropriate components if they aren't already.
+  if(!aScene.IsComponentTypeRegistered<Mesh>())
+  {
+    aScene.RegisterComponentType<Mesh>();
+  }
+
+  if(!aScene.IsComponentTypeRegistered<Model>())
+  {
+    aScene.RegisterComponentType<Model>();
+  }
+
+  if(!aScene.IsComponentTypeRegistered<Transform>())
+  {
+    aScene.RegisterComponentType<Transform>();
+  }
+
+  // Create a new Entity for the model.
+  auto modelEntity = aScene.CreateEntity();
+  Model modelComponent;
+
+  // For each mesh in the model, create a new Entity and attach the mesh.
+  for(const auto& mesh : foundModel->second)
+  {
+    auto meshEntity = aScene.CreateEntity();
+
+    auto meshCopy = mesh;
+    aScene.AddComponentToEntity<Mesh>(meshEntity, meshCopy);
+
+    Transform meshTransform;
+    meshTransform.mParent = modelEntity;
+    meshTransform.mUseParent = true;
+    aScene.AddComponentToEntity<Transform>(meshEntity, meshTransform);
+
+    // Keep track of the child Entity.
+    modelComponent.mChildren.emplace_back(meshEntity);
+  }
+
+  aScene.AddComponentToEntity<Model>(modelEntity, modelComponent);
+  aScene.AddComponentToEntity<Transform>(modelEntity);
+
+  return modelEntity;
 }
 
 /******************************************************************************/

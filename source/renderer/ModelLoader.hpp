@@ -8,9 +8,9 @@
 #include <assimp/material.h>
 #include <assimp/scene.h>
 
-#include "TextureLoader.hpp"
-
 #include "IDGenerator.hpp"
+#include "Scene.hpp"
+#include "TextureLoader.hpp"
 
 #include "Mesh.hpp"
 
@@ -37,13 +37,20 @@ class ModelLoader
                         TextureFilterOption aFilterOption = TextureFilterOption::eLINEAR);
 
     /**
-     * Returns a list of Meshes that represent the model associated with
-     * the given ID.
+     * Creates a model in the given Scene. Specifically, this will:
      *
-     * @param aID The ID of the model to retrieve.
-     * @return A list of Meshes that represent the model.
+     * 1) Create a new Entity with a Transform and Model component to
+     *    represent the model.
+     * 2) Create a new Entity with a Transform and Mesh component for each
+     *    mesh in the model. These Transforms will use the model Entity
+     *    as the parent Entity.
+     * 3) Return the model Entity.
+     *
+     * @param aID The ID of the model to create.
+     * @param aScene The Scene to create the model in.
+     * @return The Entity that represents the model.
      */
-    static std::vector<Mesh> GetModel(const ID& aID);
+    static Entity CreateModel(ID aID, Scene& aScene);
 
   private:
 
