@@ -4,12 +4,13 @@
 #include "Signal.hpp"
 
 #include "Entity.hpp"
+#include "Scene.hpp"
 #include "Signature.hpp"
 
 namespace Kuma3D {
 
-extern SignalT<const Entity&, const Signature&> EntitySignatureChanged;
-extern SignalT<const Entity&> EntityPendingDeletion;
+extern SignalT<Entity, const Signature&> EntitySignatureChanged;
+extern SignalT<Entity, const Scene&> EntityPendingDeletion;
 
 } // namespace Kuma3D
 

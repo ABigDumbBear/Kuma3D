@@ -223,7 +223,7 @@ enum class GamepadAxis
  * @param aCode The KeyCode of the key in question.
  * @return A string representation of the key.
  */
-std::string GetKeyName(const KeyCode& aCode);
+std::string GetKeyName(KeyCode aCode);
 
 /**
  * Checks if a certain key modifier is active in the given GLFW
@@ -233,7 +233,7 @@ std::string GetKeyName(const KeyCode& aCode);
  * @param aMods The bitmask that may or may not contain the modifier.
  * @return True if the given modifier is active, false otherwise.
  */
-bool IsModifierActive(const KeyboardModifier& aMod, int aMods);
+bool IsModifierActive(KeyboardModifier aMod, int aMods);
 
 extern SignalT<KeyCode, int> KeyPressed;
 extern SignalT<KeyCode, int> KeyReleased;

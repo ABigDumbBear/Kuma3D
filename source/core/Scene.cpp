@@ -29,7 +29,7 @@ void Scene::OperateSystems(double aTime)
   // Remove all entities that have been scheduled for removal.
   for(const auto& entity : mEntitiesToRemove)
   {
-    EntityPendingDeletion.Notify(entity);
+    EntityPendingDeletion.Notify(entity, *this);
     mEntityToSignatureMap.erase(entity);
     mEntityGenerator.RemoveID(entity);
   }
@@ -71,7 +71,7 @@ Entity Scene::CreateEntity()
 }
 
 /******************************************************************************/
-void Scene::RemoveEntity(const Entity& aEntity)
+void Scene::RemoveEntity(Entity aEntity)
 {
   if(mEntityToSignatureMap.find(aEntity) == mEntityToSignatureMap.end())
   {
@@ -100,7 +100,7 @@ void Scene::RemoveEntity(const Entity& aEntity)
 }
 
 /******************************************************************************/
-bool Scene::IsEntityScheduledForRemoval(const Entity& aEntity)
+bool Scene::IsEntityScheduledForRemoval(Entity aEntity)
 {
   auto foundEntity = std::find(mEntitiesToRemove.begin(), mEntitiesToRemove.end(), aEntity);
   return foundEntity != mEntitiesToRemove.end();
@@ -123,7 +123,7 @@ std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature)
 }
 
 /******************************************************************************/
-Signature Scene::GetSignatureForEntity(const Entity& aEntity)
+Signature Scene::GetSignatureForEntity(Entity aEntity)
 {
   auto foundEntity = mEntityToSignatureMap.find(aEntity);
   if(foundEntity == mEntityToSignatureMap.end())

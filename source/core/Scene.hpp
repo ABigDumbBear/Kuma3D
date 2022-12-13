@@ -64,7 +64,7 @@ class Scene
      *
      * @param aEntity The Entity ID to remove.
      */
-    void RemoveEntity(const Entity& aEntity);
+    void RemoveEntity(Entity aEntity);
 
     /**
      * Returns whether an Entity is scheduled for removal at the end of the
@@ -73,7 +73,7 @@ class Scene
      * @param aEntity The Entity to check.
      * @return Whether the Entity is scheduled for removal.
      */
-    bool IsEntityScheduledForRemoval(const Entity& aEntity);
+    bool IsEntityScheduledForRemoval(Entity aEntity);
 
     /**
      * Returns a list of Entities that fit a given Signature.
@@ -89,7 +89,7 @@ class Scene
      * @param aEntity The Entity to retrieve the Signature for.
      * @return The Signature for the Entity.
      */
-    Signature GetSignatureForEntity(const Entity& aEntity);
+    Signature GetSignatureForEntity(Entity aEntity);
 
     /**
      * Takes ownership of a System and asks it to operate on each of its
@@ -197,7 +197,7 @@ class Scene
      * @param aComponent The component to add.
      */
     template<typename T>
-    void AddComponentToEntity(const Entity& aEntity, T& aComponent)
+    void AddComponentToEntity(Entity aEntity, T& aComponent)
     {
       auto bufferList = GetBufferComponentListForType<T>();
       if(bufferList == nullptr)
@@ -225,7 +225,7 @@ class Scene
      * @param aEntity The Entity to add a component to.
      */
     template<typename T>
-    void AddComponentToEntity(const Entity& aEntity)
+    void AddComponentToEntity(Entity aEntity)
     {
       auto bufferList = GetBufferComponentListForType<T>();
       if(bufferList == nullptr)
@@ -254,7 +254,7 @@ class Scene
      * @param aEntity The Entity to remove a component from.
      */
     template<typename T>
-    void RemoveComponentFromEntity(const Entity& aEntity)
+    void RemoveComponentFromEntity(Entity aEntity)
     {
       if(GetComponentListForType<T>() == nullptr)
       {
@@ -275,7 +275,7 @@ class Scene
      * @return Whether the Entity has a component of type T.
      */
     template<typename T>
-    bool DoesEntityHaveComponent(const Entity& aEntity)
+    bool DoesEntityHaveComponent(Entity aEntity)
     {
       bool success = false;
 
@@ -306,7 +306,7 @@ class Scene
      * @return A component of type T associated with the given Entity.
      */
     template<typename T>
-    T& GetComponentForEntity(const Entity& aEntity)
+    T& GetComponentForEntity(Entity aEntity)
     {
       if(!IsComponentTypeRegistered<T>())
       {

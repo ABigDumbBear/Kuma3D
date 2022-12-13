@@ -105,7 +105,7 @@ void RenderSystem::Operate(Scene& aScene, double aTime)
 }
 
 /******************************************************************************/
-void RenderSystem::HandleEntityBecameEligible(const Entity& aEntity)
+void RenderSystem::HandleEntityBecameEligible(Entity aEntity)
 {
   mVertexArrayMap[aEntity] = 0;
   mVertexBufferMap[aEntity] = 0;
@@ -117,7 +117,7 @@ void RenderSystem::HandleEntityBecameEligible(const Entity& aEntity)
 }
 
 /******************************************************************************/
-void RenderSystem::HandleEntityBecameIneligible(const Entity& aEntity)
+void RenderSystem::HandleEntityBecameIneligible(Entity aEntity)
 {
   glDeleteVertexArrays(1, &mVertexArrayMap[aEntity]);
   glDeleteBuffers(1, &mVertexBufferMap[aEntity]);
@@ -217,7 +217,7 @@ Mat4 RenderSystem::CalculateProjectionMatrix(const CoordinateSystem& aSystem,
 
 /******************************************************************************/
 void RenderSystem::SortEntitiesByCameraDistance(Scene& aScene,
-                                                const Entity& aCamera,
+                                                Entity aCamera,
                                                 std::vector<Entity>& aEntities)
 {
   auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
@@ -230,8 +230,8 @@ void RenderSystem::SortEntitiesByCameraDistance(Scene& aScene,
 
   // Sort the entities in order from furthest to nearest along the
   // camera's forward vector.
-  auto sortFunction = [&aScene, &forwardVector, &cameraTransform](const Entity& aEntityA,
-                                                                  const Entity& aEntityB)
+  auto sortFunction = [&aScene, &forwardVector, &cameraTransform](Entity aEntityA,
+                                                                  Entity aEntityB)
   {
     auto& transformA = aScene.GetComponentForEntity<Transform>(aEntityA);
     auto& transformB = aScene.GetComponentForEntity<Transform>(aEntityB);
@@ -246,7 +246,7 @@ void RenderSystem::SortEntitiesByCameraDistance(Scene& aScene,
 
 /******************************************************************************/
 void RenderSystem::DrawEntities(Scene& aScene,
-                                const Entity& aCamera,
+                                Entity aCamera,
                                 const std::vector<Entity>& aEntities)
 {
   auto& camera = aScene.GetComponentForEntity<Camera>(aCamera);
@@ -326,7 +326,7 @@ void RenderSystem::DrawEntities(Scene& aScene,
 }
 
 /******************************************************************************/
-void RenderSystem::UpdateBuffersForEntity(const Entity& aEntity,
+void RenderSystem::UpdateBuffersForEntity(Entity aEntity,
                                           const std::vector<MeshVertex>& aVertices,
                                           const std::vector<unsigned int>& aIndices)
 {

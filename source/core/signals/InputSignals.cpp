@@ -5,7 +5,7 @@
 namespace Kuma3D {
 
 /******************************************************************************/
-std::string GetKeyName(const KeyCode& aCode)
+std::string GetKeyName(KeyCode aCode)
 {
   std::string name;
 
@@ -310,7 +310,7 @@ std::string GetKeyName(const KeyCode& aCode)
 }
 
 /******************************************************************************/
-bool IsModifierActive(const KeyboardModifier& aMod, int aMods)
+bool IsModifierActive(KeyboardModifier aMod, int aMods)
 {
   auto modAsInt = static_cast<int>(aMod);
   return (aMods & (1 << modAsInt));

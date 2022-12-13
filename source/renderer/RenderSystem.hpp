@@ -45,7 +45,7 @@ class RenderSystem : public System
      *
      * @param eEntity The Entity that became eligible.
      */
-    void HandleEntityBecameEligible(const Entity& aEntity) override;
+    void HandleEntityBecameEligible(Entity aEntity) override;
 
     /**
      * A handler function that gets called whenever an Entity becomes
@@ -53,7 +53,7 @@ class RenderSystem : public System
      *
      * @param eEntity The Entity that became ineligible.
      */
-    void HandleEntityBecameIneligible(const Entity& aEntity) override;
+    void HandleEntityBecameIneligible(Entity aEntity) override;
 
   private:
 
@@ -104,7 +104,7 @@ class RenderSystem : public System
      * @param aEntities The Entities to sort.
      */
     void SortEntitiesByCameraDistance(Scene& aScene,
-                                      const Entity& aCamera,
+                                      Entity aCamera,
                                       std::vector<Entity>& aEntities);
 
     /**
@@ -115,7 +115,7 @@ class RenderSystem : public System
      * @param aEntities The entities to draw.
      */
     void DrawEntities(Scene& aScene,
-                      const Entity& aCamera,
+                      Entity aCamera,
                       const std::vector<Entity>& aEntities);
 
     /**
@@ -126,7 +126,7 @@ class RenderSystem : public System
      * @param aVertices The vertices to copy into the vertex buffer.
      * @param aIndices The indices to copy into the element buffer.
      */
-    void UpdateBuffersForEntity(const Entity& aEntity,
+    void UpdateBuffersForEntity(Entity aEntity,
                                 const std::vector<MeshVertex>& aVertices,
                                 const std::vector<unsigned int>& aIndices);
 
