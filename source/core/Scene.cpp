@@ -100,7 +100,7 @@ void Scene::RemoveEntity(Entity aEntity)
 }
 
 /******************************************************************************/
-bool Scene::IsEntityScheduledForRemoval(Entity aEntity)
+bool Scene::IsEntityScheduledForRemoval(Entity aEntity) const
 {
   auto foundEntity = std::find(mEntitiesToRemove.begin(), mEntitiesToRemove.end(), aEntity);
   return foundEntity != mEntitiesToRemove.end();
@@ -123,7 +123,7 @@ std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature)
 }
 
 /******************************************************************************/
-Signature Scene::GetSignatureForEntity(Entity aEntity)
+Signature Scene::GetSignatureForEntity(Entity aEntity) const
 {
   auto foundEntity = mEntityToSignatureMap.find(aEntity);
   if(foundEntity == mEntityToSignatureMap.end())
@@ -133,7 +133,7 @@ Signature Scene::GetSignatureForEntity(Entity aEntity)
     throw std::invalid_argument(error.str());
   }
 
-  return mEntityToSignatureMap[aEntity];
+  return mEntityToSignatureMap.at(aEntity);
 }
 
 /******************************************************************************/

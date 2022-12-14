@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <typeinfo>
 #include <vector>
 
 #include <sstream>
@@ -73,7 +74,7 @@ class Scene
      * @param aEntity The Entity to check.
      * @return Whether the Entity is scheduled for removal.
      */
-    bool IsEntityScheduledForRemoval(Entity aEntity);
+    bool IsEntityScheduledForRemoval(Entity aEntity) const;
 
     /**
      * Returns a list of Entities that fit a given Signature.
@@ -89,7 +90,7 @@ class Scene
      * @param aEntity The Entity to retrieve the Signature for.
      * @return The Signature for the Entity.
      */
-    Signature GetSignatureForEntity(Entity aEntity);
+    Signature GetSignatureForEntity(Entity aEntity) const;
 
     /**
      * Takes ownership of a System and asks it to operate on each of its
@@ -105,7 +106,7 @@ class Scene
      * @return Whether the Scene already contains a System of the given type.
      */
     template<typename T>
-    bool ContainsSystemOfType()
+    bool ContainsSystemOfType() const
     {
       bool containsSystem = false;
       for(const auto& system : mSystems)
@@ -133,46 +134,39 @@ class Scene
      * @return The index of a component type.
      */
     template<typename T>
-    unsigned int GetComponentIndex()
+    unsigned int GetComponentIndex() const
     {
-      auto list = GetComponentListForType<T>();
-      if(list == nullptr)
+      std::string name(typeid(T).name());
+      if(!IsComponentTypeRegistered<T>())
       {
         std::stringstream error;
-        error << "Component type " << typeid(T).name() << " hasn't been registered!";
+        error << "Component type " << name << " hasn't been registered!";
         throw std::logic_error(error.str());
       }
 
-      unsigned int index = 0;
-      for(auto& componentList : mComponentLists)
-      {
-        if(componentList.get() == list)
-        {
-          break;
-        }
-        ++index;
-      }
-
-      return index;
+      return mComponentToIndexMap.at(name);
     }
 
     /**
-     * "Registers" a component type by creating a vector to store components
-     * of that type.
+     * "Registers" a component type by creating a ComponentList for that type.
      */
     template<typename T>
     void RegisterComponentType()
     {
+      std::string name(typeid(T).name());
       if(IsComponentTypeRegistered<T>())
       {
         std::stringstream error;
-        error << "Component type " << typeid(T).name() << " has already been registered!";
+        error << "Component type " << name << " has already been registered!";
         throw std::logic_error(error.str());
       }
 
       // Create two new ComponentLists.
       mComponentLists.emplace_back(std::make_unique<ComponentListT<T>>());
       mBufferLists.emplace_back(std::make_unique<ComponentListT<T>>());
+
+      // Update the ComponentToIndex map.
+      mComponentToIndexMap.emplace(name, mComponentLists.size() - 1);
 
       // Update the EntityToSignature maps.
       UpdateSignatures();
@@ -184,9 +178,10 @@ class Scene
      * @return Whether a component of type T is already registered.
      */
     template<typename T>
-    bool IsComponentTypeRegistered()
+    bool IsComponentTypeRegistered() const
     {
-      return (GetComponentListForType<T>() != nullptr);
+      std::string name(typeid(T).name());
+      return mComponentToIndexMap.find(name) != mComponentToIndexMap.end();
     }
 
     /**
@@ -199,17 +194,19 @@ class Scene
     template<typename T>
     void AddComponentToEntity(Entity aEntity, T& aComponent)
     {
-      auto bufferList = GetBufferComponentListForType<T>();
-      if(bufferList == nullptr)
+      std::string name(typeid(T).name());
+      if(!IsComponentTypeRegistered<T>())
       {
         std::stringstream error;
-        error << "Component type " << typeid(T).name() << " hasn't been registered!";
+        error << "Component type " << name << " hasn't been registered!";
         throw std::logic_error(error.str());
       }
 
+      auto index = mComponentToIndexMap[name];
+      auto bufferList = dynamic_cast<ComponentListT<T>*>(mBufferLists[index].get());
       bufferList->AddComponentToEntity(aEntity, aComponent);
 
-      // Update the EntityToSignature map.
+      // Update the buffered EntityToSignature map.
       if(mBufferEntityToSignatureMap[aEntity].empty())
       {
         mBufferEntityToSignatureMap[aEntity] = mEntityToSignatureMap[aEntity];
@@ -227,13 +224,16 @@ class Scene
     template<typename T>
     void AddComponentToEntity(Entity aEntity)
     {
-      auto bufferList = GetBufferComponentListForType<T>();
-      if(bufferList == nullptr)
+      std::string name(typeid(T).name());
+      if(!IsComponentTypeRegistered<T>())
       {
         std::stringstream error;
-        error << "Component type " << typeid(T).name() << " hasn't been registered!";
+        error << "Component type " << name << " hasn't been registered!";
         throw std::logic_error(error.str());
       }
+
+      auto index = mComponentToIndexMap[name];
+      auto bufferList = dynamic_cast<ComponentListT<T>*>(mBufferLists[index].get());
 
       T component;
       bufferList->AddComponentToEntity(aEntity, component);
@@ -256,10 +256,11 @@ class Scene
     template<typename T>
     void RemoveComponentFromEntity(Entity aEntity)
     {
-      if(GetComponentListForType<T>() == nullptr)
+      std::string name(typeid(T).name());
+      if(!IsComponentTypeRegistered<T>())
       {
         std::stringstream error;
-        error << "Component type " << typeid(T).name() << " hasn't been registered!";
+        error << "Component type " << name << " hasn't been registered!";
         throw std::logic_error(error.str());
       }
 
@@ -275,20 +276,21 @@ class Scene
      * @return Whether the Entity has a component of type T.
      */
     template<typename T>
-    bool DoesEntityHaveComponent(Entity aEntity)
+    bool DoesEntityHaveComponent(Entity aEntity) const
     {
       bool success = false;
 
-      // Check the current map.
+      // Check the current Signature map.
       auto foundEntity = mEntityToSignatureMap.find(aEntity);
       if(foundEntity != mEntityToSignatureMap.end())
       {
         success = (*foundEntity).second[GetComponentIndex<T>()];
       }
 
+      // If no component is in the current Signature map, check the buffer
+      // Signature map.
       if(!success)
       {
-        // Check the buffer map.
         auto foundBufferEntity = mBufferEntityToSignatureMap.find(aEntity);
         if(foundBufferEntity != mBufferEntityToSignatureMap.end())
         {
@@ -308,25 +310,26 @@ class Scene
     template<typename T>
     T& GetComponentForEntity(Entity aEntity)
     {
+      std::string name(typeid(T).name());
       if(!IsComponentTypeRegistered<T>())
       {
         std::stringstream error;
-        error << "Component type " << typeid(T).name() << " hasn't been registered!";
+        error << "Component type " << name << " hasn't been registered!";
         throw std::logic_error(error.str());
       }
 
-      ComponentListT<T>* list = nullptr;
       auto componentIndex = GetComponentIndex<T>();
 
       // Determine whether to query the current ComponentList or the
       // buffer ComponentList.
+      ComponentListT<T>* list = nullptr;
       if(mEntityToSignatureMap[aEntity][componentIndex])
       {
-        list = GetComponentListForType<T>();
+        list = dynamic_cast<ComponentListT<T>*>(mComponentLists[componentIndex].get());
       }
       else if(mBufferEntityToSignatureMap[aEntity][componentIndex])
       {
-        list = GetBufferComponentListForType<T>();
+        list = dynamic_cast<ComponentListT<T>*>(mBufferLists[componentIndex].get());
       }
 
       if(list == nullptr)
@@ -343,56 +346,16 @@ class Scene
   private:
 
     /**
-     * Returns a list of components for a given type.
-     *
-     * @return A list of components for a given type, or nullptr if
-     *         no such list exists.
-     */
-    template<typename T>
-    ComponentListT<T>* GetComponentListForType()
-    {
-      ComponentListT<T>* componentList = nullptr;
-      for(auto& list : mComponentLists)
-      {
-        componentList = dynamic_cast<ComponentListT<T>*>(list.get());
-        if(componentList != nullptr)
-        {
-          break;
-        }
-      }
-
-      return componentList;
-    }
-
-    /**
-     * Returns a list of buffer components for a given type.
-     *
-     * @return A list of buffer components for a given type, or nullptr if
-     *         no such list exists.
-     */
-    template<typename T>
-    ComponentListT<T>* GetBufferComponentListForType()
-    {
-      ComponentListT<T>* componentList = nullptr;
-      for(auto& list : mBufferLists)
-      {
-        componentList = dynamic_cast<ComponentListT<T>*>(list.get());
-        if(componentList != nullptr)
-        {
-          break;
-        }
-      }
-
-      return componentList;
-    }
-
-    /**
      * Updates the Signature of each Entity.
      */
     void UpdateSignatures();
 
     // Contains each System currently in the Scene.
     std::vector<std::unique_ptr<System>> mSystems;
+
+    // Maps component type names to the index of their
+    // corresponding ComponentList.
+    std::map<std::string, unsigned int> mComponentToIndexMap;
 
     // Represents the current state of each Entity in the Scene.
     std::map<Entity, Signature> mEntityToSignatureMap;
