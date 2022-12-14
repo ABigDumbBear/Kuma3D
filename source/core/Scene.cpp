@@ -107,7 +107,7 @@ bool Scene::IsEntityScheduledForRemoval(Entity aEntity)
 }
 
 /******************************************************************************/
-std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature)
+std::vector<Entity> Scene::GetEntitiesWithSignature(const Signature& aSignature) const
 {
   std::vector<Entity> entities;
 

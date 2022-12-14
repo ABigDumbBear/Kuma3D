@@ -81,7 +81,7 @@ class Scene
      * @param aSignature The Signature to retrieve Entities for.
      * @return A list of Entities that fit the Signature.
      */
-    std::vector<Entity> GetEntitiesWithSignature(const Signature& aSignature);
+    std::vector<Entity> GetEntitiesWithSignature(const Signature& aSignature) const;
 
     /**
      * Returns the Signature for a given Entity.
