@@ -96,6 +96,7 @@ void Scene::RemoveEntity(Entity aEntity)
 
     // Schedule the Entity itself for removal.
     mEntitiesToRemove.emplace_back(aEntity);
+    EntityRemoved.Notify(aEntity, *this);
   }
 }
 

@@ -176,7 +176,7 @@ class ComponentListT : public ComponentList
      *
      * @return A component of type T.
      */
-    T& GetComponentForEntity(Entity aEntity)
+    const T& GetComponentForEntity(Entity aEntity) const
     {
       if(mEntityToIndexMap.find(aEntity) == mEntityToIndexMap.end())
       {
@@ -186,7 +186,19 @@ class ComponentListT : public ComponentList
         throw std::invalid_argument(error.str());
       }
 
-      return mComponents[mEntityToIndexMap[aEntity]];
+      return mComponents.at(mEntityToIndexMap.at(aEntity));
+    }
+
+    /**
+     * Returns a component of type T associated with the given Entity. This
+     * version of the function provides write access to the component.
+     *
+     * @return A component of type T.
+     */
+    T& GetComponentForEntity(Entity aEntity)
+    {
+      auto constList = const_cast<const ComponentListT<T>*>(this);
+      return const_cast<T&>(constList->GetComponentForEntity(aEntity));
     }
 
   private:

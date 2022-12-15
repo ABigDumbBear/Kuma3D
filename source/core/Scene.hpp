@@ -308,7 +308,7 @@ class Scene
      * @return A component of type T associated with the given Entity.
      */
     template<typename T>
-    T& GetComponentForEntity(Entity aEntity)
+    const T& GetComponentForEntity(Entity aEntity) const
     {
       std::string name(typeid(T).name());
       if(!IsComponentTypeRegistered<T>())
@@ -323,11 +323,11 @@ class Scene
       // Determine whether to query the current ComponentList or the
       // buffer ComponentList.
       ComponentListT<T>* list = nullptr;
-      if(mEntityToSignatureMap[aEntity][componentIndex])
+      if(mEntityToSignatureMap.at(aEntity).at(componentIndex))
       {
         list = dynamic_cast<ComponentListT<T>*>(mComponentLists[componentIndex].get());
       }
-      else if(mBufferEntityToSignatureMap[aEntity][componentIndex])
+      else if(mBufferEntityToSignatureMap.at(aEntity).at(componentIndex))
       {
         list = dynamic_cast<ComponentListT<T>*>(mBufferLists[componentIndex].get());
       }
@@ -341,6 +341,20 @@ class Scene
       }
 
       return list->GetComponentForEntity(aEntity);
+    }
+
+    /**
+     * Returns a component of type T associated with the given Entity. This
+     * version of the function provides write access.
+     *
+     * @param aEntity The Entity to retrieve a component for.
+     * @return A component of type T associated with the given Entity.
+     */
+    template<typename T>
+    T& GetComponentForEntity(Entity aEntity)
+    {
+      auto constScene = const_cast<const Scene*>(this);
+      return const_cast<T&>(constScene->GetComponentForEntity<T>(aEntity));
     }
 
   private:
