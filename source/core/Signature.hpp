@@ -6,7 +6,7 @@
 namespace Kuma3D {
 
 // A Signature is used to identify what components are attached to an Entity.
-using Signature = std::vector<bool>;
+using Signature = std::vector<char>;
 
 /**
  * Returns whether a Signature is relevant to another Signature (whether
