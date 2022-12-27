@@ -56,6 +56,20 @@ class ComponentListT : public ComponentList
   public:
 
     /**
+     * Constructor.
+     *
+     * @param aMaxEntities The maximum number of Entities.
+     */
+    ComponentListT<T>(int aMaxEntities)
+    {
+      // Create an object for each possible Entity.
+      for(int i = 0; i < aMaxEntities; ++i)
+      {
+        mComponents.emplace_back(T());
+      }
+    }
+
+    /**
      * Retrieves a list of Entities that have a component in this list.
      *
      * @return A list of Entities that have a component in this list.
@@ -77,8 +91,8 @@ class ComponentListT : public ComponentList
      */
     void Clear() override
     {
-      mComponents.clear();
       mEntityToIndexMap.clear();
+      mSize = 0;
     }
 
     /**
@@ -98,13 +112,9 @@ class ComponentListT : public ComponentList
 
       for(const auto& entity : list->GetEntities())
       {
-        // Retrieve the component for this Entity.
+        // Retrieve the component for this Entity and add it to this list.
         auto& component = list->GetComponentForEntity(entity);
-
-        // Update the EntityToIndex map and move the component into this list.
-        int index = mComponents.size();
-        mEntityToIndexMap.emplace(entity, index);
-        mComponents.emplace_back(std::move(component));
+        AddComponentToEntity(entity, component);
       }
 
       // Clear out the merged list.
@@ -131,9 +141,11 @@ class ComponentListT : public ComponentList
         throw std::invalid_argument(error.str());
       }
 
-      auto newIndex = mComponents.size();
-      mEntityToIndexMap.emplace(aEntity, newIndex);
-      mComponents.emplace_back(std::move(aComponent));
+      auto index = mSize;
+      mComponents[index] = std::move(aComponent);
+      ++mSize;
+
+      mEntityToIndexMap.emplace(aEntity, index);
     }
 
     /**
@@ -204,6 +216,8 @@ class ComponentListT : public ComponentList
   private:
     std::map<Entity, unsigned int> mEntityToIndexMap;
     std::vector<T> mComponents;
+
+    int mSize { 0 };  // The number of valid components.
 };
 
 } // namespace Kuma3D
