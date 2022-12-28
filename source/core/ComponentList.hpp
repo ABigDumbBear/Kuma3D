@@ -26,11 +26,6 @@ class ComponentList
     virtual ~ComponentList() = default;
 
     /**
-     * Clears out all components in this list.
-     */
-    virtual void Clear() = 0;
-
-    /**
      * Takes all the components from a given list and adds them into this one.
      *
      * @param aList The list to merge.
@@ -89,7 +84,7 @@ class ComponentListT : public ComponentList
     /**
      * Clears out all components in this list.
      */
-    void Clear() override
+    void Clear()
     {
       mEntityToIndexMap.clear();
       mSize = 0;
@@ -118,7 +113,7 @@ class ComponentListT : public ComponentList
       }
 
       // Clear out the merged list.
-      aList.Clear();
+      list->Clear();
     }
 
     /**

@@ -5,6 +5,12 @@
 namespace Kuma3D {
 
 /******************************************************************************/
+Scene::Scene(unsigned int aMaxEntities)
+  : mMaxEntities(aMaxEntities)
+{
+}
+
+/******************************************************************************/
 void Scene::OperateSystems(double aTime)
 {
   // Perform logic for each System.
