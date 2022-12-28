@@ -162,8 +162,8 @@ class Scene
       }
 
       // Create two new ComponentLists.
-      mComponentLists.emplace_back(std::make_unique<ComponentListT<T>>());
-      mBufferLists.emplace_back(std::make_unique<ComponentListT<T>>());
+      mComponentLists.emplace_back(std::make_unique<ComponentListT<T>>(5000));
+      mBufferLists.emplace_back(std::make_unique<ComponentListT<T>>(5000));
 
       // Update the ComponentToIndex map.
       mComponentToIndexMap.emplace(name, mComponentLists.size() - 1);

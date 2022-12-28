@@ -23,7 +23,7 @@ struct TestComponentB
 /******************************************************************************/
 inline void TestComponentListAddition()
 {
-  ComponentListT<TestComponentA> list;
+  ComponentListT<TestComponentA> list(5);
   TestComponentA component;
   component.mValue = 55;
 
@@ -46,7 +46,7 @@ inline void TestComponentListAddition()
 /******************************************************************************/
 inline void TestComponentListRemoval()
 {
-  ComponentListT<TestComponentA> list;
+  ComponentListT<TestComponentA> list(5);
 
   TestComponentA transform;
   list.AddComponentToEntity(0, transform);
@@ -68,8 +68,8 @@ inline void TestComponentListRemoval()
 /******************************************************************************/
 inline void TestComponentListMerge()
 {
-  ComponentListT<TestComponentA> listA;
-  ComponentListT<TestComponentA> listB;
+  ComponentListT<TestComponentA> listA(5);
+  ComponentListT<TestComponentA> listB(5);
 
   TestComponentA componentA;
   componentA.mValue = 55;

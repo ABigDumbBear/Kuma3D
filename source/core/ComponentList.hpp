@@ -60,7 +60,7 @@ class ComponentListT : public ComponentList
      *
      * @param aMaxEntities The maximum number of Entities.
      */
-    ComponentListT<T>(int aMaxEntities)
+    ComponentListT<T>(unsigned int aMaxEntities)
     {
       // Create an object for each possible Entity.
       for(int i = 0; i < aMaxEntities; ++i)
@@ -163,24 +163,24 @@ class ComponentListT : public ComponentList
         throw std::invalid_argument(error.str());
       }
 
-      // Erase the component at the correct index for the Entity.
-      auto removedComponentIndex = mEntityToIndexMap[aEntity];
-      mComponents.erase(mComponents.begin() + removedComponentIndex);
+      // Move the last valid component into the removed component's spot.
+      auto index = mEntityToIndexMap[aEntity];
+      mComponents[index] = std::move(mComponents[mSize - 1]);
 
-      // Remove the entry from the EntityToIndex map.
-      mEntityToIndexMap.erase(aEntity);
-
-      // Erasing an item from a vector shifts each item afterwards back
-      // by one. So, in order to keep the EntityToIndex map valid, each
-      // index greater than or equal to the index of the erased item needs
-      // to be decremented by one.
+      // Find the Entity that corresponds to the last valid component
+      // and update its index.
       for(auto& entityIndexPair : mEntityToIndexMap)
       {
-        if(entityIndexPair.second >= removedComponentIndex)
+        if(entityIndexPair.second == (mSize - 1))
         {
-          --entityIndexPair.second;
+          entityIndexPair.second = index;
+          break;
         }
       }
+      --mSize;
+
+      // Remove the Entity from the index map.
+      mEntityToIndexMap.erase(aEntity);
     }
 
     /**
@@ -217,7 +217,7 @@ class ComponentListT : public ComponentList
     std::map<Entity, unsigned int> mEntityToIndexMap;
     std::vector<T> mComponents;
 
-    int mSize { 0 };  // The number of valid components.
+    unsigned int mSize { 0 };  // The number of valid components.
 };
 
 } // namespace Kuma3D
