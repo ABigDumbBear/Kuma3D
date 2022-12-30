@@ -53,6 +53,12 @@ void RenderSystem::Initialize(Scene& aScene)
     this->HandleGamePendingExit(aTime);
   });
 
+  FramebufferResized.Connect(mObserver, [this](int aWidth, int aHeight)
+  {
+    this->mFramebufferWidth = aWidth;
+    this->mFramebufferHeight = aHeight;
+  });
+
   // Enable OpenGL blending.
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -253,7 +259,14 @@ void RenderSystem::DrawEntities(Scene& aScene,
   auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
 
   // Set the viewport to fit the camera.
-  glViewport(0.0, 0.0, camera.mViewportX, camera.mViewportY);
+  if(camera.mUseWindowAsViewport)
+  {
+    glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
+  }
+  else
+  {
+    glViewport(0, 0, camera.mViewportX, camera.mViewportY);
+  }
 
   auto viewMatrix = CalculateViewMatrix(camera, cameraTransform);
 

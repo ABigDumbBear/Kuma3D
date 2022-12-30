@@ -5,6 +5,7 @@
 
 namespace Kuma3D {
 
+extern SignalT<int, int> FramebufferResized;
 extern SignalT<double> GamePendingExit;
 
 } // namespace Kuma3D

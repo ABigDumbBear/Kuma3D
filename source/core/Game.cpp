@@ -29,7 +29,7 @@ void GLFWErrorCallback(int aError, const char* aDescription)
 /*****************************************************************************/
 void GLFWFramebufferSizeCallback(GLFWwindow* aWindow, int aWidth, int aHeight)
 {
-  //glViewport(0, 0, aWidth, aHeight);
+  FramebufferResized.Notify(aWidth, aHeight);
 }
 
 /*****************************************************************************/

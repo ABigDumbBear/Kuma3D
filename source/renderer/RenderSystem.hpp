@@ -134,6 +134,9 @@ class RenderSystem : public System
     std::map<Entity, unsigned int> mVertexBufferMap;
     std::map<Entity, unsigned int> mElementBufferMap;
 
+    int mFramebufferWidth { 0 };
+    int mFramebufferHeight { 0 };
+
     Observer mObserver;
 };
 
