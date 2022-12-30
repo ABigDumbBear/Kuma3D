@@ -371,9 +371,18 @@ void RenderSystem::UpdateBuffersForEntity(Entity aEntity,
                         sizeof(MeshVertex),
                         (void*)(offsetof(MeshVertex, mColor)));
 
-  // Configure the vertex texture coordinates.
+  // Configure the vertex normal attributes.
   glEnableVertexAttribArray(2);
   glVertexAttribPointer(2,
+                        3,
+                        GL_FLOAT,
+                        GL_FALSE,
+                        sizeof(MeshVertex),
+                        (void*)(offsetof(MeshVertex, mNormal)));
+
+  // Configure the vertex texture coordinates.
+  glEnableVertexAttribArray(3);
+  glVertexAttribPointer(3,
                         2,
                         GL_FLOAT,
                         GL_FALSE,

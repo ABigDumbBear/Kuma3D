@@ -46,7 +46,19 @@ struct MeshVertex
 {
   Vec3 mPosition; // location = 0
   Vec3 mColor; // location = 1
-  float mTexCoords[2] { 0.0, 0.0 }; // location = 2
+  Vec3 mNormal; // location = 2
+  float mTexCoords[2] { 0.0, 0.0 }; // location = 3
+};
+
+/**
+ * A struct that defines how a Mesh responds to light.
+ */
+struct Material
+{
+  Vec3 mAmbientColor { 1, 1, 1 };
+  Vec3 mDiffuseColor { 1, 1, 1 };
+  Vec3 mSpecularColor { 1, 1, 1 };
+  float mShininess { 1 };
 };
 
 /**
@@ -61,6 +73,8 @@ struct Mesh
   std::vector<unsigned int> mIndices;
   std::vector<ID> mTextures;
   std::vector<ID> mShaders;
+
+  Material mMaterial;
 
   bool mUseDepthTesting { true };
 
