@@ -75,8 +75,8 @@ ID TextureLoader::LoadTextureFromData(unsigned char* aData,
 
   switch(aFilterOption)
   {
-    case TextureFilterOption::eNEAREST: { filterOption = GL_NEAREST_MIPMAP_NEAREST; break; }
-    case TextureFilterOption::eLINEAR: { filterOption = GL_LINEAR_MIPMAP_LINEAR; break; }
+    case TextureFilterOption::eNEAREST: { filterOption = GL_NEAREST; break; }
+    case TextureFilterOption::eLINEAR: { filterOption = GL_LINEAR; break; }
   }
 
   // Set default texture wrapping and filtering options.
