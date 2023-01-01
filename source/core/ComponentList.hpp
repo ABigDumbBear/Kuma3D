@@ -53,12 +53,12 @@ class ComponentListT : public ComponentList
     /**
      * Constructor.
      *
-     * @param aMaxEntities The maximum number of Entities.
+     * @param aMax The maximum number of components.
      */
-    ComponentListT<T>(unsigned int aMaxEntities)
+    ComponentListT<T>(size_t aMax)
     {
-      // Create an object for each possible Entity.
-      for(int i = 0; i < aMaxEntities; ++i)
+      // Initialize the vector with empty components.
+      for(size_t i = 0; i < aMax; ++i)
       {
         mComponents.emplace_back(T());
       }
@@ -87,7 +87,7 @@ class ComponentListT : public ComponentList
     void Clear()
     {
       mEntityToIndexMap.clear();
-      mSize = 0;
+      mNumValidComponents = 0;
     }
 
     /**
@@ -118,7 +118,8 @@ class ComponentListT : public ComponentList
 
     /**
      * Adds a component to the list. Note that Entities are not allowed
-     * to have multiple components of the same type.
+     * to have multiple components of the same type. If the ComponentList
+     * is full, this function does nothing.
      *
      * The component is moved (not copied) into the underlying container.
      *
@@ -136,11 +137,14 @@ class ComponentListT : public ComponentList
         throw std::invalid_argument(error.str());
       }
 
-      auto index = mSize;
-      mComponents[index] = std::move(aComponent);
-      ++mSize;
+      if(mNumValidComponents < mComponents.size())
+      {
+        auto index = mNumValidComponents;
+        mComponents[index] = std::move(aComponent);
+        ++mNumValidComponents;
 
-      mEntityToIndexMap.emplace(aEntity, index);
+        mEntityToIndexMap.emplace(aEntity, index);
+      }
     }
 
     /**
@@ -159,20 +163,21 @@ class ComponentListT : public ComponentList
       }
 
       // Move the last valid component into the removed component's spot.
-      auto index = mEntityToIndexMap[aEntity];
-      mComponents[index] = std::move(mComponents[mSize - 1]);
+      auto removedIndex = mEntityToIndexMap[aEntity];
+      auto lastValidIndex = mNumValidComponents - 1;
+      mComponents[removedIndex] = std::move(mComponents[lastValidIndex]);
 
       // Find the Entity that corresponds to the last valid component
       // and update its index.
       for(auto& entityIndexPair : mEntityToIndexMap)
       {
-        if(entityIndexPair.second == (mSize - 1))
+        if(entityIndexPair.second == lastValidIndex)
         {
-          entityIndexPair.second = index;
+          entityIndexPair.second = removedIndex;
           break;
         }
       }
-      --mSize;
+      --mNumValidComponents;
 
       // Remove the Entity from the index map.
       mEntityToIndexMap.erase(aEntity);
@@ -212,7 +217,7 @@ class ComponentListT : public ComponentList
     std::map<Entity, unsigned int> mEntityToIndexMap;
     std::vector<T> mComponents;
 
-    unsigned int mSize { 0 };  // The number of valid components.
+    size_t mNumValidComponents { 0 };
 };
 
 } // namespace Kuma3D
