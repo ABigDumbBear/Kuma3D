@@ -66,7 +66,7 @@ class TextureLoader
     static ID LoadTextureFromFile(const std::string& aFilePath,
                                   TextureStorageFormat aFormat = TextureStorageFormat::eRGBA,
                                   TextureWrapOption aWrapOption = TextureWrapOption::eREPEAT,
-                                  TextureFilterOption aFilterOption = TextureFilterOption::eLINEAR);
+                                  TextureFilterOption aFilterOption = TextureFilterOption::eNEAREST);
 
     /**
      * Creates an OpenGL texture from preloaded image data.

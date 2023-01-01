@@ -44,13 +44,6 @@ class Scene
   public:
 
     /**
-     * Constructor.
-     *
-     * @param aMaxEntities The maximum number of Entities allowed in the Scene.
-     */
-    Scene(unsigned int aMaxEntities = 5000);
-
-    /**
      * Asks each system to perform its logic. Note that systems will
      * perform logic in the order in which they were added.
      *
@@ -156,9 +149,12 @@ class Scene
 
     /**
      * "Registers" a component type by creating a ComponentList for that type.
+     *
+     * @param aMax The maximum amount of components of this type. The default
+     *             is 5000.
      */
     template<typename T>
-    void RegisterComponentType()
+    void RegisterComponentType(size_t aMax = 5000)
     {
       std::string name(typeid(T).name());
       if(IsComponentTypeRegistered<T>())
@@ -169,8 +165,8 @@ class Scene
       }
 
       // Create two new ComponentLists.
-      mComponentLists.emplace_back(std::make_unique<ComponentListT<T>>(mMaxEntities));
-      mBufferLists.emplace_back(std::make_unique<ComponentListT<T>>(mMaxEntities));
+      mComponentLists.emplace_back(std::make_unique<ComponentListT<T>>(aMax));
+      mBufferLists.emplace_back(std::make_unique<ComponentListT<T>>(aMax));
 
       // Update the ComponentToIndex map.
       mComponentToIndexMap.emplace(name, mComponentLists.size() - 1);
@@ -392,8 +388,6 @@ class Scene
     std::vector<std::pair<Entity, unsigned int>> mComponentsToRemove;
 
     IDGenerator mEntityGenerator;
-
-    unsigned int mMaxEntities { 0 };
 };
 
 } // namespace Kuma3D
