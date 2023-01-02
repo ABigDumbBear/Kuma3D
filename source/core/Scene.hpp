@@ -2,9 +2,9 @@
 #define SCENE_HPP
 
 #include <algorithm>
-#include <map>
 #include <memory>
 #include <typeinfo>
+#include <unordered_map>
 #include <vector>
 
 #include <sstream>
@@ -372,15 +372,15 @@ class Scene
 
     // Maps component type names to the index of their
     // corresponding ComponentList.
-    std::map<std::string, unsigned int> mComponentToIndexMap;
+    std::unordered_map<std::string, unsigned int> mComponentToIndexMap;
 
     // Represents the current state of each Entity in the Scene.
-    std::map<Entity, Signature> mEntityToSignatureMap;
+    std::unordered_map<Entity, Signature> mEntityToSignatureMap;
     std::vector<std::unique_ptr<ComponentList>> mComponentLists;
 
     // Represents the buffered state of each Entity in the Scene,
     // which will become current at the end of each frame.
-    std::map<Entity, Signature> mBufferEntityToSignatureMap;
+    std::unordered_map<Entity, Signature> mBufferEntityToSignatureMap;
     std::vector<std::unique_ptr<ComponentList>> mBufferLists;
 
     // Contains all data to remove at the end of each frame.

@@ -1,7 +1,7 @@
 #ifndef COMPONENTLIST_HPP
 #define COMPONENTLIST_HPP
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 #include <sstream>
@@ -214,7 +214,7 @@ class ComponentListT : public ComponentList
     }
 
   private:
-    std::map<Entity, unsigned int> mEntityToIndexMap;
+    std::unordered_map<Entity, unsigned int> mEntityToIndexMap;
     std::vector<T> mComponents;
 
     size_t mNumValidComponents { 0 };
