@@ -184,17 +184,17 @@ Kuma3D::Transform CreateRandomTransform(std::random_device& aDevice)
   Kuma3D::Transform transform;
 
   std::mt19937 generator(aDevice());
-  std::uniform_real_distribution<> dist(-100, 100);
+  std::uniform_real_distribution<> dist(-50, 50);
 
   transform.mPosition.x = dist(generator);
   transform.mPosition.y = dist(generator);
-  transform.mPosition.z = std::min(-10.0, dist(generator));
+  transform.mPosition.z = dist(generator) - 70;
 
   return transform;
 }
 
 /******************************************************************************/
-int main()
+int main(int argc, char* argv[])
 {
   Kuma3D::WindowOptions options;
   options.mWidth = 1280;
@@ -211,6 +211,10 @@ int main()
   auto scene = std::make_unique<Kuma3D::Scene>();
 
   int numCubes = 5000;
+  if(argc >= 2)
+  {
+    numCubes = std::atoi(argv[1]);
+  }
   scene->RegisterComponentType<Kuma3D::Camera>(1);
   scene->RegisterComponentType<Kuma3D::Transform>(numCubes + 1);
   scene->RegisterComponentType<Kuma3D::Mesh>(numCubes);
