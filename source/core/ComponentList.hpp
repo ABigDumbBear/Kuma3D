@@ -1,11 +1,8 @@
 #ifndef COMPONENTLIST_HPP
 #define COMPONENTLIST_HPP
 
-#include <map>
+#include <unordered_map>
 #include <vector>
-
-#include <sstream>
-#include <stdexcept>
 
 #include "Entity.hpp"
 
@@ -24,13 +21,6 @@ class ComponentList
 {
   public:
     virtual ~ComponentList() = default;
-
-    /**
-     * Takes all the components from a given list and adds them into this one.
-     *
-     * @param aList The list to merge.
-     */
-    virtual void Merge(ComponentList& aList) = 0;
 
     /**
      * Removes a component from a given Entity. This is made virtual so that
@@ -55,65 +45,13 @@ class ComponentListT : public ComponentList
      *
      * @param aMax The maximum number of components.
      */
-    ComponentListT<T>(size_t aMax)
+    ComponentListT<T>(std::size_t aMax)
     {
-      // Initialize the vector with empty components.
-      for(size_t i = 0; i < aMax; ++i)
+      // Initialize the vector with default components.
+      for(std::size_t i = 0; i < aMax; ++i)
       {
         mComponents.emplace_back(T());
       }
-    }
-
-    /**
-     * Retrieves a list of Entities that have a component in this list.
-     *
-     * @return A list of Entities that have a component in this list.
-     */
-    std::vector<Entity> GetEntities() const
-    {
-      std::vector<Entity> entities;
-
-      for(const auto& entityIndexPair : mEntityToIndexMap)
-      {
-        entities.emplace_back(entityIndexPair.first);
-      }
-
-      return entities;
-    }
-
-    /**
-     * Clears out all components in this list.
-     */
-    void Clear()
-    {
-      mEntityToIndexMap.clear();
-      mNumValidComponents = 0;
-    }
-
-    /**
-     * Takes all the components from a given list and adds them into this one.
-     *
-     * @param aList The list to merge.
-     */
-    void Merge(ComponentList& aList) override
-    {
-      auto list = dynamic_cast<ComponentListT<T>*>(&aList);
-      if(list == nullptr)
-      {
-        std::stringstream error;
-        error << "Two ComponentLists of different types can't be merged!";
-        throw std::invalid_argument(error.str());
-      }
-
-      for(const auto& entity : list->GetEntities())
-      {
-        // Retrieve the component for this Entity and add it to this list.
-        auto& component = list->GetComponentForEntity(entity);
-        AddComponentToEntity(entity, component);
-      }
-
-      // Clear out the merged list.
-      list->Clear();
     }
 
     /**
@@ -129,14 +67,6 @@ class ComponentListT : public ComponentList
     void AddComponentToEntity(Entity aEntity,
                               T& aComponent)
     {
-      if(mEntityToIndexMap.find(aEntity) != mEntityToIndexMap.end())
-      {
-        std::stringstream error;
-        error << "Entity " << aEntity << " already has a component of type ";
-        error << typeid(T).name();
-        throw std::invalid_argument(error.str());
-      }
-
       if(mNumValidComponents < mComponents.size())
       {
         auto index = mNumValidComponents;
@@ -154,14 +84,6 @@ class ComponentListT : public ComponentList
      */
     void RemoveComponentFromEntity(Entity aEntity) override
     {
-      if(mEntityToIndexMap.find(aEntity) == mEntityToIndexMap.end())
-      {
-        std::stringstream error;
-        error << "Entity " << aEntity << " doesn't have a component of type ";
-        error << typeid(T).name();
-        throw std::invalid_argument(error.str());
-      }
-
       // Move the last valid component into the removed component's spot.
       auto removedIndex = mEntityToIndexMap[aEntity];
       auto lastValidIndex = mNumValidComponents - 1;
@@ -190,14 +112,6 @@ class ComponentListT : public ComponentList
      */
     const T& GetComponentForEntity(Entity aEntity) const
     {
-      if(mEntityToIndexMap.find(aEntity) == mEntityToIndexMap.end())
-      {
-        std::stringstream error;
-        error << "Entity " << aEntity << " doesn't have a component of type ";
-        error << typeid(T).name();
-        throw std::invalid_argument(error.str());
-      }
-
       return mComponents.at(mEntityToIndexMap.at(aEntity));
     }
 
@@ -214,10 +128,10 @@ class ComponentListT : public ComponentList
     }
 
   private:
-    std::map<Entity, unsigned int> mEntityToIndexMap;
+    std::unordered_map<Entity, unsigned int> mEntityToIndexMap;
     std::vector<T> mComponents;
 
-    size_t mNumValidComponents { 0 };
+    std::size_t mNumValidComponents { 0 };
 };
 
 } // namespace Kuma3D
