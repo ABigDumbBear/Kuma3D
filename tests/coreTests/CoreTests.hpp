@@ -29,18 +29,8 @@ inline void TestComponentListAddition()
 
   list.AddComponentToEntity(0, component);
 
-  bool accessFailed = false;
-  try
-  {
-    component = list.GetComponentForEntity(0);
-    assert(component.mValue == 55);
-  }
-  catch(const std::invalid_argument& e)
-  {
-    accessFailed = true;
-  }
-
-  assert(!accessFailed);
+  auto& test = list.GetComponentForEntity(0);
+  assert(test.mValue == 55);
 }
 
 /******************************************************************************/
@@ -57,39 +47,11 @@ inline void TestComponentListRemoval()
   {
     transform = list.GetComponentForEntity(0);
   }
-  catch(const std::invalid_argument& e)
+  catch(const std::out_of_range& e)
   {
     accessFailed = true;
   }
 
-  assert(accessFailed);
-}
-
-/******************************************************************************/
-inline void TestComponentListMerge()
-{
-  ComponentListT<TestComponentA> listA(5);
-  ComponentListT<TestComponentA> listB(5);
-
-  TestComponentA componentA;
-  componentA.mValue = 55;
-  listA.AddComponentToEntity(0, componentA);
-  listB.Merge(listA);
-
-  // Check that the TestComponentA was moved to List B.
-  auto& componentB = listB.GetComponentForEntity(0);
-  assert(componentB.mValue == 55);
-
-  // Check that there is no longer any TestComponentA in List A.
-  bool accessFailed = false;
-  try
-  {
-    auto& componentC = listA.GetComponentForEntity(0);
-  }
-  catch(const std::invalid_argument& e)
-  {
-    accessFailed = true;
-  }
   assert(accessFailed);
 }
 
@@ -106,8 +68,6 @@ inline void TestEntityAddition()
   component.mValue = 55;
   scene.AddComponentToEntity<TestComponentA>(entity, component);
   scene.OperateSystems(0);
-
-  assert(scene.DoesEntityHaveComponent<TestComponentA>(entity));
 
   // Retrieve the TestComponentA and check it.
   auto& componentCheck = scene.GetComponentForEntity<TestComponentA>(entity);
@@ -132,8 +92,6 @@ inline void TestEntityRemoval()
   assert(scene.IsEntityScheduledForRemoval(entity));
   scene.OperateSystems(0);
   assert(!scene.IsEntityScheduledForRemoval(entity));
-
-  assert(!scene.DoesEntityHaveComponent<TestComponentA>(0));
 }
 
 /******************************************************************************/

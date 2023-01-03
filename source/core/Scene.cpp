@@ -35,12 +35,6 @@ void Scene::OperateSystems(double aTime)
   }
   mEntitiesToRemove.clear();
 
-  // Merge all buffer lists with their corresponding component list.
-  for(int i = 0; i < mBufferLists.size(); ++i)
-  {
-    mComponentLists[i]->Merge(*mBufferLists[i]);
-  }
-
   // Update the current EntityToSignatureMap.
   for(const auto& entitySignaturePair : mBufferEntityToSignatureMap)
   {
