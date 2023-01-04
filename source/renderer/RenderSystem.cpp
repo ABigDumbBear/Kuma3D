@@ -15,6 +15,7 @@
 #include "ShaderLoader.hpp"
 
 #include "Camera.hpp"
+#include "Light.hpp"
 #include "Transform.hpp"
 
 namespace Kuma3D {
@@ -255,6 +256,11 @@ void RenderSystem::DrawEntities(Scene& aScene,
                                 Entity aCamera,
                                 const std::vector<Entity>& aEntities)
 {
+  auto lightSignature = aScene.CreateSignature();
+  lightSignature[aScene.GetComponentIndex<Light>()] = true;
+  lightSignature[aScene.GetComponentIndex<Transform>()] = true;
+  auto lights = aScene.GetEntitiesWithSignature(lightSignature);
+
   auto& camera = aScene.GetComponentForEntity<Camera>(aCamera);
   auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
 
@@ -324,6 +330,33 @@ void RenderSystem::DrawEntities(Scene& aScene,
         auto matrix = CalculateProjectionMatrix(entityMesh.mSystem, camera);
         ShaderLoader::SetMat4(shader, "projectionMatrix", matrix);
       }
+
+      // Set the material properties.
+      if(ShaderLoader::IsUniformDefined(shader, "material.mAmbient"))
+      {
+        ShaderLoader::SetVec3(shader, "material.mAmbient", entityMesh.mMaterial.mAmbientColor);
+      }
+
+      if(ShaderLoader::IsUniformDefined(shader, "material.mDiffuse"))
+      {
+        ShaderLoader::SetVec3(shader, "material.mDiffuse", entityMesh.mMaterial.mDiffuseColor);
+      }
+
+      if(ShaderLoader::IsUniformDefined(shader, "material.mSpecular"))
+      {
+        ShaderLoader::SetVec3(shader, "material.mSpecular", entityMesh.mMaterial.mSpecularColor);
+      }
+
+      if(ShaderLoader::IsUniformDefined(shader, "material.mShininess"))
+      {
+        ShaderLoader::SetFloat(shader, "material.mShininess", entityMesh.mMaterial.mShininess);
+      }
+
+      // Do light stuff
+      auto& lightTransform = aScene.GetComponentForEntity<Transform>(lights[0]);
+      //auto lightPos = CalculateModelMatrix(lightTransform) * lightTransform.mPosition;
+      //ShaderLoader::SetVec3(shader, "lightPos", lightPos);
+      ShaderLoader::SetVec3(shader, "lightPos", lightTransform.mPosition);
 
       // Draw the mesh.
       glBindVertexArray(mVertexArrayMap[entity]);

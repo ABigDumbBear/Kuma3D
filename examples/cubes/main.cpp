@@ -11,6 +11,7 @@
 #include <TextureLoader.hpp>
 
 #include <Camera.hpp>
+#include <Light.hpp>
 #include <Mesh.hpp>
 #include <Transform.hpp>
 
@@ -25,6 +26,7 @@ Kuma3D::Mesh CreateCubeMesh()
 
   // Front face
   vertex.mPosition = Kuma3D::Vec3(0, 0, 0);
+  vertex.mNormal = Kuma3D::Vec3(0, 0, -1);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
@@ -50,6 +52,7 @@ Kuma3D::Mesh CreateCubeMesh()
 
   // Top face
   vertex.mPosition = Kuma3D::Vec3(0, 1, 0);
+  vertex.mNormal = Kuma3D::Vec3(0, 1, 0);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
@@ -75,6 +78,7 @@ Kuma3D::Mesh CreateCubeMesh()
 
   // Back face
   vertex.mPosition = Kuma3D::Vec3(0, 0, 1);
+  vertex.mNormal = Kuma3D::Vec3(0, 0, 1);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
@@ -100,6 +104,7 @@ Kuma3D::Mesh CreateCubeMesh()
 
   // Left face
   vertex.mPosition = Kuma3D::Vec3(0, 0, 1);
+  vertex.mNormal = Kuma3D::Vec3(-1, 0, 0);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
@@ -125,6 +130,7 @@ Kuma3D::Mesh CreateCubeMesh()
 
   // Bottom face
   vertex.mPosition = Kuma3D::Vec3(0, 0, 1);
+  vertex.mNormal = Kuma3D::Vec3(0, -1, 0);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
@@ -150,6 +156,7 @@ Kuma3D::Mesh CreateCubeMesh()
 
   // Right face
   vertex.mPosition = Kuma3D::Vec3(1, 0, 0);
+  vertex.mNormal = Kuma3D::Vec3(1, 0, 0);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
@@ -205,7 +212,12 @@ int main(int argc, char* argv[])
   Kuma3D::Game::Initialize(options);
   auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/CubeShader.vert",
                                                             "resources/shaders/CubeShader.frag");
-  auto textureID = Kuma3D::TextureLoader::LoadTextureFromFile("resources/texture.png");
+  auto lightShaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/LightShader.vert",
+                                                                 "resources/shaders/LightShader.frag");
+  auto textureID = Kuma3D::TextureLoader::LoadTextureFromFile("resources/texture.png",
+                                                              Kuma3D::TextureStorageFormat::eRGBA,
+                                                              Kuma3D::TextureWrapOption::eREPEAT,
+                                                              Kuma3D::TextureFilterOption::eNEAREST);
 
   // Create a scene, a camera, and a bunch of cubes.
   auto scene = std::make_unique<Kuma3D::Scene>();
@@ -216,9 +228,10 @@ int main(int argc, char* argv[])
     numCubes = std::atoi(argv[1]);
   }
   scene->RegisterComponentType<Kuma3D::Camera>(1);
-  scene->RegisterComponentType<Kuma3D::Transform>(numCubes + 1);
-  scene->RegisterComponentType<Kuma3D::Mesh>(numCubes);
-  scene->RegisterComponentType<Cubes::Physics>(numCubes);
+  scene->RegisterComponentType<Kuma3D::Light>(1);
+  scene->RegisterComponentType<Kuma3D::Transform>(numCubes + 2);
+  scene->RegisterComponentType<Kuma3D::Mesh>(numCubes + 1);
+  scene->RegisterComponentType<Cubes::Physics>(numCubes + 1);
 
   auto camera = scene->CreateEntity();
   scene->AddComponentToEntity<Kuma3D::Camera>(camera);
@@ -239,8 +252,22 @@ int main(int argc, char* argv[])
 
     Cubes::Physics physics;
     physics.mAcceleration.y = -9.81;
-    scene->AddComponentToEntity<Cubes::Physics>(cube, physics);
+    //scene->AddComponentToEntity<Cubes::Physics>(cube, physics);
   }
+
+  // Create a light.
+  auto light = scene->CreateEntity();
+  Kuma3D::Transform lightTransform;
+  lightTransform.mPosition = Kuma3D::Vec3(0, 0, -25);
+  scene->AddComponentToEntity<Kuma3D::Transform>(light, lightTransform);
+  scene->AddComponentToEntity<Kuma3D::Light>(light);
+  Cubes::Physics lightPhysics;
+  lightPhysics.mAcceleration.z = -2;
+  lightPhysics.mAcceleration.x = -2;
+  scene->AddComponentToEntity<Cubes::Physics>(light, lightPhysics);
+  auto lightMesh = CreateCubeMesh();
+  lightMesh.mShaders.emplace_back(lightShaderID);
+  scene->AddComponentToEntity<Kuma3D::Mesh>(light, lightMesh);
 
   // Add a PhysicsSystem to move the cubes, and a RenderSystem to draw them.
   scene->AddSystem(std::make_unique<Cubes::PhysicsSystem>());
