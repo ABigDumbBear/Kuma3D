@@ -100,8 +100,7 @@ class Scene
     template<typename T>
     unsigned int GetComponentIndex() const
     {
-      std::string name(typeid(T).name());
-      return mComponentToIndexMap.at(name);
+      return mComponentToIndexMap.at(typeid(T).name());
     }
 
     /**
@@ -117,8 +116,7 @@ class Scene
       mComponentLists.emplace_back(std::make_unique<ComponentListT<T>>(aMax));
 
       // Update the ComponentToIndex map.
-      std::string name(typeid(T).name());
-      mComponentToIndexMap.emplace(name, mComponentLists.size() - 1);
+      mComponentToIndexMap.emplace(typeid(T).name(), mComponentLists.size() - 1);
 
       // Update the EntityToSignature maps.
       UpdateSignatures();
@@ -132,8 +130,7 @@ class Scene
     template<typename T>
     bool IsComponentTypeRegistered() const
     {
-      std::string name(typeid(T).name());
-      return mComponentToIndexMap.find(name) != mComponentToIndexMap.end();
+      return mComponentToIndexMap.find(typeid(T).name()) != mComponentToIndexMap.end();
     }
 
     /**
@@ -146,8 +143,7 @@ class Scene
     template<typename T>
     void AddComponentToEntity(Entity aEntity, T& aComponent)
     {
-      std::string name(typeid(T).name());
-      auto index = mComponentToIndexMap[name];
+      auto index = mComponentToIndexMap[typeid(T).name()];
       auto list = dynamic_cast<ComponentListT<T>*>(mComponentLists[index].get());
       list->AddComponentToEntity(aEntity, aComponent);
 
@@ -169,8 +165,7 @@ class Scene
     template<typename T>
     void AddComponentToEntity(Entity aEntity)
     {
-      std::string name(typeid(T).name());
-      auto index = mComponentToIndexMap[name];
+      auto index = mComponentToIndexMap[typeid(T).name()];
       auto list = dynamic_cast<ComponentListT<T>*>(mComponentLists[index].get());
 
       T component;
@@ -241,7 +236,7 @@ class Scene
     std::vector<std::unique_ptr<ComponentList>> mComponentLists;
 
     // Maps component type names to the index of their corresponding ComponentList.
-    std::unordered_map<std::string, unsigned int> mComponentToIndexMap;
+    std::unordered_map<const char*, unsigned int> mComponentToIndexMap;
 
     // Represents the current state of each Entity in the Scene.
     std::unordered_map<Entity, Signature> mEntityToSignatureMap;

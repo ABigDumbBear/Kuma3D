@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
 
     Cubes::Physics physics;
     physics.mAcceleration.y = -9.81;
-    //scene->AddComponentToEntity<Cubes::Physics>(cube, physics);
+    scene->AddComponentToEntity<Cubes::Physics>(cube, physics);
   }
 
   // Create a light.
@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
   Cubes::Physics lightPhysics;
   lightPhysics.mAcceleration.z = -2;
   lightPhysics.mAcceleration.x = -2;
-  scene->AddComponentToEntity<Cubes::Physics>(light, lightPhysics);
+  //scene->AddComponentToEntity<Cubes::Physics>(light, lightPhysics);
   auto lightMesh = CreateCubeMesh();
   lightMesh.mShaders.emplace_back(lightShaderID);
   scene->AddComponentToEntity<Kuma3D::Mesh>(light, lightMesh);

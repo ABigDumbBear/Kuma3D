@@ -67,74 +67,35 @@ void ShaderLoader::UnloadShaders()
 }
 
 /******************************************************************************/
-bool ShaderLoader::IsUniformDefined(const ID& aID,
-                                    const std::string& aName)
-{
-  return glGetUniformLocation(aID, aName.c_str()) != -1;
-}
-
-/******************************************************************************/
 void ShaderLoader::SetInt(const ID& aID, const std::string& aName, int aValue)
 {
   int loc = glGetUniformLocation(aID, aName.c_str());
-  if(loc != -1)
-  {
-    glUseProgram(aID);
-    glUniform1i(loc, aValue);
-  }
-  else
-  {
-    std::cout << "Uniform " << aName << " does not exist "
-              << "or is reserved!" << std::endl;
-  }
+  glUseProgram(aID);
+  glUniform1i(loc, aValue);
 }
 
 /******************************************************************************/
 void ShaderLoader::SetFloat(const ID& aID, const std::string& aName, float aValue)
 {
   int loc = glGetUniformLocation(aID, aName.c_str());
-  if(loc != -1)
-  {
-    glUseProgram(aID);
-    glUniform1f(loc, aValue);
-  }
-  else
-  {
-    std::cout << "Uniform " << aName << " does not exist "
-              << "or is reserved!" << std::endl;
-  }
+  glUseProgram(aID);
+  glUniform1f(loc, aValue);
 }
 
 /******************************************************************************/
 void ShaderLoader::SetVec3(const ID& aID, const std::string& aName, const Vec3& aVec)
 {
   int loc = glGetUniformLocation(aID, aName.c_str());
-  if(loc != -1)
-  {
-    glUseProgram(aID);
-    glUniform3fv(loc, 1, &aVec.x);
-  }
-  else
-  {
-    std::cout << "Uniform " << aName << " does not exist "
-              << "or is reserved!" << std::endl;
-  }
+  glUseProgram(aID);
+  glUniform3fv(loc, 1, &aVec.x);
 }
 
 /******************************************************************************/
 void ShaderLoader::SetMat4(const ID& aID, const std::string& aName, const Mat4& aMat)
 {
   int loc = glGetUniformLocation(aID, aName.c_str());
-  if(loc != -1)
-  {
-    glUseProgram(aID);
-    glUniformMatrix4fv(loc, 1, GL_FALSE, &aMat(0, 0));
-  }
-  else
-  {
-    std::cout << "Uniform " << aName << " does not exist "
-              << "or is reserved!" << std::endl;
-  }
+  glUseProgram(aID);
+  glUniformMatrix4fv(loc, 1, GL_FALSE, &aMat(0, 0));
 }
 
 /******************************************************************************/

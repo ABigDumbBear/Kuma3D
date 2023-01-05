@@ -296,8 +296,8 @@ void RenderSystem::DrawEntities(Scene& aScene,
       glUseProgram(shader);
 
       // Set the model matrix.
-      if(ShaderLoader::IsUniformDefined(shader, "modelMatrix"))
-      {
+      //if(ShaderLoader::IsUniformDefined(shader, "modelMatrix"))
+      //{
         // If the Entity's Transform component has a parent Transform,
         // calculate the model matrix for the parent.
         Mat4 parentMatrix;
@@ -316,41 +316,41 @@ void RenderSystem::DrawEntities(Scene& aScene,
 
         auto matrix = parentMatrix * CalculateModelMatrix(entityTransform);
         ShaderLoader::SetMat4(shader, "modelMatrix", matrix);
-      }
+      //}
 
       // Set the view matrix.
-      if(ShaderLoader::IsUniformDefined(shader, "viewMatrix"))
-      {
+      //if(ShaderLoader::IsUniformDefined(shader, "viewMatrix"))
+      //{
         ShaderLoader::SetMat4(shader, "viewMatrix", viewMatrix);
-      }
+      //}
 
       // Set the projection matrix.
-      if(ShaderLoader::IsUniformDefined(shader, "projectionMatrix"))
-      {
-        auto matrix = CalculateProjectionMatrix(entityMesh.mSystem, camera);
-        ShaderLoader::SetMat4(shader, "projectionMatrix", matrix);
-      }
+      //if(ShaderLoader::IsUniformDefined(shader, "projectionMatrix"))
+      //{
+        auto projMatrix = CalculateProjectionMatrix(entityMesh.mSystem, camera);
+        ShaderLoader::SetMat4(shader, "projectionMatrix", projMatrix);
+      //}
 
       // Set the material properties.
-      if(ShaderLoader::IsUniformDefined(shader, "material.mAmbient"))
-      {
+      //if(ShaderLoader::IsUniformDefined(shader, "material.mAmbient"))
+      //{
         ShaderLoader::SetVec3(shader, "material.mAmbient", entityMesh.mMaterial.mAmbientColor);
-      }
+      //}
 
-      if(ShaderLoader::IsUniformDefined(shader, "material.mDiffuse"))
-      {
+      //if(ShaderLoader::IsUniformDefined(shader, "material.mDiffuse"))
+      //{
         ShaderLoader::SetVec3(shader, "material.mDiffuse", entityMesh.mMaterial.mDiffuseColor);
-      }
+      //}
 
-      if(ShaderLoader::IsUniformDefined(shader, "material.mSpecular"))
-      {
+      //if(ShaderLoader::IsUniformDefined(shader, "material.mSpecular"))
+      //{
         ShaderLoader::SetVec3(shader, "material.mSpecular", entityMesh.mMaterial.mSpecularColor);
-      }
+      //}
 
-      if(ShaderLoader::IsUniformDefined(shader, "material.mShininess"))
-      {
+      //if(ShaderLoader::IsUniformDefined(shader, "material.mShininess"))
+      //{
         ShaderLoader::SetFloat(shader, "material.mShininess", entityMesh.mMaterial.mShininess);
-      }
+      //}
 
       // Do light stuff
       auto& lightTransform = aScene.GetComponentForEntity<Transform>(lights[0]);

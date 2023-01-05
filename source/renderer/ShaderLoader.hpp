@@ -51,16 +51,6 @@ class ShaderLoader
     static void UnloadShaders();
 
     /**
-     * Returns whether a uniform exists in the given shader.
-     *
-     * @param aID The ID of the shader to check.
-     * @param aName The name of the uniform to check.
-     * @return True if the uniform exists, false otherwise.
-     */
-    static bool IsUniformDefined(const ID& aID,
-                                 const std::string& aName);
-
-    /**
      * Sets an integer uniform on this shader.
      *
      * @param aID The ID of the shader to change.
