@@ -14,13 +14,16 @@
 #include "Orbit.hpp"
 #include "OrbitSystem.hpp"
 
+#include "Rotate.hpp"
+#include "RotateSystem.hpp"
+
 /******************************************************************************/
 Kuma3D::Mesh CreateCubeMesh()
 {
   Kuma3D::Mesh mesh;
   Kuma3D::MeshVertex vertex;
 
-  // Front face
+  // Back face
   vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
   vertex.mNormal = Kuma3D::Vec3(0, 0, -1);
   vertex.mTexCoords[0] = 0;
@@ -34,45 +37,27 @@ Kuma3D::Mesh CreateCubeMesh()
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, -0.5);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, -0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
 
   mesh.mIndices.emplace_back(0);
   mesh.mIndices.emplace_back(1);
-  mesh.mIndices.emplace_back(3);
-  mesh.mIndices.emplace_back(1);
   mesh.mIndices.emplace_back(2);
   mesh.mIndices.emplace_back(3);
-
-  // Top face
-  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, -0.5);
-  vertex.mNormal = Kuma3D::Vec3(0, 1, 0);
-  vertex.mTexCoords[0] = 0;
-  vertex.mTexCoords[1] = 0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, -0.5);
-  vertex.mTexCoords[0] = 1;
-  vertex.mTexCoords[1] = 0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, 0.5);
-  vertex.mTexCoords[0] = 1;
-  vertex.mTexCoords[1] = 1;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, 0.5);
-  vertex.mTexCoords[0] = 0;
-  vertex.mTexCoords[1] = 1;
-  mesh.mVertices.emplace_back(vertex);
-
   mesh.mIndices.emplace_back(4);
   mesh.mIndices.emplace_back(5);
-  mesh.mIndices.emplace_back(7);
-  mesh.mIndices.emplace_back(5);
-  mesh.mIndices.emplace_back(6);
-  mesh.mIndices.emplace_back(7);
 
-  // Back face
+  // Front face
   vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, 0.5);
   vertex.mNormal = Kuma3D::Vec3(0, 0, 1);
   vertex.mTexCoords[0] = 0;
@@ -86,73 +71,75 @@ Kuma3D::Mesh CreateCubeMesh()
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, 0.5);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, 0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, 0.5);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 0;
+  mesh.mVertices.emplace_back(vertex);
 
+  mesh.mIndices.emplace_back(6);
+  mesh.mIndices.emplace_back(7);
   mesh.mIndices.emplace_back(8);
-  mesh.mIndices.emplace_back(9);
-  mesh.mIndices.emplace_back(11);
   mesh.mIndices.emplace_back(9);
   mesh.mIndices.emplace_back(10);
   mesh.mIndices.emplace_back(11);
 
   // Left face
-  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, 0.5);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, 0.5);
   vertex.mNormal = Kuma3D::Vec3(-1, 0, 0);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, -0.5);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 0;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, 0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, -0.5);
-  vertex.mTexCoords[0] = 1;
-  vertex.mTexCoords[1] = 1;
-  mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, 0.5);
-  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
 
   mesh.mIndices.emplace_back(12);
   mesh.mIndices.emplace_back(13);
-  mesh.mIndices.emplace_back(15);
-  mesh.mIndices.emplace_back(13);
   mesh.mIndices.emplace_back(14);
   mesh.mIndices.emplace_back(15);
-
-  // Bottom face
-  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, 0.5);
-  vertex.mNormal = Kuma3D::Vec3(0, -1, 0);
-  vertex.mTexCoords[0] = 0;
-  vertex.mTexCoords[1] = 0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, 0.5);
-  vertex.mTexCoords[0] = 1;
-  vertex.mTexCoords[1] = 0;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, -0.5);
-  vertex.mTexCoords[0] = 1;
-  vertex.mTexCoords[1] = 1;
-  mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
-  vertex.mTexCoords[0] = 0;
-  vertex.mTexCoords[1] = 1;
-  mesh.mVertices.emplace_back(vertex);
-
   mesh.mIndices.emplace_back(16);
   mesh.mIndices.emplace_back(17);
-  mesh.mIndices.emplace_back(19);
-  mesh.mIndices.emplace_back(17);
-  mesh.mIndices.emplace_back(18);
-  mesh.mIndices.emplace_back(19);
 
   // Right face
-  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, -0.5);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, 0.5);
   vertex.mNormal = Kuma3D::Vec3(1, 0, 0);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, -0.5);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, -0.5);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 0;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, -0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
@@ -164,17 +151,81 @@ Kuma3D::Mesh CreateCubeMesh()
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
+
+  mesh.mIndices.emplace_back(18);
+  mesh.mIndices.emplace_back(19);
+  mesh.mIndices.emplace_back(20);
+  mesh.mIndices.emplace_back(21);
+  mesh.mIndices.emplace_back(22);
+  mesh.mIndices.emplace_back(23);
+
+  // Bottom face
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
+  vertex.mNormal = Kuma3D::Vec3(0, -1, 0);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 0;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, -0.5);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 0;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, 0.5);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, 0.5);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, 0.5);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 0;
+  mesh.mVertices.emplace_back(vertex);
+
+  mesh.mIndices.emplace_back(24);
+  mesh.mIndices.emplace_back(25);
+  mesh.mIndices.emplace_back(26);
+  mesh.mIndices.emplace_back(27);
+  mesh.mIndices.emplace_back(28);
+  mesh.mIndices.emplace_back(29);
+
+  // Top face
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, -0.5);
+  vertex.mNormal = Kuma3D::Vec3(0, 1, 0);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
   vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, -0.5);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 1;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, 0.5);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 0;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, 0.5);
+  vertex.mTexCoords[0] = 1;
+  vertex.mTexCoords[1] = 0;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, 0.5);
+  vertex.mTexCoords[0] = 0;
+  vertex.mTexCoords[1] = 0;
+  mesh.mVertices.emplace_back(vertex);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, -0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
 
-  mesh.mIndices.emplace_back(20);
-  mesh.mIndices.emplace_back(21);
-  mesh.mIndices.emplace_back(23);
-  mesh.mIndices.emplace_back(21);
-  mesh.mIndices.emplace_back(22);
-  mesh.mIndices.emplace_back(23);
+  mesh.mIndices.emplace_back(30);
+  mesh.mIndices.emplace_back(31);
+  mesh.mIndices.emplace_back(32);
+  mesh.mIndices.emplace_back(33);
+  mesh.mIndices.emplace_back(34);
+  mesh.mIndices.emplace_back(35);
 
   mesh.mDirty = true;
 
@@ -207,6 +258,7 @@ int main()
   scene->RegisterComponentType<Kuma3D::Mesh>(2);
   scene->RegisterComponentType<Kuma3D::Transform>(3);
   scene->RegisterComponentType<Lighting::Orbit>(1);
+  scene->RegisterComponentType<Lighting::Rotate>(1);
 
   auto camera = scene->CreateEntity();
   scene->AddComponentToEntity<Kuma3D::Transform>(camera);
@@ -214,19 +266,18 @@ int main()
 
   auto cube = scene->CreateEntity();
   Kuma3D::Transform cubeTransform;
-  cubeTransform.mPosition.z = -10;
-  cubeTransform.mRotation.x = 45;
-  cubeTransform.mRotation.y = 45;
-  cubeTransform.mRotation.z = 45;
+  cubeTransform.mPosition.z = -5;
   scene->AddComponentToEntity<Kuma3D::Transform>(cube, cubeTransform);
   auto cubeMesh = CreateCubeMesh();
   cubeMesh.mShaders.emplace_back(cubeShaderID);
   cubeMesh.mTextures.emplace_back(textureID);
   scene->AddComponentToEntity<Kuma3D::Mesh>(cube, cubeMesh);
+  scene->AddComponentToEntity<Lighting::Rotate>(cube);
 
   auto light = scene->CreateEntity();
   Kuma3D::Transform lightTransform;
-  lightTransform.mPosition = Kuma3D::Vec3(0, 0, -25);
+  lightTransform.mPosition = Kuma3D::Vec3(0, 0, 8);
+  lightTransform.mScalar = Kuma3D::Vec3(0.3, 0.3, 0.3);
   scene->AddComponentToEntity<Kuma3D::Transform>(light, lightTransform);
   auto lightMesh = CreateCubeMesh();
   lightMesh.mShaders.emplace_back(lightShaderID);
@@ -235,10 +286,11 @@ int main()
   Lighting::Orbit orbit;
   orbit.mSpeed = 100;
   orbit.mAxis.y = 1;
-  orbit.mRadius = 1.5;
+  orbit.mRadius = 1;
   scene->AddComponentToEntity<Lighting::Orbit>(light, orbit);
 
   // Add an OrbitSystem to move the light and a RenderSystem to draw the scene.
+  scene->AddSystem(std::make_unique<Lighting::RotateSystem>());
   scene->AddSystem(std::make_unique<Lighting::OrbitSystem>());
   scene->AddSystem(std::make_unique<Kuma3D::RenderSystem>());
 

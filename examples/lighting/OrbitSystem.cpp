@@ -31,6 +31,8 @@ void OrbitSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     auto degrees = orbit.mSpeed * dt;
     auto rotationMatrix = Kuma3D::Rotate(orbit.mAxis, degrees);
     transform.mPosition = rotationMatrix * (transform.mPosition * orbit.mRadius);
+    //transform.mPosition.x = sin(aTime) * 2;
+    //transform.mPosition.y = cos(aTime) * 2;
   }
 
   mTime = aTime;

@@ -21,12 +21,23 @@ uniform Material material;
 
 void main()
 {
-  vec3 lightColor = vec3(1.0, 1.0, 1.0);
-  vec3 lightDir = normalize(lightPos - fragPos);
-
-  float diff = max(dot(normalize(normal), lightDir), 0.0);
-  vec3 diffuse = diff * lightColor;
   vec3 ambient = vec3(0.1, 0.1, 0.1);
 
-  fragColor = (vec4(diffuse, 1.0) + vec4(ambient, 1.0)) * texture(texSampler, texCoords);
+  vec3 lightColor = vec3(1.0, 1.0, 1.0);
+  vec3 lightDir = normalize(lightPos - fragPos);
+  vec3 norm = normalize(normal);
+
+  float diff = max(dot(norm, lightDir), 0.0);
+  vec3 diffuse = diff * lightColor;
+
+  vec3 viewPos = vec3(0.0, 0.0, 0.0);
+  float specularStrength = 1.0;
+  vec3 viewDir = normalize(viewPos - fragPos);
+  vec3 reflectDir = reflect(-lightDir, norm);
+
+  float spec = pow(max(dot(viewDir, reflectDir), 0.0), 256);
+  vec3 specular = specularStrength * spec * lightColor;
+
+  vec3 result = (ambient + diffuse + specular) * vec3(texture(texSampler, texCoords));
+  fragColor = vec4(result, 1.0);
 }

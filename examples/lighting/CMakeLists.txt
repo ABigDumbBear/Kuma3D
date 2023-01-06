@@ -1,6 +1,7 @@
 # Create the executable.
 add_executable(lighting main.cpp
-                        OrbitSystem.cpp)
+                        OrbitSystem.cpp
+                        RotateSystem.cpp)
 
 # Link the executable with the engine.
 target_link_libraries(lighting PUBLIC

@@ -336,9 +336,9 @@ void RenderSystem::DrawEntities(Scene& aScene,
       if(!lights.empty())
       {
       auto& lightTransform = aScene.GetComponentForEntity<Transform>(lights[0]);
-      //auto lightPos = CalculateModelMatrix(lightTransform) * lightTransform.mPosition;
-      //ShaderLoader::SetVec3(shader, "lightPos", lightPos);
-      ShaderLoader::SetVec3(shader, "lightPos", lightTransform.mPosition);
+      auto lightPos = CalculateModelMatrix(lightTransform) * lightTransform.mPosition;
+      ShaderLoader::SetVec3(shader, "lightPos", lightPos);
+      //ShaderLoader::SetVec3(shader, "lightPos", lightTransform.mPosition);
       }
 
       // Draw the mesh.
