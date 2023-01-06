@@ -1,21 +1,18 @@
-#include <memory>
-#include <random>
-
-#include <Entity.hpp>
 #include <Game.hpp>
 #include <Scene.hpp>
-
-#include <RenderSystem.hpp>
 
 #include <ShaderLoader.hpp>
 #include <TextureLoader.hpp>
 
 #include <Camera.hpp>
+#include <Light.hpp>
 #include <Mesh.hpp>
 #include <Transform.hpp>
 
-#include "Physics.hpp"
-#include "PhysicsSystem.hpp"
+#include <RenderSystem.hpp>
+
+#include "Orbit.hpp"
+#include "OrbitSystem.hpp"
 
 /******************************************************************************/
 Kuma3D::Mesh CreateCubeMesh()
@@ -24,20 +21,20 @@ Kuma3D::Mesh CreateCubeMesh()
   Kuma3D::MeshVertex vertex;
 
   // Front face
-  vertex.mPosition = Kuma3D::Vec3(0, 0, 0);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
   vertex.mNormal = Kuma3D::Vec3(0, 0, -1);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 0, 0);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, -0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 1, 0);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, -0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0, 1, 0);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, -0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
@@ -50,20 +47,20 @@ Kuma3D::Mesh CreateCubeMesh()
   mesh.mIndices.emplace_back(3);
 
   // Top face
-  vertex.mPosition = Kuma3D::Vec3(0, 1, 0);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, -0.5);
   vertex.mNormal = Kuma3D::Vec3(0, 1, 0);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 1, 0);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, -0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 1, 1);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, 0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0, 1, 1);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, 0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
@@ -76,20 +73,20 @@ Kuma3D::Mesh CreateCubeMesh()
   mesh.mIndices.emplace_back(7);
 
   // Back face
-  vertex.mPosition = Kuma3D::Vec3(0, 0, 1);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, 0.5);
   vertex.mNormal = Kuma3D::Vec3(0, 0, 1);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 0, 1);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, 0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 1, 1);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, 0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0, 1, 1);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, 0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
@@ -102,20 +99,20 @@ Kuma3D::Mesh CreateCubeMesh()
   mesh.mIndices.emplace_back(11);
 
   // Left face
-  vertex.mPosition = Kuma3D::Vec3(0, 0, 1);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, 0.5);
   vertex.mNormal = Kuma3D::Vec3(-1, 0, 0);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0, 0, 0);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0, 1, 0);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, -0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0, 1, 1);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, 0.5, 0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
@@ -128,20 +125,20 @@ Kuma3D::Mesh CreateCubeMesh()
   mesh.mIndices.emplace_back(15);
 
   // Bottom face
-  vertex.mPosition = Kuma3D::Vec3(0, 0, 1);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, 0.5);
   vertex.mNormal = Kuma3D::Vec3(0, -1, 0);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 0, 1);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, 0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 0, 0);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, -0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(0, 0, 0);
+  vertex.mPosition = Kuma3D::Vec3(-0.5, -0.5, -0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
@@ -154,20 +151,20 @@ Kuma3D::Mesh CreateCubeMesh()
   mesh.mIndices.emplace_back(19);
 
   // Right face
-  vertex.mPosition = Kuma3D::Vec3(1, 0, 0);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, -0.5);
   vertex.mNormal = Kuma3D::Vec3(1, 0, 0);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 0, 1);
+  vertex.mPosition = Kuma3D::Vec3(0.5, -0.5, 0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 0;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 1, 1);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, 0.5);
   vertex.mTexCoords[0] = 1;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
-  vertex.mPosition = Kuma3D::Vec3(1, 1, 0);
+  vertex.mPosition = Kuma3D::Vec3(0.5, 0.5, -0.5);
   vertex.mTexCoords[0] = 0;
   vertex.mTexCoords[1] = 1;
   mesh.mVertices.emplace_back(vertex);
@@ -185,77 +182,66 @@ Kuma3D::Mesh CreateCubeMesh()
 }
 
 /******************************************************************************/
-Kuma3D::Transform CreateRandomTransform(std::random_device& aDevice)
-{
-  Kuma3D::Transform transform;
-
-  std::mt19937 generator(aDevice());
-  std::uniform_real_distribution<> dist(-50, 50);
-
-  transform.mPosition.x = dist(generator);
-  transform.mPosition.y = dist(generator);
-  transform.mPosition.z = dist(generator) - 70;
-
-  return transform;
-}
-
-/******************************************************************************/
-int main(int argc, char* argv[])
+int main()
 {
   Kuma3D::WindowOptions options;
   options.mWidth = 1280;
   options.mHeight = 720;
-  options.mTitle = "Cubes";
+  options.mTitle = "Lighting";
 
   // Initialize the game window and load the cube shader and texture.
   Kuma3D::Game::Initialize(options);
-  auto shaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/CubeShader.vert",
-                                                            "resources/shaders/CubeShader.frag");
+  auto cubeShaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/CubeShader.vert",
+                                                                "resources/shaders/CubeShader.frag");
+  auto lightShaderID = Kuma3D::ShaderLoader::LoadShaderFromFiles("resources/shaders/LightShader.vert",
+                                                                 "resources/shaders/LightShader.frag");
   auto textureID = Kuma3D::TextureLoader::LoadTextureFromFile("resources/texture.png",
                                                               Kuma3D::TextureStorageFormat::eRGBA,
                                                               Kuma3D::TextureWrapOption::eREPEAT,
                                                               Kuma3D::TextureFilterOption::eNEAREST);
 
-  // Create a scene, a camera, and a bunch of cubes.
+  // Create a scene, a camera, a cube, and a light source.
   auto scene = std::make_unique<Kuma3D::Scene>();
-
-  int numCubes = 5000;
-  if(argc >= 2)
-  {
-    numCubes = std::atoi(argv[1]);
-  }
   scene->RegisterComponentType<Kuma3D::Camera>(1);
-  scene->RegisterComponentType<Kuma3D::Transform>(numCubes + 1);
-  scene->RegisterComponentType<Kuma3D::Mesh>(numCubes);
-  scene->RegisterComponentType<Cubes::Physics>(numCubes);
+  scene->RegisterComponentType<Kuma3D::Light>(1);
+  scene->RegisterComponentType<Kuma3D::Mesh>(2);
+  scene->RegisterComponentType<Kuma3D::Transform>(3);
+  scene->RegisterComponentType<Lighting::Orbit>(1);
 
   auto camera = scene->CreateEntity();
-  scene->AddComponentToEntity<Kuma3D::Camera>(camera);
   scene->AddComponentToEntity<Kuma3D::Transform>(camera);
+  scene->AddComponentToEntity<Kuma3D::Camera>(camera);
 
-  std::random_device rd;
-  for(int i = 0; i < numCubes; ++i)
-  {
-    auto cube = scene->CreateEntity();
+  auto cube = scene->CreateEntity();
+  Kuma3D::Transform cubeTransform;
+  cubeTransform.mPosition.z = -10;
+  cubeTransform.mRotation.x = 45;
+  cubeTransform.mRotation.y = 45;
+  cubeTransform.mRotation.z = 45;
+  scene->AddComponentToEntity<Kuma3D::Transform>(cube, cubeTransform);
+  auto cubeMesh = CreateCubeMesh();
+  cubeMesh.mShaders.emplace_back(cubeShaderID);
+  cubeMesh.mTextures.emplace_back(textureID);
+  scene->AddComponentToEntity<Kuma3D::Mesh>(cube, cubeMesh);
 
-    auto transform = CreateRandomTransform(rd);
-    scene->AddComponentToEntity<Kuma3D::Transform>(cube, transform);
+  auto light = scene->CreateEntity();
+  Kuma3D::Transform lightTransform;
+  lightTransform.mPosition = Kuma3D::Vec3(0, 0, -25);
+  scene->AddComponentToEntity<Kuma3D::Transform>(light, lightTransform);
+  auto lightMesh = CreateCubeMesh();
+  lightMesh.mShaders.emplace_back(lightShaderID);
+  scene->AddComponentToEntity<Kuma3D::Mesh>(light, lightMesh);
+  scene->AddComponentToEntity<Kuma3D::Light>(light);
+  Lighting::Orbit orbit;
+  orbit.mSpeed = 100;
+  orbit.mAxis.y = 1;
+  orbit.mRadius = 1.5;
+  scene->AddComponentToEntity<Lighting::Orbit>(light, orbit);
 
-    auto mesh = CreateCubeMesh();
-    mesh.mShaders.emplace_back(shaderID);
-    mesh.mTextures.emplace_back(textureID);
-    scene->AddComponentToEntity<Kuma3D::Mesh>(cube, mesh);
-
-    Cubes::Physics physics;
-    physics.mAcceleration.y = -9.81;
-    scene->AddComponentToEntity<Cubes::Physics>(cube, physics);
-  }
-
-  // Add a PhysicsSystem to move the cubes, and a RenderSystem to draw them.
-  scene->AddSystem(std::make_unique<Cubes::PhysicsSystem>());
+  // Add an OrbitSystem to move the light and a RenderSystem to draw the scene.
+  scene->AddSystem(std::make_unique<Lighting::OrbitSystem>());
   scene->AddSystem(std::make_unique<Kuma3D::RenderSystem>());
 
-  // Set the scene and run the game.
   Kuma3D::Game::SetScene(std::move(scene));
   Kuma3D::Game::Run();
 
@@ -266,3 +252,4 @@ int main(int argc, char* argv[])
 
   return 0;
 }
+

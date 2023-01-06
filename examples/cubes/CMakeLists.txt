@@ -11,5 +11,5 @@ target_include_directories(cubes PUBLIC
                            ${INCLUDE_INSTALL_DIR})
 
 # Install the executable and the resources required.
-install(TARGETS cubes DESTINATION ${EXAMPLES_INSTALL_DIR})
-install(DIRECTORY resources DESTINATION ${EXAMPLES_INSTALL_DIR})
+install(TARGETS cubes DESTINATION ${EXAMPLES_INSTALL_DIR}/cubes/)
+install(DIRECTORY resources DESTINATION ${EXAMPLES_INSTALL_DIR}/cubes/)

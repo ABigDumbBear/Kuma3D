@@ -34,6 +34,11 @@ void RenderSystem::Initialize(Scene& aScene)
     aScene.RegisterComponentType<Transform>();
   }
 
+  if(!aScene.IsComponentTypeRegistered<Light>())
+  {
+    aScene.RegisterComponentType<Light>();
+  }
+
   // Register the Camera component as well. Even though this System doesn't
   // operate on Entities with a Camera, it does query the Scene for Entities
   // that have a Camera in order to render Entities.
@@ -296,67 +301,45 @@ void RenderSystem::DrawEntities(Scene& aScene,
       glUseProgram(shader);
 
       // Set the model matrix.
-      //if(ShaderLoader::IsUniformDefined(shader, "modelMatrix"))
-      //{
-        // If the Entity's Transform component has a parent Transform,
-        // calculate the model matrix for the parent.
-        Mat4 parentMatrix;
-        if(entityTransform.mUseParent)
+      // If the Entity's Transform component has a parent Transform,
+      // calculate the model matrix for the parent.
+      Mat4 parentMatrix;
+      if(entityTransform.mUseParent)
+      {
+        auto& parentTransform = aScene.GetComponentForEntity<Transform>(entityTransform.mParent);
+        parentMatrix = CalculateModelMatrix(parentTransform);
+
+        // If the parent is scheduled for removal, schedule this
+        // entity for removal as well.
+        if(aScene.IsEntityScheduledForRemoval(entityTransform.mParent))
         {
-          auto& parentTransform = aScene.GetComponentForEntity<Transform>(entityTransform.mParent);
-          parentMatrix = CalculateModelMatrix(parentTransform);
-
-          // If the parent is scheduled for removal, schedule this
-          // entity for removal as well.
-          if(aScene.IsEntityScheduledForRemoval(entityTransform.mParent))
-          {
-            aScene.RemoveEntity(entity);
-          }
+          aScene.RemoveEntity(entity);
         }
+      }
 
-        auto matrix = parentMatrix * CalculateModelMatrix(entityTransform);
-        ShaderLoader::SetMat4(shader, "modelMatrix", matrix);
-      //}
+      auto matrix = parentMatrix * CalculateModelMatrix(entityTransform);
+      ShaderLoader::SetMat4(shader, "modelMatrix", matrix);
 
       // Set the view matrix.
-      //if(ShaderLoader::IsUniformDefined(shader, "viewMatrix"))
-      //{
-        ShaderLoader::SetMat4(shader, "viewMatrix", viewMatrix);
-      //}
+      ShaderLoader::SetMat4(shader, "viewMatrix", viewMatrix);
 
       // Set the projection matrix.
-      //if(ShaderLoader::IsUniformDefined(shader, "projectionMatrix"))
-      //{
-        auto projMatrix = CalculateProjectionMatrix(entityMesh.mSystem, camera);
-        ShaderLoader::SetMat4(shader, "projectionMatrix", projMatrix);
-      //}
+      auto projMatrix = CalculateProjectionMatrix(entityMesh.mSystem, camera);
+      ShaderLoader::SetMat4(shader, "projectionMatrix", projMatrix);
 
-      // Set the material properties.
-      //if(ShaderLoader::IsUniformDefined(shader, "material.mAmbient"))
-      //{
-        ShaderLoader::SetVec3(shader, "material.mAmbient", entityMesh.mMaterial.mAmbientColor);
-      //}
-
-      //if(ShaderLoader::IsUniformDefined(shader, "material.mDiffuse"))
-      //{
-        ShaderLoader::SetVec3(shader, "material.mDiffuse", entityMesh.mMaterial.mDiffuseColor);
-      //}
-
-      //if(ShaderLoader::IsUniformDefined(shader, "material.mSpecular"))
-      //{
-        ShaderLoader::SetVec3(shader, "material.mSpecular", entityMesh.mMaterial.mSpecularColor);
-      //}
-
-      //if(ShaderLoader::IsUniformDefined(shader, "material.mShininess"))
-      //{
-        ShaderLoader::SetFloat(shader, "material.mShininess", entityMesh.mMaterial.mShininess);
-      //}
+      ShaderLoader::SetVec3(shader, "material.mAmbient", entityMesh.mMaterial.mAmbientColor);
+      ShaderLoader::SetVec3(shader, "material.mDiffuse", entityMesh.mMaterial.mDiffuseColor);
+      ShaderLoader::SetVec3(shader, "material.mSpecular", entityMesh.mMaterial.mSpecularColor);
+      ShaderLoader::SetFloat(shader, "material.mShininess", entityMesh.mMaterial.mShininess);
 
       // Do light stuff
+      if(!lights.empty())
+      {
       auto& lightTransform = aScene.GetComponentForEntity<Transform>(lights[0]);
       //auto lightPos = CalculateModelMatrix(lightTransform) * lightTransform.mPosition;
       //ShaderLoader::SetVec3(shader, "lightPos", lightPos);
       ShaderLoader::SetVec3(shader, "lightPos", lightTransform.mPosition);
+      }
 
       // Draw the mesh.
       glBindVertexArray(mVertexArrayMap[entity]);
