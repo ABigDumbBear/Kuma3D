@@ -8,7 +8,6 @@ namespace Kuma3D {
 struct Light
 {
   Vec3 mColor { 1, 1, 1 };
-  float mIntensity { 1 };
 };
 
 } // namespace Kuma3D
