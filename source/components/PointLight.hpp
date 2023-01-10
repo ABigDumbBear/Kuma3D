@@ -11,9 +11,9 @@ struct PointLight
   float mLinear { 1 };
   float mQuadratic { 1 };
 
-  Vec3 mAmbientColor { 1, 1, 1 };
-  Vec3 mDiffuseColor { 1, 1, 1 };
-  Vec3 mSpecularColor { 1, 1, 1 };
+  float mAmbientIntensity { 1 };
+  float mDiffuseIntensity { 1 };
+  float mSpecularIntensity { 1 };
 };
 
 } // namespace Kuma3D
