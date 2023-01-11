@@ -15,7 +15,6 @@
 #include "ShaderLoader.hpp"
 
 #include "Camera.hpp"
-#include "Light.hpp"
 #include "Transform.hpp"
 
 namespace Kuma3D {
@@ -32,11 +31,6 @@ void RenderSystem::Initialize(Scene& aScene)
   if(!aScene.IsComponentTypeRegistered<Transform>())
   {
     aScene.RegisterComponentType<Transform>();
-  }
-
-  if(!aScene.IsComponentTypeRegistered<Light>())
-  {
-    aScene.RegisterComponentType<Light>();
   }
 
   // Register the Camera component as well. Even though this System doesn't
@@ -261,11 +255,6 @@ void RenderSystem::DrawEntities(Scene& aScene,
                                 Entity aCamera,
                                 const std::vector<Entity>& aEntities)
 {
-  auto lightSignature = aScene.CreateSignature();
-  lightSignature[aScene.GetComponentIndex<Light>()] = true;
-  lightSignature[aScene.GetComponentIndex<Transform>()] = true;
-  auto lights = aScene.GetEntitiesWithSignature(lightSignature);
-
   auto& camera = aScene.GetComponentForEntity<Camera>(aCamera);
   auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
 
@@ -331,15 +320,6 @@ void RenderSystem::DrawEntities(Scene& aScene,
       ShaderLoader::SetVec3(shader, "material.mDiffuse", entityMesh.mMaterial.mDiffuseColor);
       ShaderLoader::SetVec3(shader, "material.mSpecular", entityMesh.mMaterial.mSpecularColor);
       ShaderLoader::SetFloat(shader, "material.mShininess", entityMesh.mMaterial.mShininess);
-
-      // Do light stuff
-      if(!lights.empty())
-      {
-      auto& lightTransform = aScene.GetComponentForEntity<Transform>(lights[0]);
-      auto lightPos = CalculateModelMatrix(lightTransform) * lightTransform.mPosition;
-      ShaderLoader::SetVec3(shader, "lightPos", lightPos);
-      //ShaderLoader::SetVec3(shader, "lightPos", lightTransform.mPosition);
-      }
 
       // Draw the mesh.
       glBindVertexArray(mVertexArrayMap[entity]);

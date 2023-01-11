@@ -5,10 +5,11 @@
 #include <TextureLoader.hpp>
 
 #include <Camera.hpp>
-#include <Light.hpp>
 #include <Mesh.hpp>
+#include <PointLight.hpp>
 #include <Transform.hpp>
 
+#include <PointLightSystem.hpp>
 #include <RenderSystem.hpp>
 
 #include "Orbit.hpp"
@@ -254,8 +255,8 @@ int main()
   // Create a scene, a camera, a cube, and a light source.
   auto scene = std::make_unique<Kuma3D::Scene>();
   scene->RegisterComponentType<Kuma3D::Camera>(1);
-  scene->RegisterComponentType<Kuma3D::Light>(1);
   scene->RegisterComponentType<Kuma3D::Mesh>(2);
+  scene->RegisterComponentType<Kuma3D::PointLight>(1);
   scene->RegisterComponentType<Kuma3D::Transform>(3);
   scene->RegisterComponentType<Lighting::Orbit>(1);
   scene->RegisterComponentType<Lighting::Rotate>(1);
@@ -282,7 +283,7 @@ int main()
   auto lightMesh = CreateCubeMesh();
   lightMesh.mShaders.emplace_back(lightShaderID);
   scene->AddComponentToEntity<Kuma3D::Mesh>(light, lightMesh);
-  scene->AddComponentToEntity<Kuma3D::Light>(light);
+  scene->AddComponentToEntity<Kuma3D::PointLight>(light);
   Lighting::Orbit orbit;
   orbit.mSpeed = 100;
   orbit.mAxis.y = 1;
@@ -292,6 +293,7 @@ int main()
   // Add an OrbitSystem to move the light and a RenderSystem to draw the scene.
   scene->AddSystem(std::make_unique<Lighting::RotateSystem>());
   scene->AddSystem(std::make_unique<Lighting::OrbitSystem>());
+  scene->AddSystem(std::make_unique<Kuma3D::PointLightSystem>());
   scene->AddSystem(std::make_unique<Kuma3D::RenderSystem>());
 
   Kuma3D::Game::SetScene(std::move(scene));
