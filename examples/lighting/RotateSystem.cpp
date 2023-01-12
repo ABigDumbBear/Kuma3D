@@ -1,6 +1,7 @@
 #include "RotateSystem.hpp"
 
 #include <Scene.hpp>
+#include <MathUtil.hpp>
 
 #include <Transform.hpp>
 
@@ -39,34 +40,37 @@ void RotateSystem::Operate(Kuma3D::Scene& aScene, double aTime)
     auto& rotate = aScene.GetComponentForEntity<Rotate>(entity);
 
     auto degrees = rotate.mSpeed * dt;
-
     for(const auto& key : mPressedKeys)
     {
       switch(key)
       {
         case Kuma3D::KeyCode::eKEY_LEFT:
         {
-          transform.mRotation.y -= degrees;
+          rotate.mAngles.y -= degrees;
           break;
         }
         case Kuma3D::KeyCode::eKEY_RIGHT:
         {
-          transform.mRotation.y += degrees;
+          rotate.mAngles.y += degrees;
           break;
         }
         case Kuma3D::KeyCode::eKEY_UP:
         {
-          transform.mRotation.x -= degrees;
+          rotate.mAngles.x -= degrees;
           break;
         }
         case Kuma3D::KeyCode::eKEY_DOWN:
         {
-          transform.mRotation.x += degrees;
+          rotate.mAngles.x += degrees;
           break;
         }
         default: { break; }
       }
     }
+
+    transform.mRotation = Kuma3D::Rotate(Kuma3D::Vec3(1, 0, 0), rotate.mAngles.x);
+    transform.mRotation = transform.mRotation * Kuma3D::Rotate(Kuma3D::Vec3(0, 1, 0), rotate.mAngles.y);
+    transform.mRotation = transform.mRotation * Kuma3D::Rotate(Kuma3D::Vec3(0, 0, 1), rotate.mAngles.z);
   }
 
   mTime = aTime;

@@ -34,12 +34,13 @@ struct Material
 
 uniform Material material;
 
-vec3 CalcPointLight(PointLight aLight, vec3 aNormal, vec3 aFragPos, vec3 aViewDir)
-{
-}
+//vec3 CalcPointLight(PointLight aLight, vec3 aNormal, vec3 aFragPos, vec3 aViewDir)
+//{
+//}
 
 void main()
 {
-  vec3 result = (ambient + diffuse + specular) * vec3(texture(texSampler, texCoords));
-  fragColor = vec4(result, 1.0);
+  //vec3 result = (ambient + diffuse + specular) * vec3(texture(texSampler, texCoords));
+  //fragColor = vec4(result, 1.0);
+  fragColor = texture(texSampler, texCoords);
 }
