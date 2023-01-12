@@ -161,11 +161,8 @@ Mat4 RenderSystem::CalculateModelMatrix(const Transform& aTransform)
 {
   auto translationMatrix = Translate(aTransform.mPosition);
   auto scalarMatrix = Scale(aTransform.mScalar);
-  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), aTransform.mRotation.x);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), aTransform.mRotation.y);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), aTransform.mRotation.z);
 
-  return (translationMatrix * rotationMatrix * scalarMatrix);
+  return (translationMatrix * aTransform.mRotation * scalarMatrix);
 }
 
 /******************************************************************************/
@@ -179,13 +176,8 @@ Mat4 RenderSystem::CalculateViewMatrix(const Camera& aCamera,
   // the origin (0.0, 0.0, 0.0) and looking forward along the z-axis.
   Vec3 directionVector = Vec3(0.0, 0.0, 1.0);
 
-  // To get the true direction vector, we need to calculate the rotation
-  // transformation matrix of the camera and use it to rotate the default
-  // direction vector.
-  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), aTransform.mRotation.x);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), aTransform.mRotation.y);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), aTransform.mRotation.z);
-  directionVector = rotationMatrix * directionVector;
+  // To get the true direction vector, we use the transform's rotation matrix.
+  directionVector = aTransform.mRotation * directionVector;
 
   // Now that we have a direction vector, we can calculate a right vector by
   // taking the cross product of the direction vector and a default up vector
@@ -229,10 +221,7 @@ void RenderSystem::SortEntitiesByCameraDistance(Scene& aScene,
   auto& cameraTransform = aScene.GetComponentForEntity<Transform>(aCamera);
 
   Vec3 forwardVector(0.0, 0.0, 1.0);
-  auto rotationMatrix = Rotate(Vec3(1.0, 0.0, 0.0), cameraTransform.mRotation.x);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 1.0, 0.0), cameraTransform.mRotation.y);
-  rotationMatrix = rotationMatrix * Rotate(Vec3(0.0, 0.0, 1.0), cameraTransform.mRotation.z);
-  forwardVector = rotationMatrix * forwardVector;
+  forwardVector = cameraTransform.mRotation * forwardVector;
 
   // Sort the entities in order from furthest to nearest along the
   // camera's forward vector.
